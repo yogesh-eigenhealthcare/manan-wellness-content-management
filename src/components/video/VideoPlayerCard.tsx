@@ -9,6 +9,7 @@ interface VideoPlayerCardProps {
   url: string | null | undefined;
   backupUrl?: string | null | undefined;
   emptyHint?: string;
+  tall?: boolean;
 }
 
 export function VideoPlayerCard({
@@ -16,6 +17,7 @@ export function VideoPlayerCard({
   url,
   backupUrl,
   emptyHint = "No video link added yet.",
+  tall = false,
 }: VideoPlayerCardProps) {
   const [useBackup, setUseBackup] = useState(false);
 
@@ -23,9 +25,11 @@ export function VideoPlayerCard({
   const activeUrl = useBackup && hasBackup ? backupUrl : url;
   const resolved = resolveVideoEmbed(activeUrl);
 
+  const heightClass = tall ? "h-[460px] lg:h-[580px]" : "aspect-[9/12] max-h-96";
+
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-950 text-white">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 bg-slate-900 px-3 py-2 text-xs">
+    <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-slate-950 text-white">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 bg-slate-900 px-3 py-2.5 text-xs">
         <div className="flex items-center gap-2 font-medium text-slate-200">
           <Film className="h-3.5 w-3.5 text-teal-400" />
           <span>{label}</span>
@@ -58,16 +62,18 @@ export function VideoPlayerCard({
       </div>
 
       {resolved.kind === "none" ? (
-        <div className="flex aspect-[9/12] max-h-80 w-full flex-col items-center justify-center gap-2 bg-slate-900/70 p-6 text-center text-xs text-slate-400">
-          <PlayCircle className="h-8 w-8 text-slate-600" />
-          <p>{emptyHint}</p>
+        <div
+          className={`flex ${heightClass} w-full flex-col items-center justify-center gap-2 bg-slate-900/70 p-6 text-center text-xs text-slate-400`}
+        >
+          <PlayCircle className="h-9 w-9 text-slate-600" />
+          <p className="max-w-xs">{emptyHint}</p>
         </div>
       ) : resolved.kind === "direct-video" && resolved.embedUrl ? (
         <video
           src={resolved.embedUrl}
           controls
           playsInline
-          className="aspect-[9/12] max-h-96 w-full bg-black object-contain"
+          className={`${heightClass} w-full bg-black object-contain`}
         />
       ) : resolved.canInlinePlay && resolved.embedUrl ? (
         <div className="relative bg-black">
@@ -76,11 +82,11 @@ export function VideoPlayerCard({
             title={label}
             allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
             allowFullScreen
-            className="aspect-[9/12] max-h-96 w-full border-0"
+            className={`${heightClass} w-full border-0`}
           />
           {resolved.kind === "instagram" ? (
             <div className="border-t border-slate-800 bg-slate-900/95 px-3 py-1.5 text-[11px] text-slate-400">
-              If Instagram blocks inline playback for this reel, click{" "}
+              If Instagram blocks inline playback for this item, click{" "}
               <a
                 href={resolved.originalUrl}
                 target="_blank"
@@ -94,7 +100,9 @@ export function VideoPlayerCard({
           ) : null}
         </div>
       ) : (
-        <div className="flex aspect-[9/12] max-h-80 w-full flex-col items-center justify-center gap-3 p-6 text-center text-xs text-slate-300">
+        <div
+          className={`flex ${heightClass} w-full flex-col items-center justify-center gap-3 p-6 text-center text-xs text-slate-300`}
+        >
           <PlayCircle className="h-9 w-9 text-teal-400" />
           <p className="max-w-xs break-all text-slate-400">{resolved.originalUrl}</p>
           <a

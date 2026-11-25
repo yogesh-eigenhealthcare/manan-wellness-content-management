@@ -188,5 +188,26 @@ describe("firestore.rules two-gate approval security", () => {
         updatedAt: serverTimestamp(),
       })
     );
+
+    // 8. Member can also submit an uploaded PDF/image draft on carousel/long_form
+    await assertSucceeds(
+      updateDoc(doc(managerDb, "contentItems", "long-1"), {
+        status: "approved_for_production",
+        gate1ReviewedBy: "Marketing Manager",
+        gate1ReviewedAt: serverTimestamp(),
+        gate1Feedback: "Approved",
+        updatedAt: serverTimestamp(),
+      })
+    );
+    await assertSucceeds(
+      updateDoc(doc(memberDb, "contentItems", "long-1"), {
+        status: "draft_review",
+        latestDraftUrl: null,
+        latestDraftKind: "pdf",
+        latestDraftName: "storyboard.pdf",
+        latestDraftVersion: 1,
+        updatedAt: serverTimestamp(),
+      })
+    );
   });
 });

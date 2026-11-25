@@ -4,6 +4,8 @@ export type ContentFormat = "reel" | "long_form" | "carousel";
 
 export type EffortLevel = "low" | "high" | "general";
 
+export type DraftKind = "video" | "image" | "pdf";
+
 export type WorkflowStatus =
   | "idea_pending"
   | "idea_rejected"
@@ -60,6 +62,8 @@ export interface ContentItem {
   assignedTo: string[];
   targetPostDate: string | null;
   latestDraftUrl: string | null;
+  latestDraftKind?: DraftKind | null;
+  latestDraftName?: string | null;
   latestDraftVersion: number;
   publishedUrl: string | null;
   gate1ReviewedBy: string | null;
@@ -77,7 +81,11 @@ export interface ContentItem {
 export interface DraftSubmission {
   id: string;
   version: number;
+  draftKind?: DraftKind;
   videoUrl: string;
+  fileDataUrl?: string;
+  fileName?: string;
+  mimeType?: string;
   notes: string;
   submittedByUid: string;
   submittedByName: string;

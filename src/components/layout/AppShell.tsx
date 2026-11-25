@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { PipelineBoard } from "@/components/board/PipelineBoard";
 import { SubmitIdeaModal } from "@/components/modals/SubmitIdeaModal";
-import { SideBySideReviewDrawer } from "@/components/review/SideBySideReviewDrawer";
+import { ContentDetailView } from "@/components/review/ContentDetailView";
 import { ContentView } from "@/components/views/ContentView";
 import { DashboardView } from "@/components/views/DashboardView";
 import { InsightsView } from "@/components/views/InsightsView";
@@ -33,6 +33,14 @@ import {
 } from "@/types/content";
 
 type NavPage = "dashboard" | "content" | "board" | "insights" | "settings";
+
+const PAGE_LABELS: Record<NavPage, string> = {
+  dashboard: "Dashboard",
+  content: "Channel Content",
+  board: "Workflow Board",
+  insights: "Insights",
+  settings: "Settings",
+};
 
 export function AppShell() {
   const { profile, isManager, signOut } = useAuth();
@@ -137,6 +145,7 @@ export function AppShell() {
   ];
 
   const handleNavClick = (target: NavPage) => {
+    setSelectedItemId(null);
     setPage(target);
     setMobileMenuOpen(false);
   };
@@ -179,7 +188,7 @@ export function AppShell() {
 
         <nav aria-label="Primary studio navigation" className="space-y-1">
           {navItems.map((item) => {
-            const active = page === item.id;
+            const active = !selectedItem && page === item.id;
             return (
               <button
                 key={item.id}
@@ -286,7 +295,26 @@ export function AppShell() {
         </header>
 
         <main className="mx-auto w-full max-w-[1440px] flex-1 p-4 sm:p-6">
-          {content.loading && page === "dashboard" ? (
+          {selectedItem ? (
+            <ContentDetailView
+              item={selectedItem}
+              backLabel={PAGE_LABELS[page]}
+              hashtagPresets={content.hashtagPresets}
+              onBack={() => setSelectedItemId(null)}
+              actions={{
+                reviewGate1: content.reviewGate1,
+                resubmitIdea: content.resubmitIdea,
+                startProduction: content.startProduction,
+                submitDraftLink: content.submitDraftLink,
+                submitDraftFile: content.submitDraftFile,
+                reviewGate2: content.reviewGate2,
+                markPosted: content.markPosted,
+                updateItemDetails: content.updateItemDetails,
+                deleteContentItem: content.deleteContentItem,
+                addAuditComment: content.addAuditComment,
+              }}
+            />
+          ) : content.loading && page === "dashboard" ? (
             <div className="studio-surface rounded-2xl border p-12 text-center text-sm text-[var(--text-muted)]">
               Loading Manan Wellness Studio...
             </div>
@@ -426,23 +454,6 @@ export function AppShell() {
           )}
         </main>
       </div>
-
-      <SideBySideReviewDrawer
-        item={selectedItem}
-        hashtagPresets={content.hashtagPresets}
-        onClose={() => setSelectedItemId(null)}
-        actions={{
-          reviewGate1: content.reviewGate1,
-          resubmitIdea: content.resubmitIdea,
-          startProduction: content.startProduction,
-          submitDraftLink: content.submitDraftLink,
-          reviewGate2: content.reviewGate2,
-          markPosted: content.markPosted,
-          updateItemDetails: content.updateItemDetails,
-          deleteContentItem: content.deleteContentItem,
-          addAuditComment: content.addAuditComment,
-        }}
-      />
 
       <SubmitIdeaModal
         open={submitOpen}
