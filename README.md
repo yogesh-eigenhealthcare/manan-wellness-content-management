@@ -31,6 +31,9 @@ Two-gate Instagram Reel & Content Approval Platform built with **Next.js (App Ro
    *(Or pass an email directly: `node scripts/seed-managers.mjs --email=manager@mananwellness.com`.)*
 3. Once at least one Manager is signed in, they can also promote/demote team members and manage pre-assigned emails directly in the **Team Roles** modal inside the app.
 
+```bash
+GOOGLE_APPLICATION_CREDENTIALS="./scripts/service-account.json" npm run seed:managers
+```
 ---
 
 ## Importing Your Google Sheet Data
@@ -42,6 +45,10 @@ The deduplicated marketing data from `Manan_wellness_content` (excluding clinica
 To import into live Firestore (requires `GOOGLE_APPLICATION_CREDENTIALS` or Application Default Credentials):
 ```bash
 npm run import:sheet
+```
+
+```bash
+GOOGLE_APPLICATION_CREDENTIALS="./scripts/service-account.json" npm run import:sheet
 ```
 
 ---
