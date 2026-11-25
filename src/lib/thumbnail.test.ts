@@ -21,12 +21,14 @@ describe("resolveThumbnail", () => {
     expect(res.imageUrl).toBe("https://drive.google.com/thumbnail?id=1AbCdEfGh&sz=w480");
   });
 
-  it("returns instagram provider fallback when no image thumbnail URL is available", () => {
+  it("routes Instagram reel and post URLs through /api/thumbnail", () => {
     const res = resolveThumbnail({
       format: "reel",
       referenceUrl: "https://www.instagram.com/reel/DZ-pcctqPrL/",
     });
     expect(res.provider).toBe("instagram");
-    expect(res.imageUrl).toBeNull();
+    expect(res.imageUrl).toBe(
+      "/api/thumbnail?url=https%3A%2F%2Fwww.instagram.com%2Freel%2FDZ-pcctqPrL%2F"
+    );
   });
 });

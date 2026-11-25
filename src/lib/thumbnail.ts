@@ -44,12 +44,16 @@ export function resolveThumbnail(params: {
         };
       }
     }
+    if (resolved.kind === "instagram" && resolved.originalUrl) {
+      return {
+        imageUrl: `/api/thumbnail?url=${encodeURIComponent(resolved.originalUrl)}`,
+        provider: "instagram",
+        format: params.format,
+      };
+    }
   }
 
   const primary = resolveVideoEmbed(params.referenceUrl || params.latestDraftUrl);
-  if (primary.kind === "instagram") {
-    return { imageUrl: null, provider: "instagram", format: params.format };
-  }
   if (primary.kind === "direct-video") {
     return { imageUrl: null, provider: "direct", format: params.format };
   }

@@ -38,7 +38,10 @@ export function DraftPreviewCard({
 
           <a
             href={draft.fileDataUrl}
-            download={draft.fileName || `draft-v${draft.version}.${kind === "pdf" ? "pdf" : "png"}`}
+            download={
+              draft.fileName ||
+              `draft-v${draft.version}.${kind === "pdf" ? "pdf" : "png"}`
+            }
             className="inline-flex items-center gap-1 rounded-md bg-[#232325] px-2.5 py-1 text-[11px] font-medium text-[#ededed] hover:bg-[#2a2a2d]"
           >
             <span>Download</span>
@@ -46,21 +49,25 @@ export function DraftPreviewCard({
           </a>
         </div>
 
-        {kind === "image" ? (
-          <div className="flex h-[460px] items-center justify-center bg-[#141415] p-4 lg:h-[580px]">
-            <img
-              src={draft.fileDataUrl}
-              alt={draft.fileName || label}
-              className="max-h-full max-w-full rounded-lg object-contain"
-            />
+        {/* Strict 9/16 scroll-free black letterboxed preview stage */}
+        <div className="flex w-full items-center justify-center bg-black p-3">
+          <div className="relative aspect-[9/16] w-full max-w-[360px] overflow-hidden rounded-lg bg-black">
+            {kind === "image" ? (
+              <img
+                src={draft.fileDataUrl}
+                alt={draft.fileName || label}
+                className="h-full w-full bg-black object-contain"
+              />
+            ) : (
+              <iframe
+                src={`${draft.fileDataUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+                title={draft.fileName || label}
+                scrolling="no"
+                className="h-full w-full overflow-hidden border-0 bg-black"
+              />
+            )}
           </div>
-        ) : (
-          <iframe
-            src={draft.fileDataUrl}
-            title={draft.fileName || label}
-            className="h-[460px] w-full border-0 bg-white lg:h-[580px]"
-          />
-        )}
+        </div>
 
         {draft.fileName ? (
           <div className="border-t border-[rgba(237,237,237,0.08)] bg-[#19191b] px-3.5 py-2 text-[11px] text-[#a1a1a6]">

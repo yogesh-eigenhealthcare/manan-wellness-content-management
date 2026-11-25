@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { ExternalLink, MessageSquare } from "lucide-react";
 import { ContentThumbnail } from "@/components/video/ContentThumbnail";
 import { STATUS_META } from "@/lib/workflow";
@@ -16,6 +16,9 @@ interface PipelineBoardProps {
   showParked?: boolean;
   onSelectItem: (item: ContentItem) => void;
 }
+
+const INITIAL_COLUMN_ITEMS = 4;
+const LOAD_MORE_STEP = 6;
 
 const KANBAN_COLUMNS: {
   title: string;
@@ -60,6 +63,8 @@ export function PipelineBoard({
   showParked = false,
   onSelectItem,
 }: PipelineBoardProps) {
+  const [visibleCounts, setVisibleCounts] = useState<Record<string, number>>({});
+
   if (viewMode === "table") {
     return (
       <div
@@ -204,10 +209,21 @@ export function PipelineBoard({
       ]
     : KANBAN_COLUMNS;
 
+  const handleShowMore = (colTitle: string) => {
+    setVisibleCounts((prev) => ({
+      ...prev,
+      [colTitle]: (prev[colTitle] ?? INITIAL_COLUMN_ITEMS) + LOAD_MORE_STEP,
+    }));
+  };
+
   return (
-    <div className="flex gap-4 overflow-x-auto pb-4">
+    <div className="flex items-start gap-4 overflow-x-auto pb-4">
       {columns.map((col) => {
         const colItems = items.filter((it) => col.statuses.includes(it.status));
+        const limit = visibleCounts[col.title] ?? INITIAL_COLUMN_ITEMS;
+        const visibleItems = colItems.slice(0, limit);
+        const remaining = colItems.length - visibleItems.length;
+
         return (
           <section
             key={col.title}
@@ -225,13 +241,13 @@ export function PipelineBoard({
               </span>
             </header>
 
-            <div className="flex max-h-[68vh] flex-col gap-2.5 overflow-y-auto p-2.5">
-              {colItems.length === 0 ? (
+            <div className="flex flex-col gap-2.5 p-2.5">
+              {visibleItems.length === 0 ? (
                 <div className="studio-surface rounded-lg border border-dashed p-4 text-center text-xs text-[var(--text-muted)]">
                   No items
                 </div>
               ) : (
-                colItems.map((item) => {
+                visibleItems.map((item) => {
                   const meta = STATUS_META[item.status];
                   return (
                     <button
@@ -267,12 +283,6 @@ export function PipelineBoard({
                         {item.title}
                       </div>
 
-                      {item.adaptationIdea ? (
-                        <p className="line-clamp-2 text-xs text-[var(--text-muted)]">
-                          {item.adaptationIdea}
-                        </p>
-                      ) : null}
-
                       <div className="flex items-center justify-between gap-2 border-t border-[var(--border-subtle)] pt-2 text-xs text-[var(--text-muted)]">
                         <span className="truncate capitalize">
                           {item.assignedTo.length > 0
@@ -297,6 +307,16 @@ export function PipelineBoard({
                   );
                 })
               )}
+
+              {remaining > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => handleShowMore(col.title)}
+                  className="studio-surface h-8 w-full rounded-lg border text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
+                >
+                  Show more ({remaining})
+                </button>
+              ) : null}
             </div>
           </section>
         );
