@@ -22,16 +22,16 @@ export function DraftPreviewCard({
 
   if (draft && (kind === "image" || kind === "pdf") && draft.fileDataUrl) {
     return (
-      <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-slate-950 text-white">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 bg-slate-900 px-3 py-2.5 text-xs">
-          <div className="flex items-center gap-2 font-medium text-slate-200">
+      <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[#0f0f10] text-[#ededed]">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[rgba(237,237,237,0.08)] bg-[#19191b] px-3.5 py-2.5 text-xs">
+          <div className="flex items-center gap-2 font-medium text-[#ededed]">
             {kind === "pdf" ? (
-              <FileText className="h-3.5 w-3.5 text-rose-400" />
+              <FileText className="h-4 w-4 text-[#a1a1a6]" strokeWidth={1.5} />
             ) : (
-              <ImageIcon className="h-3.5 w-3.5 text-sky-400" />
+              <ImageIcon className="h-4 w-4 text-[#a1a1a6]" strokeWidth={1.5} />
             )}
             <span>{label}</span>
-            <span className="rounded-md bg-slate-800 px-2 py-0.5 text-[11px] uppercase text-slate-300">
+            <span className="font-mono-meta rounded bg-[#232325] px-2 py-0.5 text-[11px] uppercase text-[#a1a1a6]">
               {kind}
             </span>
           </div>
@@ -39,14 +39,15 @@ export function DraftPreviewCard({
           <a
             href={draft.fileDataUrl}
             download={draft.fileName || `draft-v${draft.version}.${kind === "pdf" ? "pdf" : "png"}`}
-            className="inline-flex items-center gap-1 rounded-md bg-teal-600/90 px-2.5 py-1 text-[11px] font-medium text-white hover:bg-teal-500"
+            className="inline-flex items-center gap-1 rounded-md bg-[#232325] px-2.5 py-1 text-[11px] font-medium text-[#ededed] hover:bg-[#2a2a2d]"
           >
-            Download <Download className="h-3 w-3" />
+            <span>Download</span>
+            <Download className="h-3.5 w-3.5" strokeWidth={1.5} />
           </a>
         </div>
 
         {kind === "image" ? (
-          <div className="flex h-[460px] lg:h-[580px] items-center justify-center bg-black p-3">
+          <div className="flex h-[460px] items-center justify-center bg-[#141415] p-4 lg:h-[580px]">
             <img
               src={draft.fileDataUrl}
               alt={draft.fileName || label}
@@ -57,13 +58,13 @@ export function DraftPreviewCard({
           <iframe
             src={draft.fileDataUrl}
             title={draft.fileName || label}
-            className="h-[460px] lg:h-[580px] w-full border-0 bg-white"
+            className="h-[460px] w-full border-0 bg-white lg:h-[580px]"
           />
         )}
 
         {draft.fileName ? (
-          <div className="border-t border-slate-800 bg-slate-900/95 px-3 py-1.5 text-[11px] text-slate-400">
-            File: <span className="text-slate-200">{draft.fileName}</span>
+          <div className="border-t border-[rgba(237,237,237,0.08)] bg-[#19191b] px-3.5 py-2 text-[11px] text-[#a1a1a6]">
+            File: <span className="text-[#ededed]">{draft.fileName}</span>
           </div>
         ) : null}
       </div>

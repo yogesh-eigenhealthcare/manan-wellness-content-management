@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Check, Copy, Hash, Monitor, Moon, ShieldCheck, Sun, Trash2, UserPlus } from "lucide-react";
+import { Check, Copy, Hash, Monitor, Moon, Sun, Trash2, UserPlus } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme, type ThemePreference } from "@/contexts/ThemeContext";
 import type { HashtagPreset, UserRole } from "@/types/content";
@@ -37,9 +37,9 @@ export function SettingsView({ hashtagPresets }: SettingsViewProps) {
     try {
       await saveRolePreassignment(email, role, teamTag);
       setEmail("");
-      setMsg("Saved email pre-assignment.");
+      setMsg("Saved email pre-assignment");
     } catch (err: unknown) {
-      setMsg(err instanceof Error ? err.message : "Failed to save pre-assignment.");
+      setMsg(err instanceof Error ? err.message : "Failed to save pre-assignment");
     } finally {
       setBusy(false);
     }
@@ -59,38 +59,37 @@ export function SettingsView({ hashtagPresets }: SettingsViewProps) {
   }[] = [
     {
       value: "system",
-      label: `System (Currently ${systemScheme})`,
-      description: "Automatically matches your device theme.",
-      icon: <Monitor className="h-4 w-4" />,
+      label: `System (${systemScheme})`,
+      description: "Matches your device theme",
+      icon: <Monitor className="h-4 w-4 text-[var(--text-muted)]" strokeWidth={1.5} />,
     },
     {
       value: "light",
-      label: "Light Mode",
-      description: "Bright studio workspace.",
-      icon: <Sun className="h-4 w-4" />,
+      label: "Light",
+      description: "Bright studio surface",
+      icon: <Sun className="h-4 w-4 text-[var(--text-muted)]" strokeWidth={1.5} />,
     },
     {
       value: "dark",
-      label: "Dark Mode",
-      description: "Low-glare dark workspace.",
-      icon: <Moon className="h-4 w-4" />,
+      label: "Dark",
+      description: "Graphite dark studio",
+      icon: <Moon className="h-4 w-4 text-[var(--text-muted)]" strokeWidth={1.5} />,
     },
   ];
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <div>
-        <h2 className="text-xl font-bold text-[var(--text-primary)]">Settings</h2>
-        <p className="text-xs text-[var(--text-muted)]">
-          Appearance, manager approval roles, and Manan Wellness hashtag presets
-        </p>
-      </div>
+      <h1 className="text-2xl font-medium tracking-tight text-[var(--text-primary)]">
+        Settings
+      </h1>
 
-      {/* Theme Appearance */}
-      <section className="studio-surface rounded-2xl border p-5">
-        <h3 className="text-sm font-bold text-[var(--text-primary)]">Appearance</h3>
-        <p className="mt-0.5 text-xs text-[var(--text-muted)]">
-          Choose Dark Mode, Light Mode, or follow your OS preference.
+      {/* Appearance */}
+      <section className="studio-surface rounded-xl border p-5">
+        <h2 className="text-base font-medium text-[var(--text-primary)]">
+          Appearance
+        </h2>
+        <p className="mt-1 text-xs text-[var(--text-muted)]">
+          Choose Dark, Light, or System theme
         </p>
 
         <fieldset className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -100,10 +99,10 @@ export function SettingsView({ hashtagPresets }: SettingsViewProps) {
             return (
               <label
                 key={opt.value}
-                className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3.5 transition ${
+                className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3.5 transition-colors ${
                   active
-                    ? "border-teal-600 bg-teal-600/10"
-                    : "studio-muted hover:border-teal-500/60"
+                    ? "border-[var(--accent)] bg-[var(--accent-soft)]"
+                    : "studio-raised hover:bg-[var(--bg-hover)]"
                 }`}
               >
                 <input
@@ -112,14 +111,14 @@ export function SettingsView({ hashtagPresets }: SettingsViewProps) {
                   value={opt.value}
                   checked={active}
                   onChange={() => setThemePreference(opt.value)}
-                  className="mt-0.5 accent-teal-600"
+                  className="mt-0.5"
                 />
                 <div className="min-w-0">
-                  <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--text-primary)]">
+                  <div className="flex items-center gap-1.5 text-sm font-medium text-[var(--text-primary)]">
                     {opt.icon}
                     <span>{opt.label}</span>
                   </div>
-                  <p className="mt-1 text-[11px] text-[var(--text-muted)]">
+                  <p className="mt-0.5 text-xs text-[var(--text-muted)]">
                     {opt.description}
                   </p>
                 </div>
@@ -130,30 +129,30 @@ export function SettingsView({ hashtagPresets }: SettingsViewProps) {
       </section>
 
       {/* Team Roles & Manager Access */}
-      <section className="studio-surface space-y-4 rounded-2xl border p-5">
+      <section className="studio-surface space-y-4 rounded-xl border p-5">
         <div>
-          <h3 className="text-sm font-bold text-[var(--text-primary)]">
-            Team Roles &amp; Manager Permissions
-          </h3>
-          <p className="mt-0.5 text-xs text-[var(--text-muted)]">
-            Everyone can sign in and submit drafts; only Managers can approve ideas (Gate 1) and final cuts (Gate 2).
+          <h2 className="text-base font-medium text-[var(--text-primary)]">
+            Team roles and permissions
+          </h2>
+          <p className="mt-1 text-xs text-[var(--text-muted)]">
+            Everyone can sign in and submit drafts; only Managers approve Gate 1 and Gate 2.
           </p>
         </div>
 
         {!isManager ? (
-          <div className="rounded-xl border border-amber-300/60 bg-amber-50 px-4 py-3 text-xs text-amber-900">
-            You are signed in as a <strong>Team Member</strong>. To pre-seed the initial Manager email, add it to{" "}
-            <code className="rounded bg-amber-100 px-1 py-0.5">scripts/managers.json</code> and run{" "}
-            <code className="rounded bg-amber-100 px-1 py-0.5">npm run seed:managers</code>.
+          <div className="studio-raised rounded-lg border px-4 py-3 text-xs text-[var(--text-secondary)]">
+            Signed in as a Team member. To pre-seed the initial Manager email, add it to{" "}
+            <code className="font-mono-meta">scripts/managers.json</code> and run{" "}
+            <code className="font-mono-meta">npm run seed:managers</code>.
           </div>
         ) : (
           <form
             onSubmit={handlePreassign}
-            className="studio-muted space-y-3 rounded-xl border p-4"
+            className="studio-raised space-y-3 rounded-lg border p-4"
           >
-            <div className="flex items-center gap-2 text-xs font-semibold text-[var(--text-primary)]">
-              <UserPlus className="h-4 w-4 text-teal-600" />
-              Pre-assign Manager / Team Role by Email
+            <div className="flex items-center gap-2 text-xs font-medium text-[var(--text-primary)]">
+              <UserPlus className="h-4 w-4 text-[var(--text-muted)]" strokeWidth={1.5} />
+              <span>Pre-assign role by email</span>
             </div>
             <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-4">
               <input
@@ -163,13 +162,13 @@ export function SettingsView({ hashtagPresets }: SettingsViewProps) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="manager@mananwellness.com"
-                className="studio-input sm:col-span-2 rounded-lg border px-3 py-2 text-sm"
+                className="studio-input h-9 sm:col-span-2 rounded-lg border px-3 text-sm"
               />
               <select
                 aria-label="Pre-assigned role"
                 value={role}
                 onChange={(e) => setRole(e.target.value as UserRole)}
-                className="studio-input rounded-lg border px-2.5 py-2 text-sm"
+                className="studio-input h-9 rounded-lg border px-2.5 text-sm"
               >
                 <option value="manager">Manager</option>
                 <option value="member">Member</option>
@@ -177,37 +176,37 @@ export function SettingsView({ hashtagPresets }: SettingsViewProps) {
               <button
                 type="submit"
                 disabled={busy}
-                className="rounded-lg bg-teal-600 px-3 py-2 text-xs font-semibold text-white hover:bg-teal-700 disabled:opacity-50"
+                className="studio-btn-accent h-9 rounded-lg px-3 text-xs font-medium disabled:opacity-50"
               >
-                Save Email Role
+                Save email
               </button>
             </div>
             <input
               type="text"
               value={teamTag}
               onChange={(e) => setTeamTag(e.target.value)}
-              placeholder="Team label (e.g. Marketing Manager, Animation Team)"
-              className="studio-input w-full rounded-lg border px-3 py-1.5 text-xs"
+              placeholder="Team label"
+              className="studio-input h-9 w-full rounded-lg border px-3 text-xs"
             />
             {msg ? (
-              <p role="status" className="text-xs font-medium text-teal-600">
+              <p role="status" className="text-xs font-medium text-[var(--accent)]">
                 {msg}
               </p>
             ) : null}
           </form>
         )}
 
-        <div className="divide-y divide-[var(--border-subtle)] rounded-xl border border-[var(--border-subtle)]">
+        <div className="divide-y divide-[var(--border-subtle)] rounded-lg border border-[var(--border-subtle)]">
           {teamUsers.map((u) => (
             <div
               key={u.uid}
               className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm"
             >
               <div>
-                <div className="flex items-center gap-2 font-semibold text-[var(--text-primary)]">
+                <div className="flex items-center gap-2 font-medium text-[var(--text-primary)]">
                   <span>{u.displayName}</span>
                   {u.uid === profile?.uid ? (
-                    <span className="studio-muted rounded border px-1.5 py-0.5 text-[10px] text-[var(--text-muted)]">
+                    <span className="studio-raised rounded border px-1.5 py-0.5 text-[10px] text-[var(--text-muted)]">
                       You
                     </span>
                   ) : null}
@@ -225,20 +224,20 @@ export function SettingsView({ hashtagPresets }: SettingsViewProps) {
                   onChange={(e) =>
                     void updateMemberRole(u.uid, e.target.value as UserRole, u.teamTag)
                   }
-                  className="studio-input rounded-lg border px-2.5 py-1.5 text-xs font-medium"
+                  className="studio-input h-8 rounded-lg border px-2.5 text-xs font-medium"
                 >
-                  <option value="manager">Manager (Can Approve)</option>
-                  <option value="member">Team Member</option>
+                  <option value="manager">Manager</option>
+                  <option value="member">Team member</option>
                 </select>
               ) : (
-                <span
-                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                    u.role === "manager"
-                      ? "bg-teal-100 text-teal-800"
-                      : "studio-muted text-[var(--text-secondary)]"
-                  }`}
-                >
-                  {u.role === "manager" ? <ShieldCheck className="h-3.5 w-3.5" /> : null}
+                <span className="studio-raised inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs text-[var(--text-secondary)]">
+                  <span
+                    className="inline-block h-1.5 w-1.5 rounded-full"
+                    style={{
+                      backgroundColor:
+                        u.role === "manager" ? "var(--accent)" : "var(--text-muted)",
+                    }}
+                  />
                   {u.role === "manager" ? "Manager" : "Member"}
                 </span>
               )}
@@ -247,27 +246,27 @@ export function SettingsView({ hashtagPresets }: SettingsViewProps) {
         </div>
 
         {isManager && preassignments.length > 0 ? (
-          <div className="divide-y divide-[var(--border-subtle)] rounded-xl border border-[var(--border-subtle)]">
+          <div className="divide-y divide-[var(--border-subtle)] rounded-lg border border-[var(--border-subtle)]">
             {preassignments.map((p) => (
               <div
                 key={p.email}
                 className="flex items-center justify-between px-4 py-2.5 text-xs"
               >
-                <div>
-                  <span className="font-semibold text-[var(--text-primary)]">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-[var(--text-primary)]">
                     {p.email}
                   </span>
-                  <span className="ml-2 rounded bg-teal-100 px-1.5 py-0.5 font-semibold text-teal-800">
+                  <span className="studio-raised rounded border px-1.5 py-0.5 capitalize text-[var(--text-secondary)]">
                     {p.role}
                   </span>
                 </div>
                 <button
                   type="button"
                   onClick={() => void removeRolePreassignment(p.email)}
-                  className="rounded p-1 text-[var(--text-muted)] hover:bg-rose-50 hover:text-rose-600"
+                  className="rounded p-1 text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--danger)]"
                   aria-label={`Remove ${p.email}`}
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
+                  <Trash2 className="h-4 w-4" strokeWidth={1.5} />
                 </button>
               </div>
             ))}
@@ -276,40 +275,42 @@ export function SettingsView({ hashtagPresets }: SettingsViewProps) {
       </section>
 
       {/* Hashtag Bank */}
-      <section className="studio-surface space-y-3 rounded-2xl border p-5">
+      <section className="studio-surface space-y-3 rounded-xl border p-5">
         <div className="flex items-center gap-2">
-          <Hash className="h-4 w-4 text-teal-600" />
-          <h3 className="text-sm font-bold text-[var(--text-primary)]">
-            Hashtag Presets ({hashtagPresets.length})
-          </h3>
+          <Hash className="h-4 w-4 text-[var(--text-muted)]" strokeWidth={1.5} />
+          <h2 className="text-base font-medium text-[var(--text-primary)]">
+            Hashtag presets
+          </h2>
+          <span className="font-mono-meta text-xs text-[var(--text-muted)]">
+            ({hashtagPresets.length})
+          </span>
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {hashtagPresets.map((preset) => (
-            <div
-              key={preset.id}
-              className="studio-muted rounded-xl border p-3.5"
-            >
+            <div key={preset.id} className="studio-raised rounded-lg border p-3.5">
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs font-bold capitalize text-[var(--text-primary)]">
+                <span className="text-xs font-medium capitalize text-[var(--text-primary)]">
                   {preset.category}
                 </span>
                 <button
                   type="button"
                   onClick={() => handleCopyTags(preset)}
-                  className="studio-surface inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
+                  className="studio-surface inline-flex h-7 items-center gap-1 rounded-md border px-2 text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
                 >
                   {copiedId === preset.id ? (
                     <>
-                      <Check className="h-3 w-3 text-emerald-600" /> Copied
+                      <Check className="h-3.5 w-3.5 text-[var(--positive)]" strokeWidth={1.5} />
+                      <span>Copied</span>
                     </>
                   ) : (
                     <>
-                      <Copy className="h-3 w-3" /> Copy
+                      <Copy className="h-3.5 w-3.5" strokeWidth={1.5} />
+                      <span>Copy</span>
                     </>
                   )}
                 </button>
               </div>
-              <p className="text-[11px] leading-relaxed text-[var(--text-muted)]">
+              <p className="text-xs leading-relaxed text-[var(--text-muted)]">
                 {preset.tags.join(" ")}
               </p>
             </div>

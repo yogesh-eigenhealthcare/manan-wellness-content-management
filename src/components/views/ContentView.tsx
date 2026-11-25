@@ -1,7 +1,14 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Plus, Search as SearchIcon } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Plus,
+  Search,
+} from "lucide-react";
 import { PipelineBoard } from "@/components/board/PipelineBoard";
 import { isGate1Pending, isGate2Pending } from "@/lib/workflow";
 import {
@@ -16,6 +23,7 @@ interface ContentViewProps {
   items: ContentItem[];
   loading: boolean;
   isManager: boolean;
+  initialQuery?: string;
   onSelectItem: (item: ContentItem) => void;
   onNewIdea: () => void;
 }
@@ -26,18 +34,23 @@ export function ContentView({
   items,
   loading,
   isManager,
+  initialQuery = "",
   onSelectItem,
   onNewIdea,
 }: ContentViewProps) {
   const [formatTab, setFormatTab] = useState<"all" | ContentFormat>("all");
   const [stageFilter, setStageFilter] = useState<StageFilter>("all");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [topicFilter, setTopicFilter] = useState("all");
   const [assigneeFilter, setAssigneeFilter] = useState("all");
   const [effortFilter, setEffortFilter] = useState("all");
 
   const [pageSize, setPageSize] = useState(15);
   const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    setSearchQuery(initialQuery);
+  }, [initialQuery]);
 
   const filteredItems = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -109,52 +122,41 @@ export function ContentView({
     [filteredItems, startIndex, pageSize]
   );
 
-  const pageNumbers = useMemo(() => {
-    const pages: number[] = [];
-    const start = Math.max(1, clampedPage - 2);
-    const end = Math.min(totalPages, clampedPage + 2);
-    for (let p = start; p <= end; p += 1) pages.push(p);
-    return pages;
-  }, [clampedPage, totalPages]);
-
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-xl font-bold text-[var(--text-primary)]">
-            Channel Content
-          </h2>
-          <p className="text-xs text-[var(--text-muted)]">
-            Browse, filter, and review all Reels / Shorts, Long form videos, and Carousels
-          </p>
-        </div>
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h1 className="text-2xl font-medium tracking-tight text-[var(--text-primary)]">
+          Channel content
+        </h1>
         <button
           type="button"
           onClick={onNewIdea}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-teal-600 px-3.5 py-2 text-xs font-semibold text-white hover:bg-teal-700"
+          className="studio-btn-accent inline-flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-medium"
         >
-          <Plus className="h-4 w-4" /> New Idea
+          <Plus className="h-4 w-4" strokeWidth={1.5} />
+          <span>New idea</span>
         </button>
       </div>
 
-      {/* Format Tabs (YouTube Studio style) */}
+      {/* Format Underline Tabs (YouTube Studio style) */}
       <div
         role="tablist"
         aria-label="Content format tabs"
-        className="flex flex-wrap gap-1 border-b border-[var(--border-subtle)]"
+        className="flex flex-wrap gap-2 border-b border-[var(--border-subtle)]"
       >
         <button
           type="button"
           role="tab"
           aria-selected={formatTab === "all"}
           onClick={() => setFormatTab("all")}
-          className={`border-b-2 px-4 py-2.5 text-xs font-semibold transition ${
+          className={`border-b-2 px-3 py-2.5 text-sm font-medium transition-colors ${
             formatTab === "all"
-              ? "border-teal-600 text-teal-600"
+              ? "border-[var(--text-primary)] text-[var(--text-primary)]"
               : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"
           }`}
         >
-          All ({items.length})
+          All <span className="font-mono-meta ml-1 text-xs">({items.length})</span>
         </button>
         {FORMAT_OPTIONS.map((opt) => {
           const count = items.filter((i) => i.format === opt.value).length;
@@ -165,26 +167,27 @@ export function ContentView({
               role="tab"
               aria-selected={formatTab === opt.value}
               onClick={() => setFormatTab(opt.value)}
-              className={`border-b-2 px-4 py-2.5 text-xs font-semibold transition ${
+              className={`border-b-2 px-3 py-2.5 text-sm font-medium transition-colors ${
                 formatTab === opt.value
-                  ? "border-teal-600 text-teal-600"
+                  ? "border-[var(--text-primary)] text-[var(--text-primary)]"
                   : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"
               }`}
             >
-              {opt.label} ({count})
+              {opt.label}{" "}
+              <span className="font-mono-meta ml-1 text-xs">({count})</span>
             </button>
           );
         })}
       </div>
 
-      {/* Stage Filter Pills */}
-      <div className="flex flex-wrap gap-1.5">
+      {/* Stage Filter Strip */}
+      <div className="flex flex-wrap gap-2">
         {(
           [
-            ["all", "All Stages"],
-            ["approvals", isManager ? "Needs My Approval" : "Pending Approval"],
-            ["production", "In Production & Rework"],
-            ["ready", "Ready & Posted"],
+            ["all", "All stages"],
+            ["approvals", isManager ? "Needs my approval" : "Pending approval"],
+            ["production", "In production"],
+            ["ready", "Ready and posted"],
             ["parked", "Parked"],
           ] as [StageFilter, string][]
         ).map(([key, label]) => (
@@ -192,9 +195,9 @@ export function ContentView({
             key={key}
             type="button"
             onClick={() => setStageFilter(key)}
-            className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+            className={`h-8 rounded-lg px-3 text-xs font-medium transition-colors ${
               stageFilter === key
-                ? "bg-teal-600 text-white"
+                ? "studio-btn-primary"
                 : "studio-surface border text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
             }`}
           >
@@ -203,22 +206,25 @@ export function ContentView({
         ))}
       </div>
 
-      {/* Search & Attribute Filters */}
+      {/* Filter Row */}
       <search>
         <form
           onSubmit={(e) => e.preventDefault()}
-          className="studio-surface grid grid-cols-1 gap-2.5 rounded-xl border p-3 sm:grid-cols-2 lg:grid-cols-5"
+          className="studio-surface grid grid-cols-1 gap-3 rounded-xl border p-3 sm:grid-cols-2 lg:grid-cols-5"
         >
           <div className="relative lg:col-span-2">
-            <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]"
+              strokeWidth={1.5}
+            />
             <input
               type="search"
-              aria-label="Search content items"
+              aria-label="Filter content"
               spellCheck={false}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search title, #serial, adaptation idea, or hashtag..."
-              className="studio-input w-full rounded-lg border py-2 pl-9 pr-3 text-sm"
+              placeholder="Filter"
+              className="studio-input h-9 w-full rounded-lg border pl-9 pr-3 text-sm"
             />
           </div>
 
@@ -226,9 +232,9 @@ export function ContentView({
             aria-label="Filter by topic"
             value={topicFilter}
             onChange={(e) => setTopicFilter(e.target.value)}
-            className="studio-input rounded-lg border px-3 py-2 text-sm"
+            className="studio-input h-9 rounded-lg border px-3 text-sm"
           >
-            <option value="all">All Topics</option>
+            <option value="all">All topics</option>
             {TOPIC_OPTIONS.map((t) => (
               <option key={t} value={t}>
                 {t}
@@ -240,9 +246,9 @@ export function ContentView({
             aria-label="Filter by assignee"
             value={assigneeFilter}
             onChange={(e) => setAssigneeFilter(e.target.value)}
-            className="studio-input rounded-lg border px-3 py-2 text-sm capitalize"
+            className="studio-input h-9 rounded-lg border px-3 text-sm capitalize"
           >
-            <option value="all">All Assignees</option>
+            <option value="all">All assignees</option>
             {TEAM_ASSIGNEE_OPTIONS.map((a) => (
               <option key={a} value={a}>
                 {a}
@@ -254,9 +260,9 @@ export function ContentView({
             aria-label="Filter by effort"
             value={effortFilter}
             onChange={(e) => setEffortFilter(e.target.value)}
-            className="studio-input rounded-lg border px-3 py-2 text-sm"
+            className="studio-input h-9 rounded-lg border px-3 text-sm"
           >
-            <option value="all">All Effort Levels</option>
+            <option value="all">All effort levels</option>
             <option value="low">Low effort</option>
             <option value="high">High effort</option>
             <option value="general">General</option>
@@ -266,8 +272,8 @@ export function ContentView({
 
       {/* Table */}
       {loading ? (
-        <div className="studio-surface rounded-2xl border p-12 text-center text-sm text-[var(--text-muted)]">
-          Loading content table...
+        <div className="studio-surface rounded-xl border p-12 text-center text-sm text-[var(--text-muted)]">
+          Loading content table
         </div>
       ) : (
         <PipelineBoard
@@ -277,70 +283,65 @@ export function ContentView({
         />
       )}
 
-      {/* Pagination Bar */}
-      <div className="studio-surface flex flex-wrap items-center justify-between gap-3 rounded-xl border px-4 py-2.5 text-xs">
-        <div className="flex items-center gap-3 text-[var(--text-muted)]">
-          <span>
-            Showing{" "}
-            <strong className="text-[var(--text-primary)]">
-              {filteredItems.length === 0 ? 0 : startIndex + 1}
-            </strong>
-            –
-            <strong className="text-[var(--text-primary)]">
-              {Math.min(startIndex + pageSize, filteredItems.length)}
-            </strong>{" "}
-            of <strong className="text-[var(--text-primary)]">{filteredItems.length}</strong>
-          </span>
+      {/* YouTube Studio Pagination Footer */}
+      <div className="studio-surface flex flex-wrap items-center justify-end gap-6 rounded-xl border px-4 py-2.5 text-xs text-[var(--text-muted)]">
+        <label className="inline-flex items-center gap-2">
+          <span>Rows per page:</span>
+          <select
+            aria-label="Rows per page"
+            value={pageSize}
+            onChange={(e) => setPageSize(Number(e.target.value))}
+            className="studio-input h-8 rounded-md border px-2 text-xs"
+          >
+            <option value={10}>10</option>
+            <option value={15}>15</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+          </select>
+        </label>
 
-          <label className="inline-flex items-center gap-1.5">
-            <span>Rows:</span>
-            <select
-              aria-label="Rows per page"
-              value={pageSize}
-              onChange={(e) => setPageSize(Number(e.target.value))}
-              className="studio-input rounded-md border px-2 py-1 text-xs"
-            >
-              <option value={10}>10</option>
-              <option value={15}>15</option>
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-            </select>
-          </label>
-        </div>
+        <span className="font-mono-meta text-[var(--text-secondary)]">
+          {filteredItems.length === 0 ? 0 : startIndex + 1}–
+          {Math.min(startIndex + pageSize, filteredItems.length)} of{" "}
+          {filteredItems.length}
+        </span>
 
         <nav aria-label="Pagination" className="flex items-center gap-1">
           <button
             type="button"
             disabled={clampedPage <= 1}
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            className="studio-surface inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] disabled:opacity-40"
+            onClick={() => setCurrentPage(1)}
+            aria-label="First page"
+            className="rounded-md p-1.5 text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-hover)] disabled:opacity-35"
           >
-            <ChevronLeft className="h-3.5 w-3.5" /> Prev
+            <ChevronsLeft className="h-4 w-4" strokeWidth={1.5} />
           </button>
-
-          {pageNumbers.map((p) => (
-            <button
-              key={p}
-              type="button"
-              aria-current={p === clampedPage ? "page" : undefined}
-              onClick={() => setCurrentPage(p)}
-              className={`min-w-8 rounded-lg px-2.5 py-1.5 font-semibold ${
-                p === clampedPage
-                  ? "bg-teal-600 text-white"
-                  : "studio-surface border text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
-              }`}
-            >
-              {p}
-            </button>
-          ))}
-
+          <button
+            type="button"
+            disabled={clampedPage <= 1}
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            aria-label="Previous page"
+            className="rounded-md p-1.5 text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-hover)] disabled:opacity-35"
+          >
+            <ChevronLeft className="h-4 w-4" strokeWidth={1.5} />
+          </button>
           <button
             type="button"
             disabled={clampedPage >= totalPages}
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            className="studio-surface inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] disabled:opacity-40"
+            aria-label="Next page"
+            className="rounded-md p-1.5 text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-hover)] disabled:opacity-35"
           >
-            Next <ChevronRight className="h-3.5 w-3.5" />
+            <ChevronRight className="h-4 w-4" strokeWidth={1.5} />
+          </button>
+          <button
+            type="button"
+            disabled={clampedPage >= totalPages}
+            onClick={() => setCurrentPage(totalPages)}
+            aria-label="Last page"
+            className="rounded-md p-1.5 text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-hover)] disabled:opacity-35"
+          >
+            <ChevronsRight className="h-4 w-4" strokeWidth={1.5} />
           </button>
         </nav>
       </div>

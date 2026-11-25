@@ -96,7 +96,7 @@ export function SubmitIdeaModal({
       resetForm();
       onClose();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to submit idea.");
+      setError(err instanceof Error ? err.message : "Failed to submit idea");
     } finally {
       setSubmitting(false);
     }
@@ -107,21 +107,21 @@ export function SubmitIdeaModal({
       open={open}
       onClose={onClose}
       titleId="submit-idea-title"
-      title="Submit New Content Idea (Gate 1)"
-      subtitle="Share a trending reference link and adaptation idea for Marketing Manager approval."
+      title="Submit new content idea (Gate 1)"
+      subtitle="Share a reference link and adaptation note for manager approval"
       maxWidthClass="max-w-4xl"
     >
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <div className="space-y-3.5">
           <div>
-            <span className="mb-1.5 block text-xs font-semibold text-[var(--text-secondary)]">
+            <span className="mb-1.5 block text-xs text-[var(--text-muted)]">
               Format
             </span>
             <div className="flex flex-wrap gap-2">
               {FORMAT_OPTIONS.map((opt) => (
                 <label
                   key={opt.value}
-                  className="studio-surface inline-flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm"
+                  className="studio-raised inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border px-3 text-xs font-medium"
                 >
                   <input
                     type="radio"
@@ -129,9 +129,8 @@ export function SubmitIdeaModal({
                     value={opt.value}
                     checked={format === opt.value}
                     onChange={() => setFormat(opt.value)}
-                    className="accent-teal-600"
                   />
-                  {opt.label}
+                  <span>{opt.label}</span>
                 </label>
               ))}
             </div>
@@ -140,7 +139,7 @@ export function SubmitIdeaModal({
           <div>
             <label
               htmlFor="idea-title"
-              className="mb-1 block text-xs font-semibold text-[var(--text-secondary)]"
+              className="mb-1 block text-xs text-[var(--text-muted)]"
             >
               Title / Hook <span aria-hidden="true">*</span>
             </label>
@@ -151,8 +150,8 @@ export function SubmitIdeaModal({
               autoFocus
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. 5 signs your nervous system is overloaded"
-              className="studio-input w-full rounded-lg border px-3 py-2 text-sm"
+              placeholder="5 signs your nervous system is overloaded"
+              className="studio-input h-9 w-full rounded-lg border px-3 text-sm"
             />
           </div>
 
@@ -160,7 +159,7 @@ export function SubmitIdeaModal({
             <div>
               <label
                 htmlFor="idea-topic"
-                className="mb-1 block text-xs font-semibold text-[var(--text-secondary)]"
+                className="mb-1 block text-xs text-[var(--text-muted)]"
               >
                 Topic
               </label>
@@ -168,7 +167,7 @@ export function SubmitIdeaModal({
                 id="idea-topic"
                 value={topicType}
                 onChange={(e) => setTopicType(e.target.value)}
-                className="studio-input w-full rounded-lg border px-2.5 py-2 text-sm"
+                className="studio-input h-9 w-full rounded-lg border px-2.5 text-sm"
               >
                 {TOPIC_OPTIONS.map((t) => (
                   <option key={t} value={t}>
@@ -180,18 +179,18 @@ export function SubmitIdeaModal({
             <div>
               <label
                 htmlFor="idea-effort"
-                className="mb-1 block text-xs font-semibold text-[var(--text-secondary)]"
+                className="mb-1 block text-xs text-[var(--text-muted)]"
               >
-                Effort Level
+                Effort level
               </label>
               <select
                 id="idea-effort"
                 value={effortLevel}
                 onChange={(e) => setEffortLevel(e.target.value as EffortLevel)}
-                className="studio-input w-full rounded-lg border px-2.5 py-2 text-sm"
+                className="studio-input h-9 w-full rounded-lg border px-2.5 text-sm"
               >
-                <option value="low">Low efforts</option>
-                <option value="high">High efforts</option>
+                <option value="low">Low effort</option>
+                <option value="high">High effort</option>
                 <option value="general">General</option>
               </select>
             </div>
@@ -200,9 +199,9 @@ export function SubmitIdeaModal({
           <div>
             <label
               htmlFor="idea-ref-url"
-              className="mb-1 block text-xs font-semibold text-[var(--text-secondary)]"
+              className="mb-1 block text-xs text-[var(--text-muted)]"
             >
-              Reference Reel / Short / YouTube / Post URL
+              Reference URL
             </label>
             <input
               id="idea-ref-url"
@@ -210,17 +209,17 @@ export function SubmitIdeaModal({
               spellCheck={false}
               value={referenceUrl}
               onChange={(e) => setReferenceUrl(e.target.value)}
-              placeholder="https://www.instagram.com/reel/... or https://youtu.be/..."
-              className="studio-input w-full rounded-lg border px-3 py-2 text-sm"
+              placeholder="https://www.instagram.com/reel/..."
+              className="studio-input h-9 w-full rounded-lg border px-3 text-sm"
             />
           </div>
 
           <div>
             <label
               htmlFor="idea-backup-url"
-              className="mb-1 block text-xs font-semibold text-[var(--text-secondary)]"
+              className="mb-1 block text-xs text-[var(--text-muted)]"
             >
-              Backup Drive / MP4 Link (optional)
+              Backup Drive / MP4 link (optional)
             </label>
             <input
               id="idea-backup-url"
@@ -228,24 +227,24 @@ export function SubmitIdeaModal({
               spellCheck={false}
               value={referenceBackupUrl}
               onChange={(e) => setReferenceBackupUrl(e.target.value)}
-              placeholder="https://drive.google.com/file/d/.../view"
-              className="studio-input w-full rounded-lg border px-3 py-2 text-sm"
+              placeholder="https://drive.google.com/file/d/..."
+              className="studio-input h-9 w-full rounded-lg border px-3 text-sm"
             />
           </div>
 
           <div>
             <label
               htmlFor="idea-adaptation"
-              className="mb-1 block text-xs font-semibold text-[var(--text-secondary)]"
+              className="mb-1 block text-xs text-[var(--text-muted)]"
             >
-              How should Manan Wellness recreate it?
+              Manan Wellness adaptation idea
             </label>
             <textarea
               id="idea-adaptation"
               rows={2}
               value={adaptationIdea}
               onChange={(e) => setAdaptationIdea(e.target.value)}
-              placeholder="e.g. Use Dr. Pragati speaking with subtle background piano and Manan branding"
+              placeholder="How our team should recreate this concept"
               className="studio-input w-full rounded-lg border px-3 py-2 text-sm"
             />
           </div>
@@ -253,23 +252,23 @@ export function SubmitIdeaModal({
           <div>
             <label
               htmlFor="idea-cta"
-              className="mb-1 block text-xs font-semibold text-[var(--text-secondary)]"
+              className="mb-1 block text-xs text-[var(--text-muted)]"
             >
-              Call to Action
+              Call to action
             </label>
             <input
               id="idea-cta"
               type="text"
               value={callToAction}
               onChange={(e) => setCallToAction(e.target.value)}
-              placeholder='e.g. Comment "HELP" to book a session'
-              className="studio-input w-full rounded-lg border px-3 py-2 text-sm"
+              placeholder='Comment "HELP" to book a session'
+              className="studio-input h-9 w-full rounded-lg border px-3 text-sm"
             />
           </div>
 
           <div>
-            <span className="mb-1.5 block text-xs font-semibold text-[var(--text-secondary)]">
-              Suggested Assignee
+            <span className="mb-1.5 block text-xs text-[var(--text-muted)]">
+              Suggested assignee
             </span>
             <div className="flex flex-wrap gap-1.5">
               {TEAM_ASSIGNEE_OPTIONS.map((p) => (
@@ -277,9 +276,9 @@ export function SubmitIdeaModal({
                   key={p}
                   type="button"
                   onClick={() => toggleAssignee(p)}
-                  className={`rounded-full border px-2.5 py-1 text-xs capitalize ${
+                  className={`h-8 rounded-lg border px-2.5 text-xs capitalize transition-colors ${
                     assignedTo.includes(p)
-                      ? "border-teal-600 bg-teal-50 font-medium text-teal-800"
+                      ? "border-[var(--accent)] bg-[var(--accent-soft)] font-medium text-[var(--text-primary)]"
                       : "studio-surface text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
                   }`}
                 >
@@ -292,7 +291,7 @@ export function SubmitIdeaModal({
           <div>
             <label
               htmlFor="idea-hashtags"
-              className="mb-1 block text-xs font-semibold text-[var(--text-secondary)]"
+              className="mb-1 block text-xs text-[var(--text-muted)]"
             >
               Hashtags (optional)
             </label>
@@ -302,7 +301,7 @@ export function SubmitIdeaModal({
               value={hashtagsRaw}
               onChange={(e) => setHashtagsRaw(e.target.value)}
               placeholder="#MananWellness #MentalHealthAwareness"
-              className="studio-input w-full rounded-lg border px-3 py-2 text-xs"
+              className="studio-input h-9 w-full rounded-lg border px-3 text-xs"
             />
             {hashtagPresets.length > 0 ? (
               <div className="mt-1.5 flex flex-wrap gap-1">
@@ -315,7 +314,7 @@ export function SubmitIdeaModal({
                         [prev.trim(), preset.tags.join(" ")].filter(Boolean).join(" ")
                       )
                     }
-                    className="studio-muted rounded border px-2 py-0.5 text-[11px] text-[var(--text-secondary)] hover:border-teal-500"
+                    className="studio-raised rounded border px-2 py-0.5 text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
                   >
                     + {preset.category}
                   </button>
@@ -328,18 +327,18 @@ export function SubmitIdeaModal({
         <div className="flex flex-col justify-between gap-4">
           <div className="space-y-3">
             <VideoPlayerCard
-              label="Live Reference Preview"
+              label="Reference preview"
               url={referenceUrl}
               backupUrl={referenceBackupUrl}
-              emptyHint="Paste an Instagram Reel, YouTube Shorts/Long form, or Google Drive link on the left to preview it here."
+              emptyHint="Paste a reference URL on the left to preview it here."
             />
 
             <div>
               <label
                 htmlFor="idea-script-doc"
-                className="mb-1 block text-xs font-semibold text-[var(--text-secondary)]"
+                className="mb-1 block text-xs text-[var(--text-muted)]"
               >
-                Google Doc Script URL (optional)
+                Google Doc script URL (optional)
               </label>
               <input
                 id="idea-script-doc"
@@ -348,23 +347,23 @@ export function SubmitIdeaModal({
                 value={scriptUrl}
                 onChange={(e) => setScriptUrl(e.target.value)}
                 placeholder="https://docs.google.com/document/d/..."
-                className="studio-input w-full rounded-lg border px-3 py-2 text-sm"
+                className="studio-input h-9 w-full rounded-lg border px-3 text-sm"
               />
             </div>
 
             <div>
               <label
                 htmlFor="idea-ref-notes"
-                className="mb-1 block text-xs font-semibold text-[var(--text-secondary)]"
+                className="mb-1 block text-xs text-[var(--text-muted)]"
               >
-                Editing / Music Notes
+                Editing and music notes
               </label>
               <textarea
                 id="idea-ref-notes"
                 rows={2}
                 value={referenceNotes}
                 onChange={(e) => setReferenceNotes(e.target.value)}
-                placeholder="Notes about pacing, audio, or caption style..."
+                placeholder="Notes on pacing, audio, or caption style"
                 className="studio-input w-full rounded-lg border px-3 py-2 text-sm"
               />
             </div>
@@ -374,7 +373,8 @@ export function SubmitIdeaModal({
             {error ? (
               <div
                 role="alert"
-                className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700"
+                className="studio-raised rounded-lg border border-l-4 px-3 py-2 text-xs text-[var(--danger)]"
+                style={{ borderLeftColor: "var(--danger)" }}
               >
                 {error}
               </div>
@@ -383,16 +383,16 @@ export function SubmitIdeaModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="studio-surface rounded-lg border px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
+                className="studio-raised h-9 rounded-lg border px-4 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className="rounded-lg bg-teal-600 px-5 py-2 text-xs font-semibold text-white hover:bg-teal-700 disabled:opacity-50"
+                className="studio-btn-accent h-9 rounded-lg px-5 text-xs font-medium disabled:opacity-50"
               >
-                {submitting ? "Submitting..." : "Submit for Manager Approval"}
+                {submitting ? "Submitting" : "Submit for approval"}
               </button>
             </div>
           </div>

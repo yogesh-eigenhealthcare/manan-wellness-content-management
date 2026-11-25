@@ -6,65 +6,80 @@ export interface StatusMeta {
   shortLabel: string;
   description: string;
   stage: "gate1" | "production" | "gate2" | "publishing";
+  dotClass: string;
   badgeClass: string;
 }
 
 export const STATUS_META: Record<WorkflowStatus, StatusMeta> = {
   idea_pending: {
     value: "idea_pending",
-    label: "Idea Pending Approval",
-    shortLabel: "Gate 1 Review",
+    label: "Idea pending approval",
+    shortLabel: "Gate 1 review",
     description: "Waiting for Marketing Manager to approve this reference idea.",
     stage: "gate1",
-    badgeClass: "bg-amber-100 text-amber-800 border-amber-200",
+    dotClass: "bg-amber-500",
+    badgeClass:
+      "border-[var(--border-subtle)] bg-[var(--bg-raised)] text-[var(--text-secondary)]",
   },
   idea_rejected: {
     value: "idea_rejected",
-    label: "Idea Declined / Parked",
+    label: "Idea parked",
     shortLabel: "Parked",
     description: "Declined at Gate 1. Team can revise notes and re-submit.",
     stage: "gate1",
-    badgeClass: "bg-rose-100 text-rose-800 border-rose-200",
+    dotClass: "bg-rose-500",
+    badgeClass:
+      "border-[var(--border-subtle)] bg-[var(--bg-raised)] text-[var(--text-muted)]",
   },
   approved_for_production: {
     value: "approved_for_production",
-    label: "Approved to Recreate",
-    shortLabel: "To Recreate",
-    description: "Manager approved the idea. Ready for script & production.",
+    label: "Approved to recreate",
+    shortLabel: "To recreate",
+    description: "Manager approved the idea. Ready for script and production.",
     stage: "production",
-    badgeClass: "bg-sky-100 text-sky-800 border-sky-200",
+    dotClass: "bg-sky-500",
+    badgeClass:
+      "border-[var(--border-subtle)] bg-[var(--bg-raised)] text-[var(--text-secondary)]",
   },
   in_production: {
     value: "in_production",
-    label: "In Production",
+    label: "In production",
     shortLabel: "Creating",
-    description: "Team is shooting, animating, or editing the recreated reel.",
+    description: "Team is shooting, animating, or editing the recreated post.",
     stage: "production",
-    badgeClass: "bg-indigo-100 text-indigo-800 border-indigo-200",
+    dotClass: "bg-indigo-500",
+    badgeClass:
+      "border-[var(--border-subtle)] bg-[var(--bg-raised)] text-[var(--text-secondary)]",
   },
   draft_review: {
     value: "draft_review",
-    label: "Final Video Review",
-    shortLabel: "Gate 2 Review",
-    description: "Draft video link submitted. Waiting for Manager approval before posting.",
+    label: "Final video review",
+    shortLabel: "Gate 2 review",
+    description: "Draft submitted. Waiting for Manager approval before posting.",
     stage: "gate2",
-    badgeClass: "bg-purple-100 text-purple-800 border-purple-200",
+    dotClass: "bg-amber-400",
+    badgeClass:
+      "border-[var(--border-subtle)] bg-[var(--bg-raised)] text-[var(--text-primary)]",
   },
   changes_requested: {
     value: "changes_requested",
-    label: "Changes Requested",
+    label: "Changes requested",
     shortLabel: "Rework",
-    description: "Manager left suggestions on the draft. Upload a revised link.",
+    description: "Manager left suggestions on the draft. Submit a revised version.",
     stage: "gate2",
-    badgeClass: "bg-orange-100 text-orange-800 border-orange-200",
+    dotClass: "bg-orange-500",
+    badgeClass:
+      "border-[var(--border-subtle)] bg-[var(--bg-raised)] text-[var(--text-secondary)]",
   },
   approved_to_post: {
     value: "approved_to_post",
-    label: "Approved to Post",
-    shortLabel: "Ready to Post",
-    description: "Manager approved the final cut. Ready to publish on Instagram.",
+    label: "Approved to post",
+    shortLabel: "Ready to post",
+    description: "Manager approved the final cut. Ready to publish.",
     stage: "publishing",
-    badgeClass: "bg-emerald-100 text-emerald-800 border-emerald-200",
+    dotClass: "bg-emerald-500",
+    badgeClass:
+      "border-[var(--border-subtle)] bg-[var(--bg-raised)] text-[var(--text-primary)]",
   },
   posted: {
     value: "posted",
@@ -72,7 +87,9 @@ export const STATUS_META: Record<WorkflowStatus, StatusMeta> = {
     shortLabel: "Posted",
     description: "Published live on social media.",
     stage: "publishing",
-    badgeClass: "bg-teal-100 text-teal-800 border-teal-200",
+    dotClass: "bg-teal-500",
+    badgeClass:
+      "border-[var(--border-subtle)] bg-[var(--bg-raised)] text-[var(--text-primary)]",
   },
 };
 

@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
-  CheckCircle2,
+  Check,
   Copy,
   ExternalLink,
   FileText,
@@ -15,11 +15,9 @@ import {
   RotateCcw,
   Send,
   ShieldAlert,
-  Sparkles,
   Trash2,
   Upload,
   X,
-  XCircle,
 } from "lucide-react";
 import { DraftPreviewCard } from "@/components/video/DraftPreviewCard";
 import { VideoPlayerCard } from "@/components/video/VideoPlayerCard";
@@ -144,7 +142,6 @@ export function ContentDetailView({
   const [commentText, setCommentText] = useState("");
   const [timestampLabel, setTimestampLabel] = useState("");
 
-  // Editable brief & script fields
   const [title, setTitle] = useState(item.title);
   const [format, setFormat] = useState<ContentFormat>(item.format);
   const [topicType, setTopicType] = useState(item.topicType);
@@ -230,7 +227,7 @@ export function ContentDetailView({
       await fn();
       if (successMessage) setNotice(successMessage);
     } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : "Action failed.");
+      setErrorMsg(err instanceof Error ? err.message : "Action failed");
     } finally {
       setBusy(false);
     }
@@ -256,7 +253,7 @@ export function ContentDetailView({
           assignedTo,
           targetPostDate: targetPostDate || null,
         }),
-      "Saved project details."
+      "Project details saved"
     );
   };
 
@@ -270,7 +267,7 @@ export function ContentDetailView({
       setPreparedFile(prepared);
       setDraftUrl("");
     } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : "Could not load file.");
+      setErrorMsg(err instanceof Error ? err.message : "Could not load file");
       if (fileInputRef.current) fileInputRef.current.value = "";
     } finally {
       setFileBusy(false);
@@ -309,12 +306,12 @@ export function ContentDetailView({
       setDraftUrl("");
       handleClearFile();
       setDraftNotes("");
-    }, `Submitted draft v${item.latestDraftVersion + 1} for Manager approval.`);
+    }, `Submitted draft v${item.latestDraftVersion + 1} for manager review`);
   };
 
   const handleGate1 = async (decision: "approved_for_production" | "idea_rejected") => {
     if (decision === "idea_rejected" && !gateFeedback.trim()) {
-      setErrorMsg("Please write a short reason when declining an idea.");
+      setErrorMsg("Enter a short reason before parking an idea");
       return;
     }
     await runAction(async () => {
@@ -323,12 +320,12 @@ export function ContentDetailView({
         effortLevel,
       });
       setGateFeedback("");
-    }, decision === "approved_for_production" ? "Approved for production." : "Idea parked.");
+    }, decision === "approved_for_production" ? "Approved for production" : "Idea parked");
   };
 
   const handleGate2 = async (decision: "approved_to_post" | "changes_requested") => {
     if (decision === "changes_requested" && !gateFeedback.trim()) {
-      setErrorMsg("Please add suggestions for the team before requesting changes.");
+      setErrorMsg("Add feedback for the team before requesting changes");
       return;
     }
     await runAction(async () => {
@@ -339,7 +336,7 @@ export function ContentDetailView({
         gateFeedback
       );
       setGateFeedback("");
-    }, decision === "approved_to_post" ? "Approved to post!" : "Sent back for revisions.");
+    }, decision === "approved_to_post" ? "Approved to post" : "Sent back for revisions");
   };
 
   const handleCopyCaptionAndTags = async () => {
@@ -351,7 +348,7 @@ export function ContentDetailView({
       .join("")
       .trim();
     await navigator.clipboard.writeText(caption);
-    setNotice("Copied title, CTA, and hashtags to clipboard.");
+    setNotice("Copied caption and hashtags");
   };
 
   const handleAddComment = async (e: React.FormEvent) => {
@@ -372,40 +369,45 @@ export function ContentDetailView({
 
   return (
     <div className="space-y-5">
-      {/* Project Header Bar */}
-      <div className="studio-surface rounded-2xl border p-4 sm:p-5">
+      {/* Studio Project Header */}
+      <div className="studio-surface rounded-xl border p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-2">
             <button
               type="button"
               onClick={onBack}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-600 hover:underline"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
             >
-              <ArrowLeft className="h-3.5 w-3.5" /> Back to {backLabel}
+              <ArrowLeft className="h-4 w-4" strokeWidth={1.5} />
+              <span>Back to {backLabel}</span>
             </button>
 
-            <h2 className="text-xl font-bold text-[var(--text-primary)]">
-              #{item.serialNo} · {item.title}
-            </h2>
+            <h1 className="text-xl font-medium tracking-tight text-[var(--text-primary)]">
+              <span className="font-mono-meta mr-2 text-base text-[var(--text-muted)]">
+                #{item.serialNo}
+              </span>
+              {item.title}
+            </h1>
 
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--text-secondary)]">
               <span
-                className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${statusMeta.badgeClass}`}
+                className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 font-medium ${statusMeta.badgeClass}`}
               >
+                <span className={`inline-block h-1.5 w-1.5 rounded-full ${statusMeta.dotClass}`} />
                 {statusMeta.label}
               </span>
-              <span className="studio-muted rounded-full border px-2.5 py-0.5 text-xs font-medium text-[var(--text-secondary)]">
+              <span className="studio-raised rounded-md border px-2 py-0.5">
                 {formatLabel(item.format)}
               </span>
-              <span className="studio-muted rounded-full border px-2.5 py-0.5 text-xs font-medium text-[var(--text-secondary)]">
+              <span className="studio-raised rounded-md border px-2 py-0.5">
                 {item.topicType}
               </span>
-              <span className="studio-muted rounded-full border px-2.5 py-0.5 text-xs font-medium capitalize text-[var(--text-secondary)]">
+              <span className="studio-raised rounded-md border px-2 py-0.5 capitalize">
                 {item.effortLevel} effort
               </span>
               {item.latestDraftVersion > 0 ? (
-                <span className="rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-semibold text-purple-800">
-                  Draft v{item.latestDraftVersion}
+                <span className="font-mono-meta studio-raised rounded-md border px-2 py-0.5 text-[var(--text-primary)]">
+                  v{item.latestDraftVersion}
                 </span>
               ) : null}
             </div>
@@ -415,9 +417,10 @@ export function ContentDetailView({
             <button
               type="button"
               onClick={handleCopyCaptionAndTags}
-              className="studio-surface inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
+              className="studio-raised inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-xs font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-hover)]"
             >
-              <Copy className="h-3.5 w-3.5" /> Copy Caption &amp; Tags
+              <Copy className="h-4 w-4 text-[var(--text-muted)]" strokeWidth={1.5} />
+              <span>Copy caption</span>
             </button>
             {isManager ? (
               <button
@@ -431,33 +434,34 @@ export function ContentDetailView({
                     });
                   }
                 }}
-                className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700 hover:bg-rose-100"
+                className="studio-raised inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-medium text-[var(--danger)] transition-colors hover:bg-[var(--bg-hover)]"
               >
-                <Trash2 className="h-3.5 w-3.5" /> Delete
+                <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                <span>Delete</span>
               </button>
             ) : null}
           </div>
         </div>
 
-        {/* Two Project Tabs: Reference vs Recreated */}
+        {/* Reference / Recreated Underline Tabs */}
         <div
           role="tablist"
           aria-label="Content workspace tabs"
-          className="mt-5 flex gap-2 border-t border-[var(--border-subtle)] pt-3"
+          className="mt-5 flex gap-4 border-t border-[var(--border-subtle)] pt-1"
         >
           <button
             type="button"
             role="tab"
             aria-selected={activeTab === "reference"}
             onClick={() => setActiveTab("reference")}
-            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition ${
+            className={`inline-flex items-center gap-2 border-b-2 px-1 py-2.5 text-sm font-medium transition-colors ${
               activeTab === "reference"
-                ? "bg-teal-600 text-white shadow-xs"
-                : "studio-muted text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
+                ? "border-[var(--text-primary)] text-[var(--text-primary)]"
+                : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"
             }`}
           >
-            <Link2 className="h-3.5 w-3.5" />
-            Reference Post
+            <Link2 className="h-4 w-4" strokeWidth={1.5} />
+            <span>Reference post</span>
           </button>
 
           <button
@@ -465,22 +469,16 @@ export function ContentDetailView({
             role="tab"
             aria-selected={activeTab === "recreated"}
             onClick={() => setActiveTab("recreated")}
-            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition ${
+            className={`inline-flex items-center gap-2 border-b-2 px-1 py-2.5 text-sm font-medium transition-colors ${
               activeTab === "recreated"
-                ? "bg-teal-600 text-white shadow-xs"
-                : "studio-muted text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
+                ? "border-[var(--text-primary)] text-[var(--text-primary)]"
+                : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"
             }`}
           >
-            <Film className="h-3.5 w-3.5" />
-            Recreated Post
+            <Film className="h-4 w-4" strokeWidth={1.5} />
+            <span>Recreated post</span>
             {item.latestDraftVersion > 0 ? (
-              <span
-                className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
-                  activeTab === "recreated"
-                    ? "bg-white/20 text-white"
-                    : "bg-purple-100 text-purple-800"
-                }`}
-              >
+              <span className="font-mono-meta studio-raised rounded px-1.5 py-0.5 text-xs text-[var(--text-secondary)]">
                 v{item.latestDraftVersion}
               </span>
             ) : null}
@@ -492,7 +490,8 @@ export function ContentDetailView({
         <div
           role="status"
           aria-live="polite"
-          className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-xs font-medium text-emerald-800"
+          className="studio-surface rounded-lg border border-l-4 px-4 py-2.5 text-xs font-medium text-[var(--text-primary)]"
+          style={{ borderLeftColor: "var(--positive)" }}
         >
           {notice}
         </div>
@@ -501,43 +500,45 @@ export function ContentDetailView({
         <div
           role="alert"
           aria-live="polite"
-          className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-xs font-medium text-rose-800"
+          className="studio-surface rounded-lg border border-l-4 px-4 py-2.5 text-xs font-medium text-[var(--danger)]"
+          style={{ borderLeftColor: "var(--danger)" }}
         >
           {errorMsg}
         </div>
       ) : null}
 
-      {/* TAB 1: REFERENCE POST (Left: Contents | Right: Live Preview) */}
+      {/* TAB 1: REFERENCE POST */}
       {activeTab === "reference" ? (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-          {/* LEFT HALF: Reference Details & Gate 1 */}
           <div className="space-y-5 lg:col-span-6">
-            {/* Gate 1: Manager Idea Approval */}
             {item.status === "idea_pending" ? (
-              <div className="rounded-2xl border border-amber-300/60 bg-amber-50/90 p-5 text-amber-950">
-                <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
-                  <Sparkles className="h-4 w-4 text-amber-600" />
-                  Gate 1: Marketing Manager Idea Approval
+              <section
+                className="studio-surface rounded-xl border border-l-4 p-5"
+                style={{ borderLeftColor: "var(--warning)" }}
+              >
+                <div className="mb-2 flex items-center gap-2 text-sm font-medium text-[var(--text-primary)]">
+                  <span className="inline-block h-2 w-2 rounded-full bg-amber-500" />
+                  <span>Gate 1 · Idea approval</span>
                 </div>
                 {isManager ? (
                   <div className="space-y-3">
-                    <p className="text-xs text-amber-900">
-                      Review the reference post preview on the right. Approve to let the team recreate it, or park with feedback.
+                    <p className="text-xs text-[var(--text-secondary)]">
+                      Review the reference post on the right, then approve for production or park with feedback.
                     </p>
                     <div>
                       <label
                         htmlFor="gate1-feedback"
-                        className="mb-1 block text-xs font-medium text-amber-900"
+                        className="mb-1 block text-xs text-[var(--text-muted)]"
                       >
-                        Manager Note / Direction
+                        Manager note
                       </label>
                       <textarea
                         id="gate1-feedback"
                         rows={2}
                         value={gateFeedback}
                         onChange={(e) => setGateFeedback(e.target.value)}
-                        placeholder="e.g. Approved for Dr. Pragati in Hindi, keep under 40s"
-                        className="w-full rounded-lg border border-amber-300 bg-white px-3 py-2 text-sm text-slate-900"
+                        placeholder="Optional direction for the team"
+                        className="studio-input w-full rounded-lg border px-3 py-2 text-sm"
                       />
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -545,74 +546,84 @@ export function ContentDetailView({
                         type="button"
                         disabled={busy}
                         onClick={() => handleGate1("approved_for_production")}
-                        className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-teal-600 px-3 py-2 text-xs font-semibold text-white hover:bg-teal-700 disabled:opacity-50"
+                        className="studio-btn-accent inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-medium disabled:opacity-50"
                       >
-                        <CheckCircle2 className="h-4 w-4" /> Approve to Recreate
+                        <Check className="h-4 w-4" strokeWidth={1.5} />
+                        <span>Approve to recreate</span>
                       </button>
                       <button
                         type="button"
                         disabled={busy}
                         onClick={() => handleGate1("idea_rejected")}
-                        className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-rose-300 bg-white px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-50"
+                        className="studio-raised inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border px-3 text-xs font-medium text-[var(--danger)] hover:bg-[var(--bg-hover)] disabled:opacity-50"
                       >
-                        <XCircle className="h-4 w-4" /> Decline / Park
+                        <X className="h-4 w-4" strokeWidth={1.5} />
+                        <span>Park idea</span>
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-start gap-2 text-xs text-amber-900">
-                    <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+                  <div className="flex items-start gap-2 text-xs text-[var(--text-secondary)]">
+                    <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-[var(--text-muted)]" strokeWidth={1.5} />
                     <span>
-                      Waiting for the <strong>Marketing Manager</strong> to approve this reference idea before production starts.
+                      Waiting for the Marketing Manager to approve this idea before production begins.
                     </span>
                   </div>
                 )}
-              </div>
+              </section>
             ) : null}
 
             {item.status === "idea_rejected" ? (
-              <div className="rounded-2xl border border-rose-200 bg-rose-50 p-5 text-xs text-rose-900">
-                <p className="font-semibold">Idea Parked by Manager</p>
+              <section
+                className="studio-surface rounded-xl border border-l-4 p-5 text-xs"
+                style={{ borderLeftColor: "var(--danger)" }}
+              >
+                <p className="font-medium text-[var(--text-primary)]">
+                  Idea parked by manager
+                </p>
                 {item.gate1Feedback ? (
-                  <p className="mt-1 text-rose-800">{item.gate1Feedback}</p>
+                  <p className="mt-1 text-[var(--text-secondary)]">
+                    {item.gate1Feedback}
+                  </p>
                 ) : null}
                 <button
                   type="button"
                   disabled={busy}
                   onClick={() =>
                     runAction(
-                      () => actions.resubmitIdea(item.id, "Updated and re-submitted."),
-                      "Re-submitted for Manager approval."
+                      () => actions.resubmitIdea(item.id, "Updated and re-submitted"),
+                      "Re-submitted for manager approval"
                     )
                   }
-                  className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800"
+                  className="studio-btn-primary mt-3 inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-medium"
                 >
-                  <RotateCcw className="h-3.5 w-3.5" /> Re-submit for Gate 1 Approval
+                  <RotateCcw className="h-3.5 w-3.5" strokeWidth={1.5} />
+                  <span>Re-submit for Gate 1</span>
                 </button>
-              </div>
+              </section>
             ) : null}
 
             <form
               onSubmit={handleSaveDetails}
-              className="studio-surface space-y-4 rounded-2xl border p-5"
+              className="studio-surface space-y-4 rounded-xl border p-5"
             >
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-[var(--text-primary)]">
-                  Reference Post Contents &amp; Brief
-                </h3>
+                <h2 className="text-sm font-medium text-[var(--text-primary)]">
+                  Reference details and brief
+                </h2>
                 <button
                   type="submit"
                   disabled={busy}
-                  className="rounded-lg bg-teal-600 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-teal-700 disabled:opacity-50"
+                  className="studio-btn-primary h-8 rounded-lg px-3.5 text-xs font-medium disabled:opacity-50"
                 >
-                  Save Changes
+                  Save changes
                 </button>
               </div>
 
               <div>
                 <label
                   htmlFor="ref-title"
-                  className="mb-1 block text-xs font-medium text-[var(--text-muted)]"
+                  className="mb-1 block text-xs text-[var(--text-muted)]"
                 >
                   Title / Hook
                 </label>
@@ -622,7 +633,7 @@ export function ContentDetailView({
                   required
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="studio-input w-full rounded-lg border px-3 py-2 text-sm"
+                  className="studio-input h-9 w-full rounded-lg border px-3 text-sm"
                 />
               </div>
 
@@ -630,7 +641,7 @@ export function ContentDetailView({
                 <div>
                   <label
                     htmlFor="ref-format"
-                    className="mb-1 block text-xs font-medium text-[var(--text-muted)]"
+                    className="mb-1 block text-xs text-[var(--text-muted)]"
                   >
                     Format
                   </label>
@@ -638,7 +649,7 @@ export function ContentDetailView({
                     id="ref-format"
                     value={format}
                     onChange={(e) => setFormat(e.target.value as ContentFormat)}
-                    className="studio-input w-full rounded-lg border px-2.5 py-2 text-sm"
+                    className="studio-input h-9 w-full rounded-lg border px-2.5 text-sm"
                   >
                     {FORMAT_OPTIONS.map((opt) => (
                       <option key={opt.value} value={opt.value}>
@@ -651,7 +662,7 @@ export function ContentDetailView({
                 <div>
                   <label
                     htmlFor="ref-topic"
-                    className="mb-1 block text-xs font-medium text-[var(--text-muted)]"
+                    className="mb-1 block text-xs text-[var(--text-muted)]"
                   >
                     Topic
                   </label>
@@ -659,7 +670,7 @@ export function ContentDetailView({
                     id="ref-topic"
                     value={topicType}
                     onChange={(e) => setTopicType(e.target.value)}
-                    className="studio-input w-full rounded-lg border px-2.5 py-2 text-sm"
+                    className="studio-input h-9 w-full rounded-lg border px-2.5 text-sm"
                   >
                     {TOPIC_OPTIONS.map((t) => (
                       <option key={t} value={t}>
@@ -674,7 +685,7 @@ export function ContentDetailView({
                 <div>
                   <label
                     htmlFor="ref-effort"
-                    className="mb-1 block text-xs font-medium text-[var(--text-muted)]"
+                    className="mb-1 block text-xs text-[var(--text-muted)]"
                   >
                     Effort
                   </label>
@@ -682,7 +693,7 @@ export function ContentDetailView({
                     id="ref-effort"
                     value={effortLevel}
                     onChange={(e) => setEffortLevel(e.target.value as EffortLevel)}
-                    className="studio-input w-full rounded-lg border px-2.5 py-2 text-sm"
+                    className="studio-input h-9 w-full rounded-lg border px-2.5 text-sm"
                   >
                     <option value="low">Low effort</option>
                     <option value="high">High effort</option>
@@ -693,23 +704,23 @@ export function ContentDetailView({
                 <div>
                   <label
                     htmlFor="ref-date"
-                    className="mb-1 block text-xs font-medium text-[var(--text-muted)]"
+                    className="mb-1 block text-xs text-[var(--text-muted)]"
                   >
-                    Target Post Date
+                    Target post date
                   </label>
                   <input
                     id="ref-date"
                     type="date"
                     value={targetPostDate}
                     onChange={(e) => setTargetPostDate(e.target.value)}
-                    className="studio-input w-full rounded-lg border px-2.5 py-2 text-sm"
+                    className="studio-input h-9 w-full rounded-lg border px-2.5 text-sm"
                   />
                 </div>
               </div>
 
               <div>
-                <span className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">
-                  Assigned Team
+                <span className="mb-1.5 block text-xs text-[var(--text-muted)]">
+                  Assigned team
                 </span>
                 <div className="flex flex-wrap gap-2">
                   {TEAM_ASSIGNEE_OPTIONS.map((person) => {
@@ -719,9 +730,9 @@ export function ContentDetailView({
                         key={person}
                         type="button"
                         onClick={() => toggleAssignee(person)}
-                        className={`rounded-full border px-3 py-1 text-xs font-medium capitalize transition ${
+                        className={`h-8 rounded-lg border px-3 text-xs capitalize transition-colors ${
                           active
-                            ? "border-teal-600 bg-teal-50 text-teal-800"
+                            ? "border-[var(--accent)] bg-[var(--accent-soft)] font-medium text-[var(--text-primary)]"
                             : "studio-surface text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
                         }`}
                       >
@@ -735,7 +746,7 @@ export function ContentDetailView({
               <div>
                 <label
                   htmlFor="ref-url"
-                  className="mb-1 block text-xs font-medium text-[var(--text-muted)]"
+                  className="mb-1 block text-xs text-[var(--text-muted)]"
                 >
                   Reference URL
                 </label>
@@ -746,16 +757,16 @@ export function ContentDetailView({
                   value={referenceUrl}
                   onChange={(e) => setReferenceUrl(e.target.value)}
                   placeholder="https://www.instagram.com/reel/..."
-                  className="studio-input w-full rounded-lg border px-3 py-2 text-sm"
+                  className="studio-input h-9 w-full rounded-lg border px-3 text-sm"
                 />
               </div>
 
               <div>
                 <label
                   htmlFor="ref-backup-url"
-                  className="mb-1 block text-xs font-medium text-[var(--text-muted)]"
+                  className="mb-1 block text-xs text-[var(--text-muted)]"
                 >
-                  Backup Reference Video Link (Drive / MP4 if IG won&apos;t embed)
+                  Backup reference link (Drive or MP4)
                 </label>
                 <input
                   id="ref-backup-url"
@@ -763,17 +774,17 @@ export function ContentDetailView({
                   spellCheck={false}
                   value={referenceBackupUrl}
                   onChange={(e) => setReferenceBackupUrl(e.target.value)}
-                  placeholder="https://drive.google.com/file/d/.../view"
-                  className="studio-input w-full rounded-lg border px-3 py-2 text-sm"
+                  placeholder="https://drive.google.com/file/d/..."
+                  className="studio-input h-9 w-full rounded-lg border px-3 text-sm"
                 />
               </div>
 
               <div>
                 <label
                   htmlFor="ref-adaptation"
-                  className="mb-1 block text-xs font-medium text-[var(--text-muted)]"
+                  className="mb-1 block text-xs text-[var(--text-muted)]"
                 >
-                  Manan Wellness Adaptation Idea
+                  Manan Wellness adaptation idea
                 </label>
                 <textarea
                   id="ref-adaptation"
@@ -787,9 +798,9 @@ export function ContentDetailView({
               <div>
                 <label
                   htmlFor="ref-notes"
-                  className="mb-1 block text-xs font-medium text-[var(--text-muted)]"
+                  className="mb-1 block text-xs text-[var(--text-muted)]"
                 >
-                  Reference Editing / Audio Notes
+                  Reference editing and audio notes
                 </label>
                 <textarea
                   id="ref-notes"
@@ -803,49 +814,56 @@ export function ContentDetailView({
               <div>
                 <label
                   htmlFor="ref-cta"
-                  className="mb-1 block text-xs font-medium text-[var(--text-muted)]"
+                  className="mb-1 block text-xs text-[var(--text-muted)]"
                 >
-                  Call to Action
+                  Call to action
                 </label>
                 <input
                   id="ref-cta"
                   type="text"
                   value={callToAction}
                   onChange={(e) => setCallToAction(e.target.value)}
-                  className="studio-input w-full rounded-lg border px-3 py-2 text-sm"
+                  className="studio-input h-9 w-full rounded-lg border px-3 text-sm"
                 />
               </div>
             </form>
           </div>
 
-          {/* RIGHT HALF: Reference Post Preview */}
           <div className="lg:col-span-6">
-            <div className="lg:sticky lg:top-6">
+            <div className="lg:sticky lg:top-20">
               <VideoPlayerCard
-                label="Reference Post Preview"
+                label="Reference post preview"
                 url={referenceUrl}
                 backupUrl={referenceBackupUrl}
-                emptyHint="No reference URL attached yet. Paste an Instagram, YouTube, or Google Drive link on the left to preview it here."
+                emptyHint="Paste an Instagram, YouTube, or Google Drive link on the left to preview it here."
                 tall
               />
             </div>
           </div>
         </div>
       ) : (
-        /* TAB 2: RECREATED POST (Left: Contents & Submission | Right: Live Preview) */
+        /* TAB 2: RECREATED POST */
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-          {/* LEFT HALF: Recreated Submission, Script, Gate 2, Comments */}
           <div className="space-y-5 lg:col-span-6">
             {item.status === "idea_pending" ? (
-              <div className="rounded-2xl border border-amber-300/60 bg-amber-50/90 p-4 text-xs text-amber-900">
-                <strong>Waiting on Gate 1:</strong> Once the Marketing Manager approves the Reference Post, you can submit your recreated draft here.
+              <div
+                className="studio-surface rounded-xl border border-l-4 p-4 text-xs text-[var(--text-secondary)]"
+                style={{ borderLeftColor: "var(--warning)" }}
+              >
+                <strong className="font-medium text-[var(--text-primary)]">
+                  Waiting on Gate 1:
+                </strong>{" "}
+                Once the Marketing Manager approves the Reference post, you can submit your recreated draft here.
               </div>
             ) : null}
 
             {item.status === "approved_for_production" ? (
-              <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sky-900">
-                <div className="text-xs">
-                  <strong>Idea Approved!</strong> Mark as In Production while creating, or submit your draft below.
+              <div className="studio-surface flex flex-wrap items-center justify-between gap-2 rounded-xl border p-4">
+                <div className="text-xs text-[var(--text-secondary)]">
+                  <strong className="font-medium text-[var(--text-primary)]">
+                    Approved for production
+                  </strong>{" "}
+                  — mark active while creating or submit a draft below.
                 </div>
                 <button
                   type="button"
@@ -853,39 +871,43 @@ export function ContentDetailView({
                   onClick={() =>
                     runAction(
                       () => actions.startProduction(item.id),
-                      "Moved to In Production."
+                      "Moved to In production"
                     )
                   }
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-sky-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-sky-700"
+                  className="studio-btn-primary inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-medium"
                 >
-                  <Play className="h-3.5 w-3.5" /> Start Production
+                  <Play className="h-3.5 w-3.5" strokeWidth={1.5} />
+                  <span>Start production</span>
                 </button>
               </div>
             ) : null}
 
             {/* Gate 2: Manager Final Video Review */}
             {item.status === "draft_review" ? (
-              <div className="rounded-2xl border border-purple-200 bg-purple-50/90 p-5 text-purple-950">
-                <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
-                  <Sparkles className="h-4 w-4 text-purple-600" />
-                  Gate 2: Manager Final Review (v{item.latestDraftVersion})
+              <section
+                className="studio-surface rounded-xl border border-l-4 p-5"
+                style={{ borderLeftColor: "var(--accent)" }}
+              >
+                <div className="mb-2 flex items-center gap-2 text-sm font-medium text-[var(--text-primary)]">
+                  <span className="inline-block h-2 w-2 rounded-full bg-amber-400" />
+                  <span>Gate 2 · Final review (v{item.latestDraftVersion})</span>
                 </div>
                 {isManager ? (
                   <div className="space-y-3">
                     <div>
                       <label
                         htmlFor="gate2-feedback"
-                        className="mb-1 block text-xs font-medium text-purple-950"
+                        className="mb-1 block text-xs text-[var(--text-muted)]"
                       >
-                        Approval Note or Requested Changes
+                        Approval note or requested changes
                       </label>
                       <textarea
                         id="gate2-feedback"
                         rows={2}
                         value={gateFeedback}
                         onChange={(e) => setGateFeedback(e.target.value)}
-                        placeholder="e.g. 0:08 fix caption typo, rest looks great!"
-                        className="w-full rounded-lg border border-purple-300 bg-white px-3 py-2 text-sm text-slate-900"
+                        placeholder="e.g. 0:08 adjust subtitle timing"
+                        className="studio-input w-full rounded-lg border px-3 py-2 text-sm"
                       />
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -893,32 +915,34 @@ export function ContentDetailView({
                         type="button"
                         disabled={busy}
                         onClick={() => handleGate2("approved_to_post")}
-                        className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                        className="studio-btn-accent inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-medium disabled:opacity-50"
                       >
-                        <CheckCircle2 className="h-4 w-4" /> Approve to Post
+                        <Check className="h-4 w-4" strokeWidth={1.5} />
+                        <span>Approve to post</span>
                       </button>
                       <button
                         type="button"
                         disabled={busy}
                         onClick={() => handleGate2("changes_requested")}
-                        className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-orange-300 bg-white px-3 py-2 text-xs font-semibold text-orange-800 hover:bg-orange-50 disabled:opacity-50"
+                        className="studio-raised inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border px-3 text-xs font-medium text-[var(--text-primary)] hover:bg-[var(--bg-hover)] disabled:opacity-50"
                       >
-                        <RotateCcw className="h-4 w-4" /> Request Changes
+                        <RotateCcw className="h-4 w-4" strokeWidth={1.5} />
+                        <span>Request changes</span>
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-start gap-2 text-xs text-purple-900">
-                    <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-purple-600" />
+                  <div className="flex items-start gap-2 text-xs text-[var(--text-secondary)]">
+                    <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-[var(--text-muted)]" strokeWidth={1.5} />
                     <span>
-                      Waiting for the <strong>Marketing Manager</strong> to review draft v{item.latestDraftVersion} and approve before posting.
+                      Waiting for the Marketing Manager to review draft v{item.latestDraftVersion} before posting.
                     </span>
                   </div>
                 )}
-              </div>
+              </section>
             ) : null}
 
-            {/* Publishing: Approved to Post -> Posted */}
+            {/* Ready to Post -> Posted */}
             {item.status === "approved_to_post" ? (
               <form
                 onSubmit={(e) => {
@@ -926,19 +950,20 @@ export function ContentDetailView({
                   if (!publishedUrl.trim()) return;
                   void runAction(
                     () => actions.markPosted(item.id, publishedUrl),
-                    "Marked as Posted!"
+                    "Marked as posted"
                   );
                 }}
-                className="space-y-2.5 rounded-2xl border border-emerald-200 bg-emerald-50/90 p-5 text-emerald-950"
+                className="studio-surface space-y-2.5 rounded-xl border border-l-4 p-5"
+                style={{ borderLeftColor: "var(--positive)" }}
               >
-                <div className="text-sm font-semibold">
-                  Approved &amp; Ready to Post
+                <div className="text-sm font-medium text-[var(--text-primary)]">
+                  Approved to post
                 </div>
                 <label
                   htmlFor="published-ig-url"
-                  className="block text-xs font-medium text-emerald-900"
+                  className="block text-xs text-[var(--text-muted)]"
                 >
-                  Paste Live Social Post URL after publishing
+                  Paste live social post URL after publishing
                 </label>
                 <div className="flex gap-2">
                   <input
@@ -949,81 +974,92 @@ export function ContentDetailView({
                     value={publishedUrl}
                     onChange={(e) => setPublishedUrl(e.target.value)}
                     placeholder="https://www.instagram.com/reel/..."
-                    className="min-w-0 flex-1 rounded-lg border border-emerald-300 bg-white px-3 py-2 text-sm text-slate-900"
+                    className="studio-input h-9 min-w-0 flex-1 rounded-lg border px-3 text-sm"
                   />
                   <button
                     type="submit"
                     disabled={busy}
-                    className="rounded-lg bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                    className="studio-btn-accent h-9 rounded-lg px-4 text-xs font-medium disabled:opacity-50"
                   >
-                    Mark Posted
+                    Mark posted
                   </button>
                 </div>
               </form>
             ) : null}
 
             {item.status === "posted" && item.publishedUrl ? (
-              <div className="flex items-center justify-between gap-3 rounded-2xl border border-teal-200 bg-teal-50 px-4 py-3 text-xs text-teal-900">
-                <span>
-                  <strong>Published live!</strong>
+              <div
+                className="studio-surface flex items-center justify-between gap-3 rounded-xl border border-l-4 px-4 py-3 text-xs"
+                style={{ borderLeftColor: "var(--positive)" }}
+              >
+                <span className="font-medium text-[var(--text-primary)]">
+                  Published live
                 </span>
                 <a
                   href={item.publishedUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 font-semibold text-teal-700 underline"
+                  className="inline-flex items-center gap-1 font-medium text-[var(--accent)] hover:underline"
                 >
-                  View Live Post <ExternalLink className="h-3.5 w-3.5" />
+                  <span>View live post</span>
+                  <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.5} />
                 </a>
               </div>
             ) : null}
 
-            {/* Submit Recreated Draft (Mutually Exclusive: Video Link OR Upload PDF/Image) */}
+            {/* Submit Recreated Draft (Mutually Exclusive Video Link OR PDF/Image) */}
             {item.status === "approved_for_production" ||
             item.status === "in_production" ||
             item.status === "changes_requested" ? (
               <form
                 onSubmit={handleSubmitDraft}
-                className="studio-surface space-y-4 rounded-2xl border p-5"
+                className="studio-surface space-y-4 rounded-xl border p-5"
               >
                 <div>
-                  <h3 className="text-sm font-bold text-[var(--text-primary)]">
+                  <h2 className="text-sm font-medium text-[var(--text-primary)]">
                     {item.status === "changes_requested"
-                      ? `Submit Revised Recreated Draft (v${item.latestDraftVersion + 1})`
-                      : `Submit Recreated Post (v${item.latestDraftVersion + 1})`}
-                  </h3>
+                      ? `Submit revised draft (v${item.latestDraftVersion + 1})`
+                      : `Submit recreated post (v${item.latestDraftVersion + 1})`}
+                  </h2>
                   <p className="mt-0.5 text-xs text-[var(--text-muted)]">
-                    Provide <strong>either</strong> a video link <strong>or</strong> upload a PDF/image file. Adding one locks the other.
+                    Provide either a video link or upload a PDF/image file. Adding one disables the other.
                   </p>
                 </div>
 
                 {item.status === "changes_requested" && item.gate2Feedback ? (
-                  <div className="rounded-lg border border-orange-200 bg-orange-50 px-3 py-2 text-xs text-orange-900">
-                    <strong>Manager Suggestions:</strong> {item.gate2Feedback}
+                  <div
+                    className="studio-raised rounded-lg border border-l-4 px-3 py-2 text-xs text-[var(--text-secondary)]"
+                    style={{ borderLeftColor: "var(--warning)" }}
+                  >
+                    <strong className="font-medium text-[var(--text-primary)]">
+                      Manager suggestions:
+                    </strong>{" "}
+                    {item.gate2Feedback}
                   </div>
                 ) : null}
 
                 {/* Option 1: Video Link */}
                 <div
-                  className={`studio-muted space-y-2 rounded-xl border p-3.5 transition ${
-                    hasUploadedFile ? "opacity-55" : ""
+                  className={`studio-raised space-y-2 rounded-lg border p-3.5 transition-opacity ${
+                    hasUploadedFile ? "opacity-50" : ""
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <label
                       htmlFor="draft-video-url"
-                      className="flex items-center gap-1.5 text-xs font-semibold text-[var(--text-primary)]"
+                      className="flex items-center gap-2 text-xs font-medium text-[var(--text-primary)]"
                     >
-                      <Link2 className="h-3.5 w-3.5 text-teal-600" />
-                      Option 1: Paste Video Link
+                      <Link2 className="h-4 w-4 text-[var(--text-muted)]" strokeWidth={1.5} />
+                      <span>Video link</span>
                     </label>
                     {hasVideoLink ? (
                       <button
                         type="button"
                         onClick={() => setDraftUrl("")}
-                        className="inline-flex items-center gap-1 text-[11px] font-medium text-rose-600 hover:underline"
+                        className="inline-flex items-center gap-1 text-xs text-[var(--danger)] hover:underline"
                       >
-                        <X className="h-3 w-3" /> Clear Link
+                        <X className="h-3.5 w-3.5" strokeWidth={1.5} />
+                        <span>Clear</span>
                       </button>
                     ) : null}
                   </div>
@@ -1035,37 +1071,38 @@ export function ContentDetailView({
                     disabled={hasUploadedFile}
                     value={draftUrl}
                     onChange={(e) => setDraftUrl(e.target.value)}
-                    placeholder="https://drive.google.com/file/d/.../view?usp=sharing"
-                    className="studio-input w-full rounded-lg border px-3 py-2 text-sm disabled:cursor-not-allowed"
+                    placeholder="https://drive.google.com/file/d/..."
+                    className="studio-input h-9 w-full rounded-lg border px-3 text-sm disabled:cursor-not-allowed"
                   />
                   {hasUploadedFile ? (
-                    <p className="text-[11px] text-amber-600">
-                      Video link is disabled because a PDF/image is selected below. Remove the file to paste a video link.
+                    <p className="text-xs text-[var(--text-muted)]">
+                      Disabled while a PDF/image is selected. Remove the file to paste a link.
                     </p>
                   ) : null}
                 </div>
 
                 {/* Option 2: Upload PDF or Image */}
                 <div
-                  className={`studio-muted space-y-2 rounded-xl border p-3.5 transition ${
-                    hasVideoLink ? "opacity-55" : ""
+                  className={`studio-raised space-y-2 rounded-lg border p-3.5 transition-opacity ${
+                    hasVideoLink ? "opacity-50" : ""
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <label
                       htmlFor="draft-file-upload"
-                      className="flex items-center gap-1.5 text-xs font-semibold text-[var(--text-primary)]"
+                      className="flex items-center gap-2 text-xs font-medium text-[var(--text-primary)]"
                     >
-                      <Upload className="h-3.5 w-3.5 text-sky-600" />
-                      Option 2: Upload PDF or Image
+                      <Upload className="h-4 w-4 text-[var(--text-muted)]" strokeWidth={1.5} />
+                      <span>Upload PDF or image</span>
                     </label>
                     {hasUploadedFile ? (
                       <button
                         type="button"
                         onClick={handleClearFile}
-                        className="inline-flex items-center gap-1 text-[11px] font-medium text-rose-600 hover:underline"
+                        className="inline-flex items-center gap-1 text-xs text-[var(--danger)] hover:underline"
                       >
-                        <X className="h-3 w-3" /> Remove File
+                        <X className="h-3.5 w-3.5" strokeWidth={1.5} />
+                        <span>Remove</span>
                       </button>
                     ) : null}
                   </div>
@@ -1077,30 +1114,30 @@ export function ContentDetailView({
                     accept="application/pdf,image/png,image/jpeg,image/webp,image/gif,.pdf,.png,.jpg,.jpeg,.webp"
                     disabled={hasVideoLink || fileBusy}
                     onChange={handleFileChange}
-                    className="studio-input block w-full cursor-pointer rounded-lg border px-3 py-2 text-xs file:mr-3 file:rounded-md file:border-0 file:bg-teal-600 file:px-3 file:py-1 file:text-xs file:font-semibold file:text-white hover:file:bg-teal-700 disabled:cursor-not-allowed"
+                    className="studio-input block w-full cursor-pointer rounded-lg border px-3 py-2 text-xs file:mr-3 file:rounded-md file:border-0 file:bg-[var(--bg-raised)] file:px-3 file:py-1 file:text-xs file:font-medium file:text-[var(--text-primary)] disabled:cursor-not-allowed"
                   />
 
                   {fileBusy ? (
-                    <p className="text-[11px] text-[var(--text-muted)]">
-                      Preparing file preview...
+                    <p className="text-xs text-[var(--text-muted)]">
+                      Preparing file preview
                     </p>
                   ) : preparedFile ? (
                     <div className="studio-surface flex items-center gap-2 rounded-lg border px-3 py-2 text-xs">
-                      <FileText className="h-4 w-4 text-teal-600" />
+                      <FileText className="h-4 w-4 text-[var(--text-muted)]" strokeWidth={1.5} />
                       <span className="truncate font-medium text-[var(--text-primary)]">
                         {preparedFile.fileName}
                       </span>
-                      <span className="rounded bg-teal-100 px-1.5 py-0.5 text-[10px] font-bold uppercase text-teal-800">
+                      <span className="font-mono-meta studio-raised rounded px-1.5 py-0.5 text-[10px] uppercase text-[var(--text-secondary)]">
                         {preparedFile.draftKind}
                       </span>
                     </div>
                   ) : hasVideoLink ? (
-                    <p className="text-[11px] text-amber-600">
-                      File upload is disabled because a video link was entered above. Clear the video link to upload a PDF/image.
+                    <p className="text-xs text-[var(--text-muted)]">
+                      Disabled while a video link is entered. Clear the link to upload a file.
                     </p>
                   ) : (
-                    <p className="text-[11px] text-[var(--text-muted)]">
-                      Supports PNG, JPG, WEBP (auto-compressed) and PDF (up to 650 KB).
+                    <p className="text-xs text-[var(--text-muted)]">
+                      Supports PNG, JPG, WEBP, and PDF up to 650 KB
                     </p>
                   )}
                 </div>
@@ -1108,45 +1145,46 @@ export function ContentDetailView({
                 <div>
                   <label
                     htmlFor="draft-notes"
-                    className="mb-1 block text-xs font-medium text-[var(--text-muted)]"
+                    className="mb-1 block text-xs text-[var(--text-muted)]"
                   >
-                    Notes for Manager (optional)
+                    Notes for manager (optional)
                   </label>
                   <input
                     id="draft-notes"
                     type="text"
                     value={draftNotes}
                     onChange={(e) => setDraftNotes(e.target.value)}
-                    placeholder="e.g. Updated subtitles & lowered BGM as suggested"
-                    className="studio-input w-full rounded-lg border px-3 py-2 text-sm"
+                    placeholder="Changes made in this cut"
+                    className="studio-input h-9 w-full rounded-lg border px-3 text-sm"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={busy || fileBusy || (!hasVideoLink && !hasUploadedFile)}
-                  className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2.5 text-xs font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+                  className="studio-btn-accent inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg px-4 text-xs font-medium disabled:opacity-50"
                 >
-                  <Send className="h-3.5 w-3.5" /> Submit for Manager Final Review (Gate 2)
+                  <Send className="h-4 w-4" strokeWidth={1.5} />
+                  <span>Submit for final review (Gate 2)</span>
                 </button>
               </form>
             ) : null}
 
-            {/* Script & Hashtags Card */}
+            {/* Script & Hashtags */}
             <form
               onSubmit={handleSaveDetails}
-              className="studio-surface space-y-3 rounded-2xl border p-5"
+              className="studio-surface space-y-3 rounded-xl border p-5"
             >
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-[var(--text-primary)]">
-                  Recreated Script &amp; Hashtags
-                </h3>
+                <h2 className="text-sm font-medium text-[var(--text-primary)]">
+                  Recreated script and hashtags
+                </h2>
                 <button
                   type="submit"
                   disabled={busy}
-                  className="rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-teal-700 disabled:opacity-50"
+                  className="studio-btn-primary h-8 rounded-lg px-3.5 text-xs font-medium disabled:opacity-50"
                 >
-                  Save Script
+                  Save script
                 </button>
               </div>
 
@@ -1154,18 +1192,19 @@ export function ContentDetailView({
                 <div className="mb-1 flex items-center justify-between">
                   <label
                     htmlFor="rec-script-url"
-                    className="text-xs font-medium text-[var(--text-muted)]"
+                    className="text-xs text-[var(--text-muted)]"
                   >
-                    Google Doc Script Link
+                    Google Doc script link
                   </label>
                   {scriptUrl ? (
                     <a
                       href={scriptUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-xs font-medium text-teal-600 hover:underline"
+                      className="inline-flex items-center gap-1 text-xs font-medium text-[var(--accent)] hover:underline"
                     >
-                      Open Doc <ExternalLink className="h-3 w-3" />
+                      <span>Open doc</span>
+                      <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.5} />
                     </a>
                   ) : null}
                 </div>
@@ -1176,23 +1215,23 @@ export function ContentDetailView({
                   value={scriptUrl}
                   onChange={(e) => setScriptUrl(e.target.value)}
                   placeholder="https://docs.google.com/document/d/..."
-                  className="studio-input w-full rounded-lg border px-3 py-2 text-sm"
+                  className="studio-input h-9 w-full rounded-lg border px-3 text-sm"
                 />
               </div>
 
               <div>
                 <label
                   htmlFor="rec-script-text"
-                  className="mb-1 block text-xs font-medium text-[var(--text-muted)]"
+                  className="mb-1 block text-xs text-[var(--text-muted)]"
                 >
-                  Inline Script / Talking Points
+                  Inline script / talking points
                 </label>
                 <textarea
                   id="rec-script-text"
                   rows={3}
                   value={scriptText}
                   onChange={(e) => setScriptText(e.target.value)}
-                  placeholder="Write hook, lines, or scene breakdown..."
+                  placeholder="Hook, lines, or scene breakdown"
                   className="studio-input w-full rounded-lg border px-3 py-2 text-sm"
                 />
               </div>
@@ -1200,7 +1239,7 @@ export function ContentDetailView({
               <div>
                 <label
                   htmlFor="rec-hashtags"
-                  className="mb-1 block text-xs font-medium text-[var(--text-muted)]"
+                  className="mb-1 block text-xs text-[var(--text-muted)]"
                 >
                   Hashtags
                 </label>
@@ -1212,14 +1251,14 @@ export function ContentDetailView({
                   className="studio-input w-full rounded-lg border px-3 py-2 text-xs"
                 />
                 {hashtagPresets.length > 0 ? (
-                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                    <span className="text-[11px] text-[var(--text-muted)]">Presets:</span>
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    <span className="text-xs text-[var(--text-muted)]">Presets:</span>
                     {hashtagPresets.map((preset) => (
                       <button
                         key={preset.id}
                         type="button"
                         onClick={() => applyPreset(preset.tags)}
-                        className="studio-muted rounded-md border px-2 py-0.5 text-[11px] font-medium text-[var(--text-secondary)] hover:border-teal-500"
+                        className="studio-raised rounded-md border px-2 py-0.5 text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
                       >
                         + {preset.category}
                       </button>
@@ -1230,47 +1269,41 @@ export function ContentDetailView({
             </form>
 
             {/* Feedback & Comments */}
-            <div className="studio-surface rounded-2xl border p-5">
-              <div className="mb-3 flex items-center gap-2 text-sm font-bold text-[var(--text-primary)]">
-                <MessageSquare className="h-4 w-4 text-[var(--text-muted)]" />
-                Feedback &amp; Approval Timeline
+            <section className="studio-surface rounded-xl border p-5">
+              <div className="mb-3 flex items-center gap-2 text-sm font-medium text-[var(--text-primary)]">
+                <MessageSquare className="h-4 w-4 text-[var(--text-muted)]" strokeWidth={1.5} />
+                <span>Feedback and approval timeline</span>
               </div>
 
-              <div className="mb-3 max-h-60 space-y-2.5 overflow-y-auto pr-1">
+              <div className="mb-3 max-h-60 space-y-2 overflow-y-auto pr-1">
                 {comments.length === 0 ? (
                   <p className="text-xs text-[var(--text-muted)]">
-                    No comments or approval events yet.
+                    No comments or approval events yet
                   </p>
                 ) : (
                   comments.map((c) => (
                     <div
                       key={c.id}
-                      className="studio-muted rounded-lg border px-3 py-2 text-xs"
+                      className="studio-raised rounded-lg border px-3 py-2.5 text-xs"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <div className="flex items-center gap-1.5 font-semibold text-[var(--text-primary)]">
+                        <div className="flex items-center gap-2 font-medium text-[var(--text-primary)]">
                           <span>{c.authorName}</span>
-                          <span
-                            className={`rounded px-1.5 py-0.5 text-[10px] uppercase ${
-                              c.authorRole === "manager"
-                                ? "bg-teal-100 text-teal-800"
-                                : "bg-slate-200 text-slate-700"
-                            }`}
-                          >
+                          <span className="studio-surface rounded border px-1.5 py-0.5 text-[10px] capitalize text-[var(--text-muted)]">
                             {c.authorRole}
                           </span>
                           {c.draftVersion ? (
-                            <span className="rounded bg-purple-100 px-1.5 py-0.5 text-[10px] text-purple-800">
+                            <span className="font-mono-meta text-[11px] text-[var(--text-secondary)]">
                               v{c.draftVersion}
                             </span>
                           ) : null}
                           {c.timestampLabel ? (
-                            <span className="rounded bg-amber-100 px-1.5 py-0.5 font-mono text-[10px] text-amber-900">
+                            <span className="font-mono-meta text-[11px] text-[var(--accent)]">
                               @{c.timestampLabel}
                             </span>
                           ) : null}
                         </div>
-                        <span className="text-[10px] uppercase tracking-wide text-[var(--text-muted)]">
+                        <span className="text-[11px] capitalize text-[var(--text-muted)]">
                           {c.actionType.replace(/_/g, " ")}
                         </span>
                       </div>
@@ -1289,7 +1322,7 @@ export function ContentDetailView({
                   value={timestampLabel}
                   onChange={(e) => setTimestampLabel(e.target.value)}
                   placeholder="0:12"
-                  className="studio-input w-20 rounded-lg border px-2.5 py-2 text-xs"
+                  className="studio-input font-mono-meta h-9 w-20 rounded-lg border px-2.5 text-xs"
                 />
                 <input
                   type="text"
@@ -1297,38 +1330,37 @@ export function ContentDetailView({
                   required
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
-                  placeholder="Add note or feedback..."
-                  className="studio-input min-w-0 flex-1 rounded-lg border px-3 py-2 text-xs"
+                  placeholder="Add note or feedback"
+                  className="studio-input h-9 min-w-0 flex-1 rounded-lg border px-3 text-xs"
                 />
                 <button
                   type="submit"
                   disabled={busy}
-                  className="rounded-lg bg-teal-600 px-3 py-2 text-xs font-semibold text-white hover:bg-teal-700 disabled:opacity-50"
+                  className="studio-btn-primary h-9 rounded-lg px-3.5 text-xs font-medium disabled:opacity-50"
                 >
                   Post
                 </button>
               </form>
-            </div>
+            </section>
           </div>
 
-          {/* RIGHT HALF: Recreated Draft Preview */}
           <div className="space-y-3 lg:col-span-6">
-            <div className="space-y-3 lg:sticky lg:top-6">
+            <div className="space-y-3 lg:sticky lg:top-20">
               {drafts.length > 0 ? (
-                <div className="studio-surface flex flex-wrap items-center gap-2 rounded-xl border px-3 py-2">
-                  <History className="h-3.5 w-3.5 text-[var(--text-muted)]" />
+                <div className="studio-surface flex flex-wrap items-center gap-2 rounded-xl border px-3.5 py-2.5">
+                  <History className="h-4 w-4 text-[var(--text-muted)]" strokeWidth={1.5} />
                   <span className="text-xs font-medium text-[var(--text-secondary)]">
-                    Draft Versions:
+                    Versions
                   </span>
                   {drafts.map((d) => (
                     <button
                       key={d.id}
                       type="button"
                       onClick={() => setSelectedVersion(d.version)}
-                      className={`rounded-md px-2.5 py-1 text-xs font-semibold ${
+                      className={`font-mono-meta h-7 rounded-md px-2.5 text-xs font-medium transition-colors ${
                         (activeDraft?.version ?? item.latestDraftVersion) === d.version
-                          ? "bg-purple-600 text-white"
-                          : "studio-muted border text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
+                          ? "studio-btn-primary"
+                          : "studio-raised border text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
                       }`}
                     >
                       v{d.version}
@@ -1340,8 +1372,8 @@ export function ContentDetailView({
               <DraftPreviewCard
                 label={
                   activeDraft
-                    ? `Recreated Draft (v${activeDraft.version})`
-                    : "Recreated Post Preview"
+                    ? `Recreated draft (v${activeDraft.version})`
+                    : "Recreated post preview"
                 }
                 draft={activeDraft}
                 fallbackVideoUrl={item.latestDraftUrl}

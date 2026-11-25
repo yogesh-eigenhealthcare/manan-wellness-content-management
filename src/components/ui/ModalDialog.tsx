@@ -98,25 +98,25 @@ export function ModalDialog({
     >
       {open ? (
         <div className="studio-surface flex max-h-[90dvh] flex-col overflow-hidden rounded-2xl border">
-          <div className="studio-muted flex items-start justify-between gap-4 border-b px-5 py-4">
+          <div className="studio-deep flex items-start justify-between gap-4 border-b px-5 py-4">
             <div className="min-w-0">
               <h1
                 id={titleId}
-                className="truncate text-lg font-semibold text-[var(--text-primary)]"
+                className="truncate text-base font-medium text-[var(--text-primary)]"
               >
                 {title}
               </h1>
               {subtitle ? (
-                <p className="mt-0.5 text-sm text-[var(--text-muted)]">{subtitle}</p>
+                <p className="mt-0.5 text-xs text-[var(--text-muted)]">{subtitle}</p>
               ) : null}
             </div>
             <button
               type="button"
               onClick={() => dialogRef.current?.close()}
               aria-label="Close dialog"
-              className="studio-surface inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border text-[var(--text-secondary)] transition hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
+              className="studio-raised inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
             >
-              <X className="h-4 w-4" />
+              <X className="h-4 w-4" strokeWidth={1.5} />
             </button>
           </div>
           <div className="overflow-y-auto p-5">{children}</div>

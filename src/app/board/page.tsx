@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Search as SearchIcon } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { PipelineBoard } from "@/components/board/PipelineBoard";
 import { AppShell } from "@/components/layout/AppShell";
 import { SubmitIdeaModal } from "@/components/modals/SubmitIdeaModal";
@@ -65,31 +65,26 @@ export default function BoardPage() {
   return (
     <AppShell>
       <div className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="text-xl font-bold text-[var(--text-primary)]">
-              Workflow Board
-            </h2>
-            <p className="text-xs text-[var(--text-muted)]">
-              Track items across Gate 1 approval, production, Gate 2 review, and posting
-            </p>
-          </div>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <h1 className="text-2xl font-medium tracking-tight text-[var(--text-primary)]">
+            Workflow board
+          </h1>
           <div className="flex items-center gap-2">
-            <label className="studio-surface inline-flex cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium text-[var(--text-secondary)]">
+            <label className="studio-surface inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border px-3 text-xs font-medium text-[var(--text-secondary)]">
               <input
                 type="checkbox"
                 checked={showParked}
                 onChange={(e) => setShowParked(e.target.checked)}
-                className="accent-teal-600"
               />
-              Show Parked
+              <span>Show parked</span>
             </label>
             <button
               type="button"
               onClick={() => setSubmitOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-teal-600 px-3.5 py-2 text-xs font-semibold text-white hover:bg-teal-700"
+              className="studio-btn-accent inline-flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-medium"
             >
-              <Plus className="h-4 w-4" /> New Idea
+              <Plus className="h-4 w-4" strokeWidth={1.5} />
+              <span>New idea</span>
             </button>
           </div>
         </div>
@@ -97,18 +92,21 @@ export default function BoardPage() {
         <search>
           <form
             onSubmit={(e) => e.preventDefault()}
-            className="studio-surface grid grid-cols-1 gap-2.5 rounded-xl border p-3 sm:grid-cols-2 lg:grid-cols-6"
+            className="studio-surface grid grid-cols-1 gap-3 rounded-xl border p-3 sm:grid-cols-2 lg:grid-cols-6"
           >
             <div className="relative lg:col-span-2">
-              <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]"
+                strokeWidth={1.5}
+              />
               <input
                 type="search"
-                aria-label="Search board"
+                aria-label="Filter board"
                 spellCheck={false}
                 value={boardSearch}
                 onChange={(e) => setBoardSearch(e.target.value)}
-                placeholder="Search board..."
-                className="studio-input w-full rounded-lg border py-2 pl-9 pr-3 text-sm"
+                placeholder="Filter"
+                className="studio-input h-9 w-full rounded-lg border pl-9 pr-3 text-sm"
               />
             </div>
             <select
@@ -117,9 +115,9 @@ export default function BoardPage() {
               onChange={(e) =>
                 setBoardFormat(e.target.value as "all" | ContentFormat)
               }
-              className="studio-input rounded-lg border px-3 py-2 text-sm"
+              className="studio-input h-9 rounded-lg border px-3 text-sm"
             >
-              <option value="all">All Formats</option>
+              <option value="all">All formats</option>
               {FORMAT_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}
@@ -130,9 +128,9 @@ export default function BoardPage() {
               aria-label="Filter board by topic"
               value={boardTopic}
               onChange={(e) => setBoardTopic(e.target.value)}
-              className="studio-input rounded-lg border px-3 py-2 text-sm"
+              className="studio-input h-9 rounded-lg border px-3 text-sm"
             >
-              <option value="all">All Topics</option>
+              <option value="all">All topics</option>
               {TOPIC_OPTIONS.map((t) => (
                 <option key={t} value={t}>
                   {t}
@@ -143,9 +141,9 @@ export default function BoardPage() {
               aria-label="Filter board by assignee"
               value={boardAssignee}
               onChange={(e) => setBoardAssignee(e.target.value)}
-              className="studio-input rounded-lg border px-3 py-2 text-sm capitalize"
+              className="studio-input h-9 rounded-lg border px-3 text-sm capitalize"
             >
-              <option value="all">All Assignees</option>
+              <option value="all">All assignees</option>
               {TEAM_ASSIGNEE_OPTIONS.map((a) => (
                 <option key={a} value={a}>
                   {a}
@@ -156,9 +154,9 @@ export default function BoardPage() {
               aria-label="Filter board by effort"
               value={boardEffort}
               onChange={(e) => setBoardEffort(e.target.value)}
-              className="studio-input rounded-lg border px-3 py-2 text-sm"
+              className="studio-input h-9 rounded-lg border px-3 text-sm"
             >
-              <option value="all">All Effort Levels</option>
+              <option value="all">All effort levels</option>
               <option value="low">Low effort</option>
               <option value="high">High effort</option>
               <option value="general">General</option>
@@ -167,8 +165,8 @@ export default function BoardPage() {
         </search>
 
         {content.loading ? (
-          <div className="studio-surface rounded-2xl border p-12 text-center text-sm text-[var(--text-muted)]">
-            Loading board...
+          <div className="studio-surface rounded-xl border p-12 text-center text-sm text-[var(--text-muted)]">
+            Loading board
           </div>
         ) : (
           <PipelineBoard
