@@ -4,6 +4,8 @@ import React, { useMemo, useState } from "react";
 import {
   ArrowRight,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   Clock,
   ExternalLink,
   Film,
@@ -48,7 +50,7 @@ const CREATOR_INSIDER_VIDEOS: CreatorVideoTip[] = [
     channel: "Creator Insider",
     title: "Variety Content on YouTube - Watch this First!",
     takeaway:
-      "Pair short-form Reels/Shorts hooks with deeper Long form videos on anxiety, depression, and relationships.",
+      "Pair short-form Reels / Shorts hooks with deeper Long form videos on anxiety, depression, and relationships.",
   },
   {
     id: "ci-4",
@@ -81,6 +83,7 @@ export function DashboardView({
   onNavigate,
   onSelectItem,
 }: DashboardViewProps) {
+  const [carouselIndex, setCarouselIndex] = useState(0);
   const [activeCreatorVideo, setActiveCreatorVideo] = useState<CreatorVideoTip | null>(
     null
   );
@@ -114,10 +117,22 @@ export function DashboardView({
   }, [items]);
 
   const newestIdeas = useMemo(() => {
-    return [...items]
-      .sort((a, b) => b.serialNo - a.serialNo)
-      .slice(0, 5);
+    return [...items].sort((a, b) => b.serialNo - a.serialNo).slice(0, 4);
   }, [items]);
+
+  const currentTip = CREATOR_INSIDER_VIDEOS[carouselIndex];
+
+  const handlePrevTip = () => {
+    setCarouselIndex((i) =>
+      i === 0 ? CREATOR_INSIDER_VIDEOS.length - 1 : i - 1
+    );
+  };
+
+  const handleNextTip = () => {
+    setCarouselIndex((i) =>
+      i === CREATOR_INSIDER_VIDEOS.length - 1 ? 0 : i + 1
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -125,7 +140,7 @@ export function DashboardView({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-xl font-bold text-[var(--text-primary)]">
-            Studio Dashboard
+            Studio dashboard
           </h2>
           <p className="text-xs text-[var(--text-muted)]">
             Overview of Manan Wellness Reels / Shorts, Long form &amp; Carousels
@@ -135,61 +150,23 @@ export function DashboardView({
           <button
             type="button"
             onClick={() => onNavigate("content")}
-            className="studio-surface inline-flex items-center gap-1.5 rounded-lg border px-3.5 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
+            className="studio-surface inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
           >
             All Content <ArrowRight className="h-3.5 w-3.5" />
           </button>
           <button
             type="button"
             onClick={onNewIdea}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-teal-600 px-3.5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-teal-700"
+            className="inline-flex items-center gap-1.5 rounded-full bg-teal-600 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-teal-700"
           >
             <Plus className="h-4 w-4" /> New Idea
           </button>
         </div>
       </div>
 
-      {/* Minimal Stats Strip */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <div className="studio-surface rounded-xl border p-4">
-          <div className="text-xs font-medium text-[var(--text-muted)]">Total Ideas</div>
-          <div className="mt-1 text-2xl font-bold text-[var(--text-primary)]">
-            {stats.total}
-          </div>
-        </div>
-        <div className="studio-surface rounded-xl border p-4">
-          <div className="text-xs font-medium text-[var(--text-muted)]">
-            Gate 1 · Pending
-          </div>
-          <div className="mt-1 text-2xl font-bold text-amber-600">{stats.gate1}</div>
-        </div>
-        <div className="studio-surface rounded-xl border p-4">
-          <div className="text-xs font-medium text-[var(--text-muted)]">
-            In Production
-          </div>
-          <div className="mt-1 text-2xl font-bold text-sky-600">{stats.inProd}</div>
-        </div>
-        <div className="studio-surface rounded-xl border p-4">
-          <div className="text-xs font-medium text-[var(--text-muted)]">
-            Gate 2 · Draft Review
-          </div>
-          <div className="mt-1 text-2xl font-bold text-purple-600">{stats.gate2}</div>
-        </div>
-        <div className="studio-surface rounded-xl border p-4">
-          <div className="text-xs font-medium text-[var(--text-muted)]">
-            Approved to Post
-          </div>
-          <div className="mt-1 text-2xl font-bold text-emerald-600">{stats.ready}</div>
-        </div>
-        <div className="studio-surface rounded-xl border p-4">
-          <div className="text-xs font-medium text-[var(--text-muted)]">Posted</div>
-          <div className="mt-1 text-2xl font-bold text-teal-600">{stats.posted}</div>
-        </div>
-      </div>
-
-      {/* YouTube Studio-style 3-Card Grid */}
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-        {/* Column 1: Pending Approvals / Latest Attention */}
+      {/* 3-Column YouTube Studio Layout */}
+      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-3">
+        {/* Column 1: Awaiting Manager Review */}
         <section className="studio-surface flex flex-col rounded-2xl border p-5">
           <div className="mb-4 flex items-center justify-between gap-2">
             <div>
@@ -203,7 +180,7 @@ export function DashboardView({
             <Clock className="h-4 w-4 text-amber-500" />
           </div>
 
-          <div className="flex-1 space-y-2.5">
+          <div className="space-y-2.5">
             {approvalQueue.length === 0 ? (
               <div className="studio-muted rounded-xl border border-dashed p-6 text-center text-xs text-[var(--text-muted)]">
                 <CheckCircle2 className="mx-auto mb-2 h-6 w-6 text-emerald-500" />
@@ -258,118 +235,164 @@ export function DashboardView({
           </div>
         </section>
 
-        {/* Column 2: Creator Insider (YouTube Growth Videos) */}
+        {/* Column 2: Channel / Pipeline Analytics Card (YT Studio style) */}
         <section className="studio-surface flex flex-col rounded-2xl border p-5">
-          <div className="mb-4 flex items-center justify-between gap-2">
-            <div>
-              <h3 className="text-sm font-bold text-[var(--text-primary)]">
-                Creator Insider
-              </h3>
-              <p className="text-xs text-[var(--text-muted)]">
-                Suggested YouTube videos to grow social reach
-              </p>
+          <h3 className="text-sm font-bold text-[var(--text-primary)]">
+            Pipeline analytics
+          </h3>
+          <div className="mt-3">
+            <div className="text-xs text-[var(--text-muted)]">Total ideas</div>
+            <div className="mt-0.5 text-3xl font-bold text-[var(--text-primary)]">
+              {stats.total}
             </div>
-            <Play className="h-4 w-4 text-rose-500" />
           </div>
 
-          <div className="flex-1 space-y-3">
-            {CREATOR_INSIDER_VIDEOS.map((vid) => (
-              <button
-                key={vid.id}
-                type="button"
-                onClick={() => setActiveCreatorVideo(vid)}
-                className="studio-muted group flex w-full items-start gap-3 rounded-xl border p-2.5 text-left transition hover:border-teal-500"
-              >
-                <div className="relative h-16 w-28 shrink-0 overflow-hidden rounded-lg bg-slate-900">
-                  <img
-                    src={`https://i.ytimg.com/vi/${vid.youtubeId}/hqdefault.jpg`}
-                    alt={vid.title}
-                    className="h-full w-full object-cover transition group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/25">
-                    <Play className="h-5 w-5 fill-white text-white" />
-                  </div>
-                </div>
-                <div className="min-w-0">
-                  <span className="text-[10px] font-semibold uppercase tracking-wide text-teal-600">
-                    {vid.channel}
-                  </span>
-                  <div className="line-clamp-2 text-xs font-semibold text-[var(--text-primary)]">
-                    {vid.title}
-                  </div>
-                  <p className="mt-1 line-clamp-2 text-[11px] text-[var(--text-muted)]">
-                    {vid.takeaway}
-                  </p>
-                </div>
-              </button>
-            ))}
+          <div className="mt-5 space-y-2.5 border-t border-[var(--border-subtle)] pt-4 text-xs">
+            <div className="font-semibold text-[var(--text-primary)]">Summary</div>
+            <div className="flex items-center justify-between text-[var(--text-secondary)]">
+              <span>Gate 1 · Ideas pending</span>
+              <span className="font-semibold text-amber-600">{stats.gate1}</span>
+            </div>
+            <div className="flex items-center justify-between text-[var(--text-secondary)]">
+              <span>In production / rework</span>
+              <span className="font-semibold text-sky-600">{stats.inProd}</span>
+            </div>
+            <div className="flex items-center justify-between text-[var(--text-secondary)]">
+              <span>Gate 2 · Drafts in review</span>
+              <span className="font-semibold text-purple-600">{stats.gate2}</span>
+            </div>
+            <div className="flex items-center justify-between text-[var(--text-secondary)]">
+              <span>Approved to post</span>
+              <span className="font-semibold text-emerald-600">{stats.ready}</span>
+            </div>
+            <div className="flex items-center justify-between text-[var(--text-secondary)]">
+              <span>Posted live</span>
+              <span className="font-semibold text-teal-600">{stats.posted}</span>
+            </div>
+          </div>
+
+          <div className="mt-5 border-t border-[var(--border-subtle)] pt-4">
+            <button
+              type="button"
+              onClick={() => onNavigate("insights")}
+              className="studio-muted rounded-full border px-4 py-2 text-xs font-semibold text-[var(--text-primary)] transition hover:bg-[var(--bg-hover)]"
+            >
+              Go to pipeline insights
+            </button>
           </div>
         </section>
 
-        {/* Column 3: What's New in Content Studio (Newly Added Ideas) */}
-        <section className="studio-surface flex flex-col rounded-2xl border p-5">
-          <div className="mb-4 flex items-center justify-between gap-2">
-            <div>
+        {/* Column 3: Creator Insider Carousel + What's New in Content Studio */}
+        <div className="space-y-5">
+          {/* Creator Insider Carousel (YT Studio style) */}
+          <section className="studio-surface rounded-2xl border p-5">
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <h3 className="text-sm font-bold text-[var(--text-primary)]">
+                Creator Insider
+              </h3>
+              <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
+                <button
+                  type="button"
+                  onClick={handlePrevTip}
+                  aria-label="Previous Creator Insider video"
+                  className="rounded-full p-1 text-[var(--text-secondary)] transition hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <span className="tabular-nums font-medium">
+                  {carouselIndex + 1} / {CREATOR_INSIDER_VIDEOS.length}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleNextTip}
+                  aria-label="Next Creator Insider video"
+                  className="rounded-full p-1 text-[var(--text-secondary)] transition hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setActiveCreatorVideo(currentTip)}
+              className="group relative block w-full overflow-hidden rounded-xl bg-slate-900"
+            >
+              <img
+                src={`https://i.ytimg.com/vi/${currentTip.youtubeId}/hqdefault.jpg`}
+                alt={currentTip.title}
+                className="aspect-video w-full object-cover transition group-hover:scale-[1.02]"
+              />
+              <div className="absolute inset-0 flex items-center justify-center bg-black/25 transition group-hover:bg-black/35">
+                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-black/70 text-white shadow-md">
+                  <Play className="h-5 w-5 fill-white" />
+                </span>
+              </div>
+            </button>
+
+            <h4 className="mt-3 text-sm font-semibold text-[var(--text-primary)]">
+              {currentTip.title}
+            </h4>
+            <p className="mt-1 text-xs leading-relaxed text-[var(--text-muted)]">
+              {currentTip.takeaway}
+            </p>
+
+            <div className="mt-3.5 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setActiveCreatorVideo(currentTip)}
+                className="studio-muted rounded-full border px-4 py-1.5 text-xs font-semibold text-[var(--text-primary)] transition hover:bg-[var(--bg-hover)]"
+              >
+                Watch video
+              </button>
+              <a
+                href={`https://www.youtube.com/watch?v=${currentTip.youtubeId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs font-medium text-[var(--text-muted)] hover:text-teal-600"
+              >
+                YouTube <ExternalLink className="h-3 w-3" />
+              </a>
+            </div>
+          </section>
+
+          {/* What's new in Content Studio (Newly added ideas) */}
+          <section className="studio-surface rounded-2xl border p-5">
+            <div className="mb-3 flex items-center justify-between gap-2">
               <h3 className="text-sm font-bold text-[var(--text-primary)]">
                 What&apos;s new in Content Studio
               </h3>
-              <p className="text-xs text-[var(--text-muted)]">
-                Newly added ideas &amp; references
-              </p>
+              <Sparkles className="h-4 w-4 text-teal-500" />
             </div>
-            <Sparkles className="h-4 w-4 text-teal-500" />
-          </div>
 
-          <div className="flex-1 space-y-2.5">
             {newestIdeas.length === 0 ? (
-              <div className="studio-muted rounded-xl border border-dashed p-6 text-center text-xs text-[var(--text-muted)]">
-                No ideas added yet. Click &ldquo;New Idea&rdquo; to submit your first one.
-              </div>
+              <p className="py-4 text-xs text-[var(--text-muted)]">
+                No ideas added yet.
+              </p>
             ) : (
-              newestIdeas.map((item) => {
-                const meta = STATUS_META[item.status];
-                return (
+              <div className="divide-y divide-[var(--border-subtle)]">
+                {newestIdeas.map((item) => (
                   <button
                     key={item.id}
                     type="button"
                     onClick={() => onSelectItem(item)}
-                    className="studio-muted flex w-full items-start justify-between gap-3 rounded-xl border p-3 text-left transition hover:border-teal-500"
+                    className="flex w-full items-center justify-between gap-3 py-2.5 text-left transition hover:text-teal-600"
                   >
                     <div className="min-w-0">
-                      <div className="flex items-center gap-1.5 text-[11px] text-[var(--text-muted)]">
-                        <FormatSmallIcon format={item.format} />
-                        <span>#{item.serialNo}</span>
-                        <span>·</span>
-                        <span>{formatLabel(item.format)}</span>
-                      </div>
-                      <p className="mt-0.5 truncate text-sm font-semibold text-[var(--text-primary)]">
-                        {item.title}
+                      <p className="truncate text-xs font-semibold text-[var(--text-primary)]">
+                        #{item.serialNo} {item.title}
                       </p>
-                      <p className="mt-0.5 truncate text-[11px] text-[var(--text-muted)]">
-                        {item.adaptationIdea || item.callToAction || item.topicType}
+                      <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">
+                        {formatLabel(item.format)} · {item.topicType}
                       </p>
                     </div>
-                    <span
-                      className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${meta.badgeClass}`}
-                    >
-                      {meta.shortLabel}
-                    </span>
+                    <ArrowRight className="h-3.5 w-3.5 shrink-0 text-[var(--text-muted)]" />
                   </button>
-                );
-              })
+                ))}
+              </div>
             )}
-          </div>
-
-          <div className="mt-4 border-t border-[var(--border-subtle)] pt-3">
-            <button
-              type="button"
-              onClick={() => onNavigate("insights")}
-              className="inline-flex items-center gap-1 text-xs font-semibold text-teal-600 hover:underline"
-            >
-              View Pipeline Insights <ArrowRight className="h-3.5 w-3.5" />
-            </button>
-          </div>
-        </section>
+          </section>
+        </div>
       </div>
 
       {/* Inline Creator Insider Video Player Modal */}
