@@ -1,0 +1,449 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // This security rules file assumes the following data structures:
+    //
+    // Collection: rolePreassignments
+    // Document ID: {normalizedEmail} (lowercase email)
+    // Fields:
+    //   - email: string (required, valid email, 3..320 chars, email.lower() == normalizedEmail)
+    //   - role: string (required, 'manager' | 'member')
+    //   - teamTag: string (required, 0..60 chars)
+    //   - updatedAt: timestamp (required)
+    //
+    // Collection: users (Internal Team Directory — readable by authenticated team members)
+    // Document ID: {uid}
+    // Fields:
+    //   - uid: string (required, immutable, == uid, 1..128 chars)
+    //   - email: string (required, immutable, valid email, 3..320 chars)
+    //   - displayName: string (required, 0..100 chars)
+    //   - photoURL: string (required, 0..1000 chars, empty or http(s) URL)
+    //   - role: string (required, 'manager' | 'member')
+    //   - teamTag: string (required, 0..60 chars)
+    //   - createdAt: timestamp (required, immutable)
+    //   - updatedAt: timestamp (required)
+    //
+    // Collection: contentItems
+    // Document ID: {itemId}
+    // Fields:
+    //   - serialNo: number (required, >= 0)
+    //   - format: string (required, 'reel' | 'carousel')
+    //   - title: string (required, 1..200 chars)
+    //   - topicType: string (required, 1..60 chars)
+    //   - effortLevel: string (required, 'low' | 'high' | 'general')
+    //   - status: string (required, 8-state two-gate workflow enum)
+    //   - referenceUrl: string (required, 0..1000 chars)
+    //   - referenceBackupUrl: string (required, 0..1000 chars)
+    //   - referenceNotes: string (required, 0..3000 chars)
+    //   - adaptationIdea: string (required, 0..3000 chars)
+    //   - callToAction: string (required, 0..500 chars)
+    //   - scriptUrl: string (required, 0..1000 chars)
+    //   - scriptText: string (required, 0..15000 chars)
+    //   - hashtags: list (required, size <= 50)
+    //   - assignedTo: list (required, size <= 20)
+    //   - targetPostDate: string | null (required key, 0..40 chars if string)
+    //   - latestDraftUrl: string | null (required key, 0..1000 chars if string)
+    //   - latestDraftVersion: int (required, >= 0)
+    //   - publishedUrl: string | null (required key, 0..1000 chars if string)
+    //   - gate1ReviewedBy: string | null (required key, 0..128 chars if string)
+    //   - gate1ReviewedAt: timestamp | null (required key)
+    //   - gate1Feedback: string | null (required key, 0..3000 chars if string)
+    //   - gate2ReviewedBy: string | null (required key, 0..128 chars if string)
+    //   - gate2ReviewedAt: timestamp | null (required key)
+    //   - gate2Feedback: string | null (required key, 0..3000 chars if string)
+    //   - createdByUid: string (required, immutable, 1..128 chars)
+    //   - createdByName: string (required, 0..100 chars)
+    //   - createdAt: timestamp (required, immutable)
+    //   - updatedAt: timestamp (required)
+    //
+    // Subcollection: contentItems/{itemId}/drafts
+    // Document ID: {draftId}
+    // Fields:
+    //   - version: int (required, >= 1)
+    //   - videoUrl: string (required, 1..1000 chars)
+    //   - notes: string (required, 0..2000 chars)
+    //   - submittedByUid: string (required, immutable, == request.auth.uid on create, 1..128 chars)
+    //   - submittedByName: string (required, 0..100 chars)
+    //   - submittedAt: timestamp (required)
+    //
+    // Subcollection: contentItems/{itemId}/comments
+    // Document ID: {commentId}
+    // Fields:
+    //   - authorUid: string (required, immutable, == request.auth.uid on create, 1..128 chars)
+    //   - authorName: string (required, 0..100 chars)
+    //   - authorRole: string (required, 'manager' | 'member', matches caller role)
+    //   - actionType: string (required, comment/gate action enum; gate actions manager-only)
+    //   - draftVersion: int | null (required key, >= 0 if int)
+    //   - timestampLabel: string | null (required key, 0..40 chars if string)
+    //   - body: string (required, 0..4000 chars)
+    //   - createdAt: timestamp (required)
+    //
+    // Collection: hashtagPresets
+    // Document ID: {presetId}
+    // Fields:
+    //   - category: string (required, 1..80 chars)
+    //   - tags: list (required, size <= 50)
+    //   - updatedAt: timestamp (required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function uidUnchanged() {
+      return !('uid' in request.resource.data) ||
+             request.resource.data.uid == request.auth.uid;
+    }
+
+    function uidNotModified() {
+      return !('uid' in request.resource.data) ||
+             request.resource.data.uid == resource.data.uid;
+    }
+
+    function hasAuthEmail() {
+      return isAuthenticated() &&
+             request.auth.token.email != null &&
+             request.auth.token.email is string &&
+             request.auth.token.email.size() > 0;
+    }
+
+    function authEmailLower() {
+      return request.auth.token.email.lower();
+    }
+
+    function isManager() {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'manager';
+    }
+
+    function isPreassignedManager() {
+      return hasAuthEmail() &&
+             exists(/databases/$(database)/documents/rolePreassignments/$(authEmailLower())) &&
+             get(/databases/$(database)/documents/rolePreassignments/$(authEmailLower())).data.role == 'manager';
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function areImmutableFieldsUnchanged(fields) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
+    }
+
+    function isValidString(val, minLen, maxLen) {
+      return val is string && val.size() >= minLen && val.size() <= maxLen;
+    }
+
+    function isNullableString(val, minLen, maxLen) {
+      return val == null || isValidString(val, minLen, maxLen);
+    }
+
+    function isNullableTimestamp(val) {
+      return val == null || val is timestamp;
+    }
+
+    function isNullableInt(val, minVal) {
+      return val == null || (val is int && val >= minVal);
+    }
+
+    function isValidUrl(url) {
+      return url is string &&
+             (url.matches("^https://.*") || url.matches("^http://.*"));
+    }
+
+    function isValidEmail(email) {
+      return email is string &&
+             email.size() >= 3 &&
+             email.size() <= 320 &&
+             email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidList(listVal, maxSize) {
+      return listVal is list && listVal.size() <= maxSize;
+    }
+
+    // ===============================================================
+    // Domain Validators (Used in BOTH create and update)
+    // ===============================================================
+
+    function isValidRolePreassignment(data, normalizedEmail) {
+      let allowed = ['email', 'role', 'teamTag', 'updatedAt'];
+      return hasRequiredFields(allowed) &&
+             hasOnlyAllowedFields(allowed) &&
+             isValidEmail(data.email) &&
+             data.email.lower() == normalizedEmail &&
+             data.role in ['manager', 'member'] &&
+             isValidString(data.teamTag, 0, 60) &&
+             data.updatedAt is timestamp;
+    }
+
+    function isValidUser(data, uid) {
+      let allowed = [
+        'uid', 'email', 'displayName', 'photoURL',
+        'role', 'teamTag', 'createdAt', 'updatedAt'
+      ];
+      return hasRequiredFields(allowed) &&
+             hasOnlyAllowedFields(allowed) &&
+             isValidString(data.uid, 1, 128) &&
+             data.uid == uid &&
+             isValidEmail(data.email) &&
+             isValidString(data.displayName, 0, 100) &&
+             isValidString(data.photoURL, 0, 1000) &&
+             (data.photoURL == '' || isValidUrl(data.photoURL)) &&
+             data.role in ['manager', 'member'] &&
+             isValidString(data.teamTag, 0, 60) &&
+             data.createdAt is timestamp &&
+             data.updatedAt is timestamp;
+    }
+
+    function isValidContentItem(data) {
+      let allowed = [
+        'serialNo', 'format', 'title', 'topicType', 'effortLevel', 'status',
+        'referenceUrl', 'referenceBackupUrl', 'referenceNotes', 'adaptationIdea',
+        'callToAction', 'scriptUrl', 'scriptText', 'hashtags', 'assignedTo',
+        'targetPostDate', 'latestDraftUrl', 'latestDraftVersion', 'publishedUrl',
+        'gate1ReviewedBy', 'gate1ReviewedAt', 'gate1Feedback',
+        'gate2ReviewedBy', 'gate2ReviewedAt', 'gate2Feedback',
+        'createdByUid', 'createdByName', 'createdAt', 'updatedAt'
+      ];
+      let validStatuses = [
+        'idea_pending', 'idea_rejected', 'approved_for_production',
+        'in_production', 'draft_review', 'changes_requested',
+        'approved_to_post', 'posted'
+      ];
+      return hasRequiredFields(allowed) &&
+             hasOnlyAllowedFields(allowed) &&
+             data.serialNo is number && data.serialNo >= 0 &&
+             data.format in ['reel', 'carousel'] &&
+             isValidString(data.title, 1, 200) &&
+             isValidString(data.topicType, 1, 60) &&
+             data.effortLevel in ['low', 'high', 'general'] &&
+             data.status in validStatuses &&
+             isValidString(data.referenceUrl, 0, 1000) &&
+             isValidString(data.referenceBackupUrl, 0, 1000) &&
+             isValidString(data.referenceNotes, 0, 3000) &&
+             isValidString(data.adaptationIdea, 0, 3000) &&
+             isValidString(data.callToAction, 0, 500) &&
+             isValidString(data.scriptUrl, 0, 1000) &&
+             isValidString(data.scriptText, 0, 15000) &&
+             isValidList(data.hashtags, 50) &&
+             isValidList(data.assignedTo, 20) &&
+             isNullableString(data.targetPostDate, 0, 40) &&
+             isNullableString(data.latestDraftUrl, 0, 1000) &&
+             data.latestDraftVersion is int && data.latestDraftVersion >= 0 &&
+             isNullableString(data.publishedUrl, 0, 1000) &&
+             isNullableString(data.gate1ReviewedBy, 0, 128) &&
+             isNullableTimestamp(data.gate1ReviewedAt) &&
+             isNullableString(data.gate1Feedback, 0, 3000) &&
+             isNullableString(data.gate2ReviewedBy, 0, 128) &&
+             isNullableTimestamp(data.gate2ReviewedAt) &&
+             isNullableString(data.gate2Feedback, 0, 3000) &&
+             isValidString(data.createdByUid, 1, 128) &&
+             isValidString(data.createdByName, 0, 100) &&
+             data.createdAt is timestamp &&
+             data.updatedAt is timestamp;
+    }
+
+    function isCleanInitialSubmission(data) {
+      return data.status == 'idea_pending' &&
+             data.latestDraftVersion == 0 &&
+             data.latestDraftUrl == null &&
+             data.publishedUrl == null &&
+             data.gate1ReviewedBy == null &&
+             data.gate1ReviewedAt == null &&
+             data.gate1Feedback == null &&
+             data.gate2ReviewedBy == null &&
+             data.gate2ReviewedAt == null &&
+             data.gate2Feedback == null;
+    }
+
+    function isAllowedMemberContentUpdate() {
+      let prev = resource.data.status;
+      let next = request.resource.data.status;
+      let gateFieldsUnchanged = areImmutableFieldsUnchanged([
+        'gate1ReviewedBy', 'gate1ReviewedAt', 'gate1Feedback',
+        'gate2ReviewedBy', 'gate2ReviewedAt', 'gate2Feedback'
+      ]);
+      let draftVersionUnchanged =
+        request.resource.data.latestDraftVersion == resource.data.latestDraftVersion;
+      let isDraftSubmit =
+        (prev in ['in_production', 'approved_for_production', 'changes_requested']) &&
+        next == 'draft_review' &&
+        request.resource.data.latestDraftUrl is string &&
+        request.resource.data.latestDraftUrl.size() > 0 &&
+        request.resource.data.latestDraftVersion == resource.data.latestDraftVersion + 1;
+      let isMarkPosted =
+        prev == 'approved_to_post' &&
+        next == 'posted' &&
+        request.resource.data.publishedUrl is string &&
+        request.resource.data.publishedUrl.size() > 0 &&
+        draftVersionUnchanged;
+      let isOtherAllowedTransition = draftVersionUnchanged && (
+        (next == prev) ||
+        (prev == 'idea_rejected' && next == 'idea_pending') ||
+        (prev == 'approved_for_production' && next == 'in_production')
+      );
+
+      return gateFieldsUnchanged &&
+             (isDraftSubmit || isMarkPosted || isOtherAllowedTransition);
+    }
+
+    function isValidDraft(data) {
+      let allowed = [
+        'version', 'videoUrl', 'notes',
+        'submittedByUid', 'submittedByName', 'submittedAt'
+      ];
+      return hasRequiredFields(allowed) &&
+             hasOnlyAllowedFields(allowed) &&
+             data.version is int && data.version >= 1 &&
+             isValidString(data.videoUrl, 1, 1000) &&
+             isValidString(data.notes, 0, 2000) &&
+             isValidString(data.submittedByUid, 1, 128) &&
+             isValidString(data.submittedByName, 0, 100) &&
+             data.submittedAt is timestamp;
+    }
+
+    function isValidComment(data) {
+      let allowed = [
+        'authorUid', 'authorName', 'authorRole', 'actionType',
+        'draftVersion', 'timestampLabel', 'body', 'createdAt'
+      ];
+      let validActions = [
+        'comment', 'gate1_approve', 'gate1_reject',
+        'draft_submit', 'gate2_approve', 'gate2_request_changes', 'posted'
+      ];
+      return hasRequiredFields(allowed) &&
+             hasOnlyAllowedFields(allowed) &&
+             isValidString(data.authorUid, 1, 128) &&
+             isValidString(data.authorName, 0, 100) &&
+             data.authorRole in ['manager', 'member'] &&
+             data.actionType in validActions &&
+             isNullableInt(data.draftVersion, 0) &&
+             isNullableString(data.timestampLabel, 0, 40) &&
+             isValidString(data.body, 0, 4000) &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidHashtagPreset(data) {
+      let allowed = ['category', 'tags', 'updatedAt'];
+      return hasRequiredFields(allowed) &&
+             hasOnlyAllowedFields(allowed) &&
+             isValidString(data.category, 1, 80) &&
+             isValidList(data.tags, 50) &&
+             data.updatedAt is timestamp;
+    }
+
+    // ===============================================================
+    // Collection Rules
+    // ===============================================================
+
+    // Role preassignments: signed-in user may get ONLY their own email doc;
+    // managers may get, list, and write any preassignment.
+    match /rolePreassignments/{normalizedEmail} {
+      allow get: if isAuthenticated() &&
+                    ((hasAuthEmail() && normalizedEmail == authEmailLower()) || isManager());
+      allow list: if isManager();
+      allow create, update: if isManager() &&
+                               isValidRolePreassignment(request.resource.data, normalizedEmail);
+      allow delete: if isManager();
+    }
+
+    // Users: authenticated team directory read; self-create with preassigned manager check;
+    // strict self-update vs manager role/teamTag update; deletes denied.
+    match /users/{uid} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(uid) &&
+                       uidUnchanged() &&
+                       isValidUser(request.resource.data, uid) &&
+                       (!hasAuthEmail() || request.resource.data.email.lower() == authEmailLower()) &&
+                       (request.resource.data.role == 'member' ||
+                        (request.resource.data.role == 'manager' && isPreassignedManager()));
+      allow update: if isAuthenticated() &&
+                       uidNotModified() &&
+                       isValidUser(request.resource.data, uid) &&
+                       areImmutableFieldsUnchanged(['uid', 'email', 'createdAt']) &&
+                       (
+                         (isOwner(uid) &&
+                          request.resource.data.diff(resource.data).affectedKeys()
+                            .hasOnly(['displayName', 'photoURL', 'teamTag', 'updatedAt'])) ||
+                         (isManager() &&
+                          request.resource.data.diff(resource.data).affectedKeys()
+                            .hasOnly(['role', 'teamTag', 'updatedAt']))
+                       );
+      allow delete: if false;
+    }
+
+    // Content items: two-gate reel/carousel approval pipeline
+    match /contentItems/{itemId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() &&
+                       isValidContentItem(request.resource.data) &&
+                       request.resource.data.createdByUid == request.auth.uid &&
+                       (isManager() || isCleanInitialSubmission(request.resource.data));
+      allow update: if isAuthenticated() &&
+                       isValidContentItem(request.resource.data) &&
+                       areImmutableFieldsUnchanged(['createdByUid', 'createdAt']) &&
+                       (isManager() || isAllowedMemberContentUpdate());
+      allow delete: if isManager();
+
+      // Draft version history: append-only for members, deletable only by managers
+      match /drafts/{draftId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() &&
+                         isValidDraft(request.resource.data) &&
+                         request.resource.data.submittedByUid == request.auth.uid &&
+                         existsAfter(/databases/$(database)/documents/contentItems/$(itemId));
+        allow update: if false;
+        allow delete: if isManager();
+      }
+
+      // Comments & workflow audit trail: strictly append-only
+      match /comments/{commentId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() &&
+                         isValidComment(request.resource.data) &&
+                         request.resource.data.authorUid == request.auth.uid &&
+                         request.resource.data.authorRole == (isManager() ? 'manager' : 'member') &&
+                         (!(request.resource.data.actionType in [
+                           'gate1_approve', 'gate1_reject',
+                           'gate2_approve', 'gate2_request_changes'
+                         ]) || isManager()) &&
+                         existsAfter(/databases/$(database)/documents/contentItems/$(itemId));
+        allow update, delete: if false;
+      }
+    }
+
+    // Hashtag presets: shared team presets; delete restricted to managers
+    match /hashtagPresets/{presetId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() &&
+                               isValidHashtagPreset(request.resource.data);
+      allow delete: if isManager();
+    }
+
+    // Explicit catch-all deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
