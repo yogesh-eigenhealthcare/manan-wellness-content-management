@@ -44,9 +44,9 @@ export function LoginScreen() {
 
   return (
     <main className="flex min-h-dvh items-center justify-center bg-[var(--bg-app)] p-6">
-      <div className="studio-surface w-full max-w-md rounded-xl border p-6 sm:p-8">
+      <div className="studio-surface w-full max-w-md rounded-2xl border p-6 sm:p-8">
         <div className="mb-6 flex items-center gap-3">
-          <div className="flex h-10 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-white px-2.5">
+          <div className="flex h-11 items-center justify-center rounded-xl border border-[var(--accent-border)] bg-white px-2.5">
             <img
               src="https://mananwellness.com/svg/manan-logo.svg"
               alt="Manan Wellness"
@@ -54,7 +54,7 @@ export function LoginScreen() {
             />
           </div>
           <div>
-            <h1 className="text-lg font-medium text-[var(--text-primary)]">
+            <h1 className="font-display text-xl font-semibold text-[var(--text-primary)]">
               Manan Wellness Studio
             </h1>
             <p className="text-xs text-[var(--text-muted)]">
@@ -67,7 +67,7 @@ export function LoginScreen() {
           type="button"
           onClick={handleGoogle}
           disabled={submitting}
-          className="studio-raised flex h-10 w-full items-center justify-center gap-2.5 rounded-lg border px-4 text-sm font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-hover)] disabled:opacity-60"
+          className="studio-raised flex h-10 w-full items-center justify-center gap-2.5 rounded-full border px-4 text-sm font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-hover)] disabled:opacity-60"
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
             <path
@@ -206,7 +206,7 @@ export function LoginScreen() {
           <button
             type="submit"
             disabled={submitting}
-            className="studio-btn-accent flex h-10 w-full items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium disabled:opacity-60"
+            className="studio-btn-accent flex h-10 w-full items-center justify-center gap-2 rounded-full px-4 text-sm font-medium disabled:opacity-60"
           >
             <Lock className="h-4 w-4" strokeWidth={1.5} />
             <span>
@@ -229,7 +229,7 @@ export function LoginScreen() {
                   clearAuthError();
                   setMode("signup");
                 }}
-                className="font-medium text-[var(--accent)] hover:underline"
+                className="font-medium text-[var(--accent-text)] hover:underline"
               >
                 Create an account
               </button>
@@ -243,7 +243,7 @@ export function LoginScreen() {
                   clearAuthError();
                   setMode("signin");
                 }}
-                className="font-medium text-[var(--accent)] hover:underline"
+                className="font-medium text-[var(--accent-text)] hover:underline"
               >
                 Sign in
               </button>

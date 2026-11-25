@@ -66,11 +66,11 @@ export default function BoardPage() {
     <AppShell>
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <h1 className="text-2xl font-medium tracking-tight text-[var(--text-primary)]">
+          <h1 className="font-display text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
             Workflow board
           </h1>
           <div className="flex items-center gap-2">
-            <label className="studio-surface inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border px-3 text-xs font-medium text-[var(--text-secondary)]">
+            <label className="studio-surface inline-flex h-9 cursor-pointer items-center gap-2 rounded-full border px-3.5 text-xs font-medium text-[var(--text-secondary)]">
               <input
                 type="checkbox"
                 checked={showParked}
@@ -81,9 +81,9 @@ export default function BoardPage() {
             <button
               type="button"
               onClick={() => setSubmitOpen(true)}
-              className="studio-btn-accent inline-flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-medium"
+              className="studio-btn-accent inline-flex h-9 items-center gap-2 rounded-full px-4 text-sm font-medium"
             >
-              <Plus className="h-4 w-4" strokeWidth={1.5} />
+              <Plus className="h-4 w-4" strokeWidth={1.75} />
               <span>New idea</span>
             </button>
           </div>
@@ -92,7 +92,7 @@ export default function BoardPage() {
         <search>
           <form
             onSubmit={(e) => e.preventDefault()}
-            className="studio-surface grid grid-cols-1 gap-3 rounded-xl border p-3 sm:grid-cols-2 lg:grid-cols-6"
+            className="studio-surface grid grid-cols-1 gap-3 rounded-2xl border p-3 sm:grid-cols-2 lg:grid-cols-6"
           >
             <div className="relative lg:col-span-2">
               <Search
@@ -106,7 +106,7 @@ export default function BoardPage() {
                 value={boardSearch}
                 onChange={(e) => setBoardSearch(e.target.value)}
                 placeholder="Filter"
-                className="studio-input h-9 w-full rounded-lg border pl-9 pr-3 text-sm"
+                className="studio-input h-9 w-full rounded-xl border pl-9 pr-3 text-sm"
               />
             </div>
             <select
@@ -115,7 +115,7 @@ export default function BoardPage() {
               onChange={(e) =>
                 setBoardFormat(e.target.value as "all" | ContentFormat)
               }
-              className="studio-input h-9 rounded-lg border px-3 text-sm"
+              className="studio-input h-9 rounded-xl border px-3 text-sm"
             >
               <option value="all">All formats</option>
               {FORMAT_OPTIONS.map((opt) => (
@@ -128,7 +128,7 @@ export default function BoardPage() {
               aria-label="Filter board by topic"
               value={boardTopic}
               onChange={(e) => setBoardTopic(e.target.value)}
-              className="studio-input h-9 rounded-lg border px-3 text-sm"
+              className="studio-input h-9 rounded-xl border px-3 text-sm"
             >
               <option value="all">All topics</option>
               {TOPIC_OPTIONS.map((t) => (
@@ -141,7 +141,7 @@ export default function BoardPage() {
               aria-label="Filter board by assignee"
               value={boardAssignee}
               onChange={(e) => setBoardAssignee(e.target.value)}
-              className="studio-input h-9 rounded-lg border px-3 text-sm capitalize"
+              className="studio-input h-9 rounded-xl border px-3 text-sm capitalize"
             >
               <option value="all">All assignees</option>
               {TEAM_ASSIGNEE_OPTIONS.map((a) => (
@@ -154,7 +154,7 @@ export default function BoardPage() {
               aria-label="Filter board by effort"
               value={boardEffort}
               onChange={(e) => setBoardEffort(e.target.value)}
-              className="studio-input h-9 rounded-lg border px-3 text-sm"
+              className="studio-input h-9 rounded-xl border px-3 text-sm"
             >
               <option value="all">All effort levels</option>
               <option value="low">Low effort</option>

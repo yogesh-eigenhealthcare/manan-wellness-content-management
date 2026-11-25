@@ -2,9 +2,13 @@
 
 import React, { useMemo, useState } from "react";
 import {
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  Clock,
   ExternalLink,
+  Film,
+  Layers,
   Play,
   Plus,
 } from "lucide-react";
@@ -125,43 +129,135 @@ export function DashboardView({
     <div className="space-y-6">
       {/* Page Title Bar */}
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl font-medium tracking-tight text-[var(--text-primary)]">
-          Channel dashboard
-        </h1>
-        <div className="flex items-center gap-2">
+        <div>
+          <h1 className="font-display text-2xl font-bold tracking-tight text-[var(--text-primary)]">
+            Channel dashboard
+          </h1>
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">
+            Welcome back. Here&apos;s what&apos;s moving across your content studio.
+          </p>
+        </div>
+        <div className="flex items-center gap-2.5">
           <button
             type="button"
             onClick={() => onNavigate("content")}
-            className="studio-raised inline-flex h-9 items-center rounded-lg border px-4 text-sm font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-hover)]"
+            className="studio-btn-secondary inline-flex h-9 items-center rounded-full px-4 text-sm font-medium"
           >
             All content
           </button>
           <button
             type="button"
             onClick={onNewIdea}
-            className="studio-btn-accent inline-flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-medium"
+            className="studio-btn-accent inline-flex h-9 items-center gap-2 rounded-full px-4 text-sm font-medium"
           >
-            <Plus className="h-4 w-4" strokeWidth={1.5} />
+            <Plus className="h-4 w-4" strokeWidth={1.75} />
             <span>New idea</span>
           </button>
         </div>
       </div>
 
+      {/* Friendly Pastel Summary Strip (Image 1 aesthetic) */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <button
+          type="button"
+          onClick={() => onNavigate("content")}
+          className="rounded-2xl bg-[var(--pastel-mint)] p-5 text-left transition-transform duration-150 hover:-translate-y-0.5"
+        >
+          <div className="flex items-center justify-between">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[var(--icon-indigo)] shadow-xs dark:bg-[var(--bg-surface)]">
+              <CheckCircle2 className="h-5 w-5" strokeWidth={1.75} />
+            </span>
+            <span className="font-mono-meta rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[#16a34a] dark:bg-[var(--bg-surface)]">
+              {stats.ready} ready
+            </span>
+          </div>
+          <div className="tabular-nums mt-5 text-3xl font-bold tracking-tight text-[var(--text-primary)]">
+            {stats.posted + stats.ready}
+          </div>
+          <div className="mt-1 text-sm text-[var(--text-secondary)]">
+            Ready &amp; posted
+          </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onNavigate("board")}
+          className="rounded-2xl bg-[var(--pastel-sky)] p-5 text-left transition-transform duration-150 hover:-translate-y-0.5"
+        >
+          <div className="flex items-center justify-between">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[var(--icon-indigo)] shadow-xs dark:bg-[var(--bg-surface)]">
+              <Film className="h-5 w-5" strokeWidth={1.75} />
+            </span>
+            <span className="font-mono-meta rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[var(--text-primary)] dark:bg-[var(--bg-surface)]">
+              Active
+            </span>
+          </div>
+          <div className="tabular-nums mt-5 text-3xl font-bold tracking-tight text-[var(--text-primary)]">
+            {stats.inProd}
+          </div>
+          <div className="mt-1 text-sm text-[var(--text-secondary)]">
+            In production &amp; rework
+          </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onNavigate("board")}
+          className="rounded-2xl bg-[var(--pastel-rose)] p-5 text-left transition-transform duration-150 hover:-translate-y-0.5"
+        >
+          <div className="flex items-center justify-between">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[var(--icon-indigo)] shadow-xs dark:bg-[var(--bg-surface)]">
+              <Clock className="h-5 w-5" strokeWidth={1.75} />
+            </span>
+            <span className="font-mono-meta rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[#dc2626] dark:bg-[var(--bg-surface)]">
+              {stats.gate2} final
+            </span>
+          </div>
+          <div className="tabular-nums mt-5 text-3xl font-bold tracking-tight text-[var(--text-primary)]">
+            {stats.gate1 + stats.gate2}
+          </div>
+          <div className="mt-1 text-sm text-[var(--text-secondary)]">
+            Pending manager approval
+          </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onNavigate("insights")}
+          className="rounded-2xl bg-[var(--pastel-lavender)] p-5 text-left transition-transform duration-150 hover:-translate-y-0.5"
+        >
+          <div className="flex items-center justify-between">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[var(--icon-indigo)] shadow-xs dark:bg-[var(--bg-surface)]">
+              <Layers className="h-5 w-5" strokeWidth={1.75} />
+            </span>
+            <span className="font-mono-meta rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[#16a34a] dark:bg-[var(--bg-surface)]">
+              All formats
+            </span>
+          </div>
+          <div className="tabular-nums mt-5 text-3xl font-bold tracking-tight text-[var(--text-primary)]">
+            {stats.total}
+          </div>
+          <div className="mt-1 text-sm text-[var(--text-secondary)]">
+            Total pipeline ideas
+          </div>
+        </button>
+      </div>
+
       {/* YouTube Studio 3-Column Grid */}
       <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-3">
         {/* Column 1: Awaiting Manager Review */}
-        <section className="studio-surface rounded-xl border p-5">
+        <section className="studio-surface rounded-2xl border p-5">
           <div className="mb-4 flex items-baseline justify-between gap-2">
-            <h2 className="text-base font-medium text-[var(--text-primary)]">
+            <h2 className="text-base font-semibold text-[var(--text-primary)]">
               {isManager ? "Needs your approval" : "Awaiting manager review"}
             </h2>
-            <span className="font-mono-meta text-xs text-[var(--text-muted)]">
+            <span className="font-mono-meta rounded-full bg-[var(--accent-soft)] px-2.5 py-0.5 text-xs font-medium text-[var(--text-primary)]">
               {stats.gate1 + stats.gate2}
             </span>
           </div>
 
           {approvalQueue.length === 0 ? (
-            <div className="studio-raised rounded-lg border border-dashed p-6 text-center text-sm text-[var(--text-muted)]">
+            <div className="studio-raised rounded-xl border border-dashed p-6 text-center text-sm text-[var(--text-muted)]">
               No pending Gate 1 or Gate 2 reviews
             </div>
           ) : (
@@ -173,7 +269,7 @@ export function DashboardView({
                     key={item.id}
                     type="button"
                     onClick={() => onSelectItem(item)}
-                    className="flex w-full items-center gap-3 py-3 text-left transition-colors hover:bg-[var(--bg-hover)] -mx-2 px-2 rounded-lg"
+                    className="-mx-2 flex w-full items-center gap-3 rounded-xl px-2 py-3 text-left transition-colors hover:bg-[var(--bg-hover)]"
                   >
                     <ContentThumbnail
                       format={item.format}
@@ -210,7 +306,7 @@ export function DashboardView({
             <button
               type="button"
               onClick={() => onNavigate("board")}
-              className="studio-raised inline-flex h-9 items-center rounded-lg border px-4 text-xs font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-hover)]"
+              className="studio-raised inline-flex h-9 items-center rounded-full border px-4 text-xs font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-hover)]"
             >
               Open workflow board
             </button>
@@ -218,14 +314,14 @@ export function DashboardView({
         </section>
 
         {/* Column 2: Pipeline Analytics (YT Studio Channel Analytics style) */}
-        <section className="studio-surface rounded-xl border p-5">
-          <h2 className="text-base font-medium text-[var(--text-primary)]">
+        <section className="studio-surface rounded-2xl border p-5">
+          <h2 className="text-base font-semibold text-[var(--text-primary)]">
             Pipeline analytics
           </h2>
 
-          <div className="mt-4">
-            <div className="text-xs text-[var(--text-muted)]">Total items</div>
-            <div className="tabular-nums mt-1 text-3xl font-medium tracking-tight text-[var(--text-primary)]">
+          <div className="mt-4 rounded-xl bg-[var(--secondary-soft)] px-4 py-3">
+            <div className="text-xs font-medium text-[var(--text-secondary)]">Total items</div>
+            <div className="tabular-nums mt-1 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
               {stats.total}
             </div>
           </div>
@@ -270,7 +366,7 @@ export function DashboardView({
             <button
               type="button"
               onClick={() => onNavigate("insights")}
-              className="studio-raised inline-flex h-9 items-center rounded-lg border px-4 text-xs font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-hover)]"
+              className="studio-raised inline-flex h-9 items-center rounded-full border px-4 text-xs font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-hover)]"
             >
               Go to pipeline insights
             </button>
@@ -279,7 +375,7 @@ export function DashboardView({
 
         {/* Column 3: Creator Insider Carousel + What's New */}
         <div className="space-y-5">
-          <section className="studio-surface rounded-xl border p-5">
+          <section className="studio-surface rounded-2xl border p-5">
             <div className="mb-3 flex items-center justify-between gap-2">
               <h2 className="text-base font-medium text-[var(--text-primary)]">
                 Creator Insider
@@ -335,7 +431,7 @@ export function DashboardView({
               <button
                 type="button"
                 onClick={() => setActiveCreatorVideo(currentTip)}
-                className="studio-raised inline-flex h-8 items-center rounded-lg border px-3.5 text-xs font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-hover)]"
+                className="studio-btn-accent inline-flex h-8 items-center rounded-full px-4 text-xs font-medium"
               >
                 Watch video
               </button>
@@ -351,8 +447,8 @@ export function DashboardView({
             </div>
           </section>
 
-          <section className="studio-surface rounded-xl border p-5">
-            <h2 className="mb-3 text-base font-medium text-[var(--text-primary)]">
+          <section className="studio-surface rounded-2xl border p-5">
+            <h2 className="mb-3 text-base font-semibold text-[var(--text-primary)]">
               What&apos;s new in Studio
             </h2>
 
@@ -367,7 +463,7 @@ export function DashboardView({
                     key={item.id}
                     type="button"
                     onClick={() => onSelectItem(item)}
-                    className="flex w-full items-center justify-between gap-3 py-2.5 text-left transition-colors hover:text-[var(--accent)]"
+                    className="flex w-full items-center justify-between gap-3 py-2.5 text-left transition-colors hover:text-[var(--accent-text)]"
                   >
                     <div className="min-w-0">
                       <p className="truncate text-sm text-[var(--text-primary)]">
@@ -397,7 +493,7 @@ export function DashboardView({
       >
         {activeCreatorVideo ? (
           <div className="space-y-4">
-            <div className="overflow-hidden rounded-lg bg-black">
+            <div className="overflow-hidden rounded-xl bg-black">
               <iframe
                 src={`https://www.youtube.com/embed/${activeCreatorVideo.youtubeId}`}
                 title={activeCreatorVideo.title}
@@ -406,7 +502,7 @@ export function DashboardView({
                 className="aspect-video w-full border-0"
               />
             </div>
-            <div className="studio-raised flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3.5 text-xs">
+            <div className="studio-raised flex flex-wrap items-center justify-between gap-3 rounded-xl border p-3.5 text-xs">
               <p className="max-w-xl text-[var(--text-secondary)]">
                 {activeCreatorVideo.takeaway}
               </p>
@@ -414,7 +510,7 @@ export function DashboardView({
                 href={`https://www.youtube.com/watch?v=${activeCreatorVideo.youtubeId}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 font-medium text-[var(--accent)] hover:underline"
+                className="inline-flex items-center gap-1 font-medium text-[var(--accent-text)] hover:underline"
               >
                 Watch on YouTube
                 <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.5} />

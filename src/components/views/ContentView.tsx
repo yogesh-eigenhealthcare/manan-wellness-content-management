@@ -126,15 +126,15 @@ export function ContentView({
     <div className="space-y-4">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl font-medium tracking-tight text-[var(--text-primary)]">
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
           Channel content
         </h1>
         <button
           type="button"
           onClick={onNewIdea}
-          className="studio-btn-accent inline-flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-medium"
+          className="studio-btn-accent inline-flex h-9 items-center gap-2 rounded-full px-4 text-sm font-medium"
         >
-          <Plus className="h-4 w-4" strokeWidth={1.5} />
+          <Plus className="h-4 w-4" strokeWidth={1.75} />
           <span>New idea</span>
         </button>
       </div>
@@ -152,7 +152,7 @@ export function ContentView({
           onClick={() => setFormatTab("all")}
           className={`border-b-2 px-3 py-2.5 text-sm font-medium transition-colors ${
             formatTab === "all"
-              ? "border-[var(--text-primary)] text-[var(--text-primary)]"
+              ? "border-[var(--accent-text)] text-[var(--text-primary)]"
               : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"
           }`}
         >
@@ -169,7 +169,7 @@ export function ContentView({
               onClick={() => setFormatTab(opt.value)}
               className={`border-b-2 px-3 py-2.5 text-sm font-medium transition-colors ${
                 formatTab === opt.value
-                  ? "border-[var(--text-primary)] text-[var(--text-primary)]"
+                  ? "border-[var(--accent-text)] text-[var(--text-primary)]"
                   : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"
               }`}
             >
@@ -195,9 +195,9 @@ export function ContentView({
             key={key}
             type="button"
             onClick={() => setStageFilter(key)}
-            className={`h-8 rounded-lg px-3 text-xs font-medium transition-colors ${
+            className={`h-8 rounded-full px-3.5 text-xs font-medium transition-colors ${
               stageFilter === key
-                ? "studio-btn-primary"
+                ? "studio-btn-secondary"
                 : "studio-surface border text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
             }`}
           >
@@ -210,7 +210,7 @@ export function ContentView({
       <search>
         <form
           onSubmit={(e) => e.preventDefault()}
-          className="studio-surface grid grid-cols-1 gap-3 rounded-xl border p-3 sm:grid-cols-2 lg:grid-cols-5"
+          className="studio-surface grid grid-cols-1 gap-3 rounded-2xl border p-3 sm:grid-cols-2 lg:grid-cols-5"
         >
           <div className="relative lg:col-span-2">
             <Search
@@ -224,7 +224,7 @@ export function ContentView({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Filter"
-              className="studio-input h-9 w-full rounded-lg border pl-9 pr-3 text-sm"
+              className="studio-input h-9 w-full rounded-xl border pl-9 pr-3 text-sm"
             />
           </div>
 
@@ -232,7 +232,7 @@ export function ContentView({
             aria-label="Filter by topic"
             value={topicFilter}
             onChange={(e) => setTopicFilter(e.target.value)}
-            className="studio-input h-9 rounded-lg border px-3 text-sm"
+            className="studio-input h-9 rounded-xl border px-3 text-sm"
           >
             <option value="all">All topics</option>
             {TOPIC_OPTIONS.map((t) => (
@@ -246,7 +246,7 @@ export function ContentView({
             aria-label="Filter by assignee"
             value={assigneeFilter}
             onChange={(e) => setAssigneeFilter(e.target.value)}
-            className="studio-input h-9 rounded-lg border px-3 text-sm capitalize"
+            className="studio-input h-9 rounded-xl border px-3 text-sm capitalize"
           >
             <option value="all">All assignees</option>
             {TEAM_ASSIGNEE_OPTIONS.map((a) => (
@@ -260,7 +260,7 @@ export function ContentView({
             aria-label="Filter by effort"
             value={effortFilter}
             onChange={(e) => setEffortFilter(e.target.value)}
-            className="studio-input h-9 rounded-lg border px-3 text-sm"
+            className="studio-input h-9 rounded-xl border px-3 text-sm"
           >
             <option value="all">All effort levels</option>
             <option value="low">Low effort</option>
@@ -272,7 +272,7 @@ export function ContentView({
 
       {/* Table */}
       {loading ? (
-        <div className="studio-surface rounded-xl border p-12 text-center text-sm text-[var(--text-muted)]">
+        <div className="studio-surface rounded-2xl border p-12 text-center text-sm text-[var(--text-muted)]">
           Loading content table
         </div>
       ) : (
@@ -284,7 +284,7 @@ export function ContentView({
       )}
 
       {/* YouTube Studio Pagination Footer */}
-      <div className="studio-surface flex flex-wrap items-center justify-end gap-6 rounded-xl border px-4 py-2.5 text-xs text-[var(--text-muted)]">
+      <div className="studio-surface flex flex-wrap items-center justify-end gap-6 rounded-2xl border px-4 py-2.5 text-xs text-[var(--text-muted)]">
         <label className="inline-flex items-center gap-2">
           <span>Rows per page:</span>
           <select

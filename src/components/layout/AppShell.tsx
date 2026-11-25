@@ -102,30 +102,30 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const sidebarBody = (
     <div className="flex h-full flex-col justify-between px-3 py-4">
       <div className="space-y-4">
-        {/* Channel Identity Block (YouTube Studio style) */}
+        {/* Channel Identity Block (Friendly Sidebar Header style) */}
         <div className="flex flex-col items-center border-b border-[var(--border-subtle)] pb-4 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[var(--border-subtle)] bg-white p-1.5">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[var(--border-subtle)] bg-white p-1.5 shadow-xs">
             <img
               src="https://mananwellness.com/svg/manan-logo.svg"
               alt="Manan Wellness"
               className="h-6 w-auto"
             />
           </div>
-          <div className="mt-2.5 text-sm font-medium text-[var(--text-primary)]">
+          <div className="font-display mt-2.5 text-sm font-semibold text-[var(--text-primary)]">
             Manan Wellness
           </div>
-          <div className="mt-0.5 flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
+          <div className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-[var(--pastel-cream)] px-2.5 py-0.5 text-[11px] font-medium text-[var(--accent-text)]">
             <span
               className="inline-block h-1.5 w-1.5 rounded-full"
               style={{
-                backgroundColor: isManager ? "var(--accent)" : "var(--text-muted)",
+                backgroundColor: isManager ? "var(--positive)" : "var(--accent-text)",
               }}
             />
             <span>{isManager ? "Manager" : "Team member"}</span>
           </div>
         </div>
 
-        {/* Navigation Links (36px row height, 4px grid) */}
+        {/* Navigation Links (Image 1 warm cream active pill) */}
         <nav aria-label="Primary studio navigation" className="space-y-1">
           {navItems.map((item) => {
             const active = item.match(pathname || "/");
@@ -135,16 +135,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex h-9 w-full items-center justify-between rounded-lg px-3 text-sm transition-colors duration-150 ${
+                className={`flex h-10 w-full items-center justify-between rounded-xl px-3 text-sm transition-colors duration-150 ${
                   active
-                    ? "studio-raised border font-medium text-[var(--text-primary)]"
-                    : "border border-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
+                    ? "bg-[var(--pastel-cream)] font-medium text-[var(--accent-text)]"
+                    : "text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
                 }`}
               >
                 <span className="flex items-center gap-3">
                   <span
                     className={
-                      active ? "text-[var(--text-primary)]" : "text-[var(--text-muted)]"
+                      active ? "text-[var(--accent-text)]" : "text-[var(--text-muted)]"
                     }
                   >
                     {item.icon}
@@ -152,7 +152,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   <span>{item.label}</span>
                 </span>
                 {item.badge !== undefined ? (
-                  <span className="font-mono-meta text-xs text-[var(--text-muted)]">
+                  <span
+                    className={`font-mono-meta text-xs ${
+                      active ? "text-[var(--accent-text)]" : "text-[var(--text-muted)]"
+                    }`}
+                  >
                     {item.badge}
                   </span>
                 ) : null}
@@ -168,15 +172,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           href="/settings"
           aria-current={isSettingsActive ? "page" : undefined}
           onClick={() => setMobileMenuOpen(false)}
-          className={`flex h-9 w-full items-center gap-3 rounded-lg px-3 text-sm transition-colors duration-150 ${
+          className={`flex h-10 w-full items-center gap-3 rounded-xl px-3 text-sm transition-colors duration-150 ${
             isSettingsActive
-              ? "studio-raised border font-medium text-[var(--text-primary)]"
-              : "border border-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
+              ? "bg-[var(--pastel-cream)] font-medium text-[var(--accent-text)]"
+              : "text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
           }`}
         >
           <Settings
             className={`h-4 w-4 shrink-0 ${
-              isSettingsActive ? "text-[var(--text-primary)]" : "text-[var(--text-muted)]"
+              isSettingsActive ? "text-[var(--accent-text)]" : "text-[var(--text-muted)]"
             }`}
             strokeWidth={1.5}
           />
@@ -219,14 +223,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </button>
 
           <Link href="/dashboard" className="flex items-center gap-2.5">
-            <span className="flex h-7 items-center rounded-md bg-white px-2">
+            <span className="flex h-7 items-center rounded-full border border-[var(--border-subtle)] bg-white px-2.5">
               <img
                 src="https://mananwellness.com/svg/manan-logo.svg"
                 alt="Manan Wellness"
                 className="h-4 w-auto"
               />
             </span>
-            <span className="text-base font-medium tracking-tight text-[var(--text-primary)]">
+            <span className="font-display text-base font-semibold tracking-tight text-[var(--text-primary)]">
               Studio
             </span>
           </Link>
@@ -236,7 +240,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <search className="hidden max-w-md flex-1 sm:block">
           <form onSubmit={handleGlobalSearch} className="relative">
             <Search
-              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]"
+              className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]"
               strokeWidth={1.5}
             />
             <input
@@ -246,7 +250,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               value={globalSearch}
               onChange={(e) => setGlobalSearch(e.target.value)}
               placeholder="Search across your studio"
-              className="studio-raised h-9 w-full rounded-lg border pl-9 pr-3 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
+              className="studio-surface h-9 w-full rounded-full border pl-10 pr-4 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
             />
           </form>
         </search>
@@ -256,9 +260,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <button
             type="button"
             onClick={() => setSubmitOpen(true)}
-            className="studio-btn-primary inline-flex h-9 items-center gap-2 rounded-lg px-3.5 text-sm font-medium"
+            className="studio-btn-accent inline-flex h-9 items-center gap-2 rounded-full px-4 text-sm font-medium"
           >
-            <Plus className="h-4 w-4" strokeWidth={1.5} />
+            <Plus className="h-4 w-4" strokeWidth={1.75} />
             <span>Create</span>
           </button>
         </div>

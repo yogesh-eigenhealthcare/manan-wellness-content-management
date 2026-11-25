@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
+import { CheckCircle2, Clock, Film, Sparkles } from "lucide-react";
 import { isGate1Pending, isGate2Pending } from "@/lib/workflow";
 import { FORMAT_OPTIONS, type ContentItem } from "@/types/content";
 
@@ -110,65 +111,93 @@ export function InsightsView({ items, onGoToContent }: InsightsViewProps) {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl font-medium tracking-tight text-[var(--text-primary)]">
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
           Pipeline insights
         </h1>
         <button
           type="button"
           onClick={onGoToContent}
-          className="studio-raised inline-flex h-9 items-center rounded-lg border px-4 text-sm font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-hover)]"
+          className="studio-btn-secondary inline-flex h-9 items-center rounded-full px-4 text-sm font-medium"
         >
           Inspect content table
         </button>
       </div>
 
-      {/* 4 Compact Stat Cards (Numbers only, equal height, per unslop) */}
+      {/* 4 Compact Stat Cards (Friendly Pastel Surfaces) */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="studio-surface rounded-xl border p-5">
-          <div className="text-xs text-[var(--text-muted)]">Gate 1 pass rate</div>
-          <div className="tabular-nums mt-2 text-3xl font-medium tracking-tight text-[var(--text-primary)]">
+        <div className="rounded-2xl bg-[var(--pastel-mint)] p-5">
+          <div className="flex items-center justify-between">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[var(--icon-indigo)] shadow-xs dark:bg-[var(--bg-surface)]">
+              <Sparkles className="h-5 w-5" strokeWidth={1.75} />
+            </span>
+            <span className="font-mono-meta rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[#16a34a] dark:bg-[var(--bg-surface)]">
+              Gate 1
+            </span>
+          </div>
+          <div className="tabular-nums mt-4 text-3xl font-bold tracking-tight text-[var(--text-primary)]">
             {analytics.gate1ApprovalRate}%
           </div>
           <div className="mt-1 text-xs text-[var(--text-secondary)]">
-            {analytics.pastGate1} approved of reviewed
+            Gate 1 pass rate · {analytics.pastGate1} approved
           </div>
         </div>
 
-        <div className="studio-surface rounded-xl border p-5">
-          <div className="text-xs text-[var(--text-muted)]">Publishing queue</div>
-          <div className="tabular-nums mt-2 text-3xl font-medium tracking-tight text-[var(--text-primary)]">
+        <div className="rounded-2xl bg-[var(--pastel-sky)] p-5">
+          <div className="flex items-center justify-between">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[var(--icon-indigo)] shadow-xs dark:bg-[var(--bg-surface)]">
+              <CheckCircle2 className="h-5 w-5" strokeWidth={1.75} />
+            </span>
+            <span className="font-mono-meta rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[#16a34a] dark:bg-[var(--bg-surface)]">
+              {analytics.posted} live
+            </span>
+          </div>
+          <div className="tabular-nums mt-4 text-3xl font-bold tracking-tight text-[var(--text-primary)]">
             {analytics.readyToPost + analytics.posted}
           </div>
           <div className="mt-1 text-xs text-[var(--text-secondary)]">
-            {analytics.readyToPost} ready · {analytics.posted} posted
+            Publishing queue · {analytics.readyToPost} ready
           </div>
         </div>
 
-        <div className="studio-surface rounded-xl border p-5">
-          <div className="text-xs text-[var(--text-muted)]">Pending approvals</div>
-          <div className="tabular-nums mt-2 text-3xl font-medium tracking-tight text-[var(--text-primary)]">
+        <div className="rounded-2xl bg-[var(--pastel-rose)] p-5">
+          <div className="flex items-center justify-between">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[var(--icon-indigo)] shadow-xs dark:bg-[var(--bg-surface)]">
+              <Clock className="h-5 w-5" strokeWidth={1.75} />
+            </span>
+            <span className="font-mono-meta rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[#dc2626] dark:bg-[var(--bg-surface)]">
+              {analytics.gate2Pending} Gate 2
+            </span>
+          </div>
+          <div className="tabular-nums mt-4 text-3xl font-bold tracking-tight text-[var(--text-primary)]">
             {analytics.gate1Pending + analytics.gate2Pending}
           </div>
           <div className="mt-1 text-xs text-[var(--text-secondary)]">
-            {analytics.gate1Pending} Gate 1 · {analytics.gate2Pending} Gate 2
+            Pending approvals · {analytics.gate1Pending} Gate 1
           </div>
         </div>
 
-        <div className="studio-surface rounded-xl border p-5">
-          <div className="text-xs text-[var(--text-muted)]">Drafts submitted</div>
-          <div className="tabular-nums mt-2 text-3xl font-medium tracking-tight text-[var(--text-primary)]">
+        <div className="rounded-2xl bg-[var(--pastel-lavender)] p-5">
+          <div className="flex items-center justify-between">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[var(--icon-indigo)] shadow-xs dark:bg-[var(--bg-surface)]">
+              <Film className="h-5 w-5" strokeWidth={1.75} />
+            </span>
+            <span className="font-mono-meta rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[var(--text-primary)] dark:bg-[var(--bg-surface)]">
+              {analytics.changesRequested} rework
+            </span>
+          </div>
+          <div className="tabular-nums mt-4 text-3xl font-bold tracking-tight text-[var(--text-primary)]">
             {analytics.draftsSubmitted}
           </div>
           <div className="mt-1 text-xs text-[var(--text-secondary)]">
-            {analytics.changesRequested} in rework
+            Drafts submitted across cuts
           </div>
         </div>
       </div>
 
       {/* Asymmetric Split: 2/3 Main Topic Chart + 1/3 Team Workload List */}
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-        <section className="studio-surface rounded-xl border p-5 lg:col-span-2">
-          <h2 className="text-base font-medium text-[var(--text-primary)]">
+        <section className="studio-surface rounded-2xl border p-5 lg:col-span-2">
+          <h2 className="text-base font-semibold text-[var(--text-primary)]">
             Mental health topic coverage
           </h2>
           <p className="mt-0.5 text-xs text-[var(--text-muted)]">
@@ -188,13 +217,13 @@ export function InsightsView({ items, onGoToContent }: InsightsViewProps) {
                       {t.count}
                     </span>
                   </div>
-                  <div className="studio-raised h-2.5 overflow-hidden rounded">
+                  <div className="studio-raised h-2.5 overflow-hidden rounded-full">
                     <div
-                      className="h-full rounded"
+                      className="h-full rounded-full"
                       style={{
                         width: `${pct}%`,
                         backgroundColor:
-                          idx === 0 ? "var(--accent)" : "var(--text-muted)",
+                          idx === 0 ? "var(--accent-border)" : "var(--secondary-border)",
                       }}
                     />
                   </div>
@@ -204,8 +233,8 @@ export function InsightsView({ items, onGoToContent }: InsightsViewProps) {
           </div>
         </section>
 
-        <section className="studio-surface rounded-xl border p-5">
-          <h2 className="text-base font-medium text-[var(--text-primary)]">
+        <section className="studio-surface rounded-2xl border p-5">
+          <h2 className="text-base font-semibold text-[var(--text-primary)]">
             Team workload
           </h2>
           <p className="mt-0.5 text-xs text-[var(--text-muted)]">
@@ -230,8 +259,8 @@ export function InsightsView({ items, onGoToContent }: InsightsViewProps) {
 
       {/* Format Mix + Next Actions */}
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-        <section className="studio-surface rounded-xl border p-5">
-          <h2 className="mb-4 text-base font-medium text-[var(--text-primary)]">
+        <section className="studio-surface rounded-2xl border p-5">
+          <h2 className="mb-4 text-base font-semibold text-[var(--text-primary)]">
             Format mix
           </h2>
           <div className="space-y-3">
@@ -248,12 +277,12 @@ export function InsightsView({ items, onGoToContent }: InsightsViewProps) {
                       {f.count} ({pct}%)
                     </span>
                   </div>
-                  <div className="studio-raised h-2 overflow-hidden rounded">
+                  <div className="studio-raised h-2.5 overflow-hidden rounded-full">
                     <div
-                      className="h-full rounded"
+                      className="h-full rounded-full"
                       style={{
                         width: `${pct}%`,
-                        backgroundColor: "var(--accent)",
+                        backgroundColor: "var(--accent-border)",
                       }}
                     />
                   </div>
@@ -263,8 +292,8 @@ export function InsightsView({ items, onGoToContent }: InsightsViewProps) {
           </div>
         </section>
 
-        <section className="studio-surface rounded-xl border p-5">
-          <h2 className="mb-4 text-base font-medium text-[var(--text-primary)]">
+        <section className="studio-surface rounded-2xl border p-5">
+          <h2 className="mb-4 text-base font-semibold text-[var(--text-primary)]">
             Recommended next actions
           </h2>
           <ul className="space-y-2.5 text-sm text-[var(--text-secondary)]">
@@ -274,7 +303,7 @@ export function InsightsView({ items, onGoToContent }: InsightsViewProps) {
               analytics.recommendations.map((rec) => (
                 <li
                   key={rec}
-                  className="studio-raised rounded-lg border px-3.5 py-2.5 text-xs leading-relaxed"
+                  className="studio-raised rounded-xl border px-3.5 py-2.5 text-xs leading-relaxed"
                 >
                   {rec}
                 </li>

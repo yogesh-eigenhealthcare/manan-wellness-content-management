@@ -120,7 +120,7 @@ export function PipelineBoard({
                           <button
                             type="button"
                             onClick={() => onSelectItem(item)}
-                            className="line-clamp-1 text-left text-sm font-medium text-[var(--text-primary)] hover:text-[var(--accent)]"
+                            className="line-clamp-1 text-left text-sm font-medium text-[var(--text-primary)] hover:text-[var(--accent-text)]"
                           >
                             <span className="font-mono-meta mr-1.5 text-xs text-[var(--text-muted)]">
                               #{item.serialNo}
@@ -143,7 +143,7 @@ export function PipelineBoard({
                     </td>
                     <td data-label="Status">
                       <span
-                        className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs font-medium ${meta.badgeClass}`}
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${meta.badgeClass}`}
                       >
                         <span
                           className={`inline-block h-1.5 w-1.5 rounded-full ${meta.dotClass}`}
@@ -171,7 +171,7 @@ export function PipelineBoard({
                             href={item.referenceUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-[var(--text-secondary)] hover:text-[var(--accent)]"
+                            className="inline-flex items-center gap-1 text-[var(--text-secondary)] hover:text-[var(--accent-text)]"
                           >
                             Ref <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.5} />
                           </a>
@@ -181,7 +181,7 @@ export function PipelineBoard({
                             href={item.latestDraftUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-[var(--accent)] hover:underline"
+                            className="inline-flex items-center gap-1 font-medium text-[var(--accent-text)] hover:underline"
                           >
                             Draft <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.5} />
                           </a>
@@ -227,23 +227,23 @@ export function PipelineBoard({
         return (
           <section
             key={col.title}
-            className="studio-raised flex w-72 shrink-0 flex-col rounded-xl border"
+            className="studio-raised flex w-72 shrink-0 flex-col rounded-2xl border"
           >
-            <header className="flex items-center justify-between border-b border-[var(--border-subtle)] px-3.5 py-2.5">
+            <header className="flex items-center justify-between border-b border-[var(--border-subtle)] px-4 py-3">
               <div className="flex items-center gap-2">
-                <span className={`inline-block h-1.5 w-1.5 rounded-full ${col.dotClass}`} />
-                <h2 className="text-xs font-medium text-[var(--text-primary)]">
+                <span className={`inline-block h-2 w-2 rounded-full ${col.dotClass}`} />
+                <h2 className="text-xs font-semibold text-[var(--text-primary)]">
                   {col.title}
                 </h2>
               </div>
-              <span className="font-mono-meta text-xs text-[var(--text-muted)]">
+              <span className="font-mono-meta rounded-full bg-[var(--bg-surface)] px-2 py-0.5 text-[11px] text-[var(--text-muted)]">
                 {colItems.length}
               </span>
             </header>
 
             <div className="flex flex-col gap-2.5 p-2.5">
               {visibleItems.length === 0 ? (
-                <div className="studio-surface rounded-lg border border-dashed p-4 text-center text-xs text-[var(--text-muted)]">
+                <div className="studio-surface rounded-xl border border-dashed p-4 text-center text-xs text-[var(--text-muted)]">
                   No items
                 </div>
               ) : (
@@ -254,7 +254,7 @@ export function PipelineBoard({
                       key={item.id}
                       type="button"
                       onClick={() => onSelectItem(item)}
-                      className="studio-surface group w-full space-y-2 rounded-lg border p-2.5 text-left transition-colors duration-150 hover:border-[var(--border-strong)] hover:bg-[var(--bg-hover)]"
+                      className="studio-surface group w-full space-y-2 rounded-xl border p-2.5 text-left transition-colors duration-150 hover:border-[var(--accent-border)] hover:bg-[var(--bg-hover)]"
                     >
                       <ContentThumbnail
                         format={item.format}
@@ -312,7 +312,7 @@ export function PipelineBoard({
                 <button
                   type="button"
                   onClick={() => handleShowMore(col.title)}
-                  className="studio-surface h-8 w-full rounded-lg border text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
+                  className="studio-btn-secondary h-8 w-full rounded-full text-xs font-medium"
                 >
                   Show more ({remaining})
                 </button>

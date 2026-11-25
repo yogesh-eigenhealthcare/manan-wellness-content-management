@@ -276,9 +276,9 @@ export function SubmitIdeaModal({
                   key={p}
                   type="button"
                   onClick={() => toggleAssignee(p)}
-                  className={`h-8 rounded-lg border px-2.5 text-xs capitalize transition-colors ${
+                  className={`h-8 rounded-full border px-3 text-xs capitalize transition-colors ${
                     assignedTo.includes(p)
-                      ? "border-[var(--accent)] bg-[var(--accent-soft)] font-medium text-[var(--text-primary)]"
+                      ? "border-[var(--accent-border)] bg-[var(--accent)] font-medium text-[var(--accent-ink)]"
                       : "studio-surface text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
                   }`}
                 >
@@ -383,14 +383,14 @@ export function SubmitIdeaModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="studio-raised h-9 rounded-lg border px-4 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
+                className="studio-raised h-9 rounded-full border px-4 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className="studio-btn-accent h-9 rounded-lg px-5 text-xs font-medium disabled:opacity-50"
+                className="studio-btn-accent h-9 rounded-full px-5 text-xs font-medium disabled:opacity-50"
               >
                 {submitting ? "Submitting" : "Submit for approval"}
               </button>

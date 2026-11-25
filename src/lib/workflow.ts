@@ -19,7 +19,7 @@ export const STATUS_META: Record<WorkflowStatus, StatusMeta> = {
     stage: "gate1",
     dotClass: "bg-amber-500",
     badgeClass:
-      "border-[var(--border-subtle)] bg-[var(--bg-raised)] text-[var(--text-secondary)]",
+      "border-[#F5D0A9]/60 bg-[#FEF3C7]/75 text-[#111827] dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-200",
   },
   idea_rejected: {
     value: "idea_rejected",
@@ -29,7 +29,7 @@ export const STATUS_META: Record<WorkflowStatus, StatusMeta> = {
     stage: "gate1",
     dotClass: "bg-rose-500",
     badgeClass:
-      "border-[var(--border-subtle)] bg-[var(--bg-raised)] text-[var(--text-muted)]",
+      "border-[#F2D9DC] bg-[#F2D9DC]/65 text-[#111827] dark:border-rose-500/30 dark:bg-rose-500/15 dark:text-rose-200",
   },
   approved_for_production: {
     value: "approved_for_production",
@@ -37,9 +37,9 @@ export const STATUS_META: Record<WorkflowStatus, StatusMeta> = {
     shortLabel: "To recreate",
     description: "Manager approved the idea. Ready for script and production.",
     stage: "production",
-    dotClass: "bg-sky-500",
+    dotClass: "bg-emerald-500",
     badgeClass:
-      "border-[var(--border-subtle)] bg-[var(--bg-raised)] text-[var(--text-secondary)]",
+      "border-[#BBE5B8] bg-[#D9F2D8]/85 text-[#111827] dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-200",
   },
   in_production: {
     value: "in_production",
@@ -47,9 +47,9 @@ export const STATUS_META: Record<WorkflowStatus, StatusMeta> = {
     shortLabel: "Creating",
     description: "Team is shooting, animating, or editing the recreated post.",
     stage: "production",
-    dotClass: "bg-indigo-500",
+    dotClass: "bg-sky-500",
     badgeClass:
-      "border-[var(--border-subtle)] bg-[var(--bg-raised)] text-[var(--text-secondary)]",
+      "border-[#CBE4F9] bg-[#E3F2FD]/85 text-[#111827] dark:border-sky-500/30 dark:bg-sky-500/15 dark:text-sky-200",
   },
   draft_review: {
     value: "draft_review",
@@ -57,9 +57,9 @@ export const STATUS_META: Record<WorkflowStatus, StatusMeta> = {
     shortLabel: "Gate 2 review",
     description: "Draft submitted. Waiting for Manager approval before posting.",
     stage: "gate2",
-    dotClass: "bg-amber-400",
+    dotClass: "bg-rose-400",
     badgeClass:
-      "border-[var(--border-subtle)] bg-[var(--bg-raised)] text-[var(--text-primary)]",
+      "border-[#EBC3C8] bg-[#F2D9DC]/85 text-[#111827] dark:border-rose-400/35 dark:bg-rose-400/20 dark:text-rose-100",
   },
   changes_requested: {
     value: "changes_requested",
@@ -69,7 +69,7 @@ export const STATUS_META: Record<WorkflowStatus, StatusMeta> = {
     stage: "gate2",
     dotClass: "bg-orange-500",
     badgeClass:
-      "border-[var(--border-subtle)] bg-[var(--bg-raised)] text-[var(--text-secondary)]",
+      "border-[#F7CFA8] bg-[#FFEDD5]/85 text-[#111827] dark:border-orange-500/30 dark:bg-orange-500/15 dark:text-orange-200",
   },
   approved_to_post: {
     value: "approved_to_post",
@@ -77,9 +77,9 @@ export const STATUS_META: Record<WorkflowStatus, StatusMeta> = {
     shortLabel: "Ready to post",
     description: "Manager approved the final cut. Ready to publish.",
     stage: "publishing",
-    dotClass: "bg-emerald-500",
+    dotClass: "bg-emerald-600",
     badgeClass:
-      "border-[var(--border-subtle)] bg-[var(--bg-raised)] text-[var(--text-primary)]",
+      "border-[#BBE5B8] bg-[#D9F2D8] text-[#111827] dark:border-emerald-500/35 dark:bg-emerald-500/20 dark:text-emerald-100",
   },
   posted: {
     value: "posted",
@@ -87,9 +87,9 @@ export const STATUS_META: Record<WorkflowStatus, StatusMeta> = {
     shortLabel: "Posted",
     description: "Published live on social media.",
     stage: "publishing",
-    dotClass: "bg-teal-500",
+    dotClass: "bg-emerald-600",
     badgeClass:
-      "border-[var(--border-subtle)] bg-[var(--bg-raised)] text-[var(--text-primary)]",
+      "border-[#BBE5B8] bg-[#D9F2D8]/90 text-[#111827] dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-200",
   },
 };
 

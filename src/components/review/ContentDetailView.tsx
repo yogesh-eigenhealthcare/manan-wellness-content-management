@@ -106,7 +106,7 @@ interface ContentDetailViewProps {
   };
 }
 
-type DetailTab = "reference" | "recreated";
+type DetailTab = "reference" | "recreated" | "changes";
 
 export function ContentDetailView({
   item,
@@ -120,13 +120,14 @@ export function ContentDetailView({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [activeTab, setActiveTab] = useState<DetailTab>(
-    item.status === "draft_review" ||
-      item.status === "changes_requested" ||
-      item.status === "approved_to_post" ||
-      item.status === "posted" ||
-      item.latestDraftVersion > 0
-      ? "recreated"
-      : "reference"
+    item.status === "changes_requested"
+      ? "changes"
+      : item.status === "draft_review" ||
+          item.status === "approved_to_post" ||
+          item.status === "posted" ||
+          item.latestDraftVersion > 0
+        ? "recreated"
+        : "reference"
   );
 
   const [selectedVersion, setSelectedVersion] = useState<number | null>(
@@ -193,6 +194,18 @@ export function ContentDetailView({
   const statusMeta = STATUS_META[item.status];
   const activeDraft =
     drafts.find((d) => d.version === selectedVersion) ?? drafts[0] ?? null;
+
+  const revisionComments = comments.filter(
+    (c) =>
+      c.actionType === "gate2_request_changes" ||
+      c.actionType === "gate1_reject" ||
+      c.actionType === "comment"
+  );
+  const changesBadgeCount =
+    revisionComments.length +
+    (item.status === "changes_requested" && item.gate2Feedback && revisionComments.length === 0
+      ? 1
+      : 0);
 
   const hasVideoLink = Boolean(draftUrl.trim());
   const hasUploadedFile = Boolean(preparedFile);
@@ -370,7 +383,7 @@ export function ContentDetailView({
   return (
     <div className="space-y-5">
       {/* Studio Project Header */}
-      <div className="studio-surface rounded-xl border p-5">
+      <div className="studio-surface rounded-2xl border p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-2">
             <button
@@ -382,8 +395,8 @@ export function ContentDetailView({
               <span>Back to {backLabel}</span>
             </button>
 
-            <h1 className="text-xl font-medium tracking-tight text-[var(--text-primary)]">
-              <span className="font-mono-meta mr-2 text-base text-[var(--text-muted)]">
+            <h1 className="font-display text-xl font-semibold tracking-tight text-[var(--text-primary)]">
+              <span className="font-mono-meta mr-2 text-base font-normal text-[var(--text-muted)]">
                 #{item.serialNo}
               </span>
               {item.title}
@@ -391,22 +404,22 @@ export function ContentDetailView({
 
             <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--text-secondary)]">
               <span
-                className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 font-medium ${statusMeta.badgeClass}`}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-medium ${statusMeta.badgeClass}`}
               >
                 <span className={`inline-block h-1.5 w-1.5 rounded-full ${statusMeta.dotClass}`} />
                 {statusMeta.label}
               </span>
-              <span className="studio-raised rounded-md border px-2 py-0.5">
+              <span className="studio-raised rounded-full border px-2.5 py-0.5">
                 {formatLabel(item.format)}
               </span>
-              <span className="studio-raised rounded-md border px-2 py-0.5">
+              <span className="studio-raised rounded-full border px-2.5 py-0.5">
                 {item.topicType}
               </span>
-              <span className="studio-raised rounded-md border px-2 py-0.5 capitalize">
+              <span className="studio-raised rounded-full border px-2.5 py-0.5 capitalize">
                 {item.effortLevel} effort
               </span>
               {item.latestDraftVersion > 0 ? (
-                <span className="font-mono-meta studio-raised rounded-md border px-2 py-0.5 text-[var(--text-primary)]">
+                <span className="font-mono-meta studio-raised rounded-full border px-2.5 py-0.5 text-[var(--text-primary)]">
                   v{item.latestDraftVersion}
                 </span>
               ) : null}
@@ -417,9 +430,9 @@ export function ContentDetailView({
             <button
               type="button"
               onClick={handleCopyCaptionAndTags}
-              className="studio-raised inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-xs font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-hover)]"
+              className="studio-btn-secondary inline-flex h-9 items-center gap-2 rounded-full px-3.5 text-xs font-medium"
             >
-              <Copy className="h-4 w-4 text-[var(--text-muted)]" strokeWidth={1.5} />
+              <Copy className="h-4 w-4" strokeWidth={1.5} />
               <span>Copy caption</span>
             </button>
             {isManager ? (
@@ -434,7 +447,7 @@ export function ContentDetailView({
                     });
                   }
                 }}
-                className="studio-raised inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-medium text-[var(--danger)] transition-colors hover:bg-[var(--bg-hover)]"
+                className="studio-raised inline-flex h-9 items-center gap-1.5 rounded-full border px-3.5 text-xs font-medium text-[var(--danger)] transition-colors hover:bg-[var(--bg-hover)]"
               >
                 <Trash2 className="h-4 w-4" strokeWidth={1.5} />
                 <span>Delete</span>
@@ -456,7 +469,7 @@ export function ContentDetailView({
             onClick={() => setActiveTab("reference")}
             className={`inline-flex items-center gap-2 border-b-2 px-1 py-2.5 text-sm font-medium transition-colors ${
               activeTab === "reference"
-                ? "border-[var(--text-primary)] text-[var(--text-primary)]"
+                ? "border-[var(--accent-text)] text-[var(--text-primary)]"
                 : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"
             }`}
           >
@@ -471,15 +484,39 @@ export function ContentDetailView({
             onClick={() => setActiveTab("recreated")}
             className={`inline-flex items-center gap-2 border-b-2 px-1 py-2.5 text-sm font-medium transition-colors ${
               activeTab === "recreated"
-                ? "border-[var(--text-primary)] text-[var(--text-primary)]"
+                ? "border-[var(--accent-text)] text-[var(--text-primary)]"
                 : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"
             }`}
           >
             <Film className="h-4 w-4" strokeWidth={1.5} />
             <span>Recreated post</span>
             {item.latestDraftVersion > 0 ? (
-              <span className="font-mono-meta studio-raised rounded px-1.5 py-0.5 text-xs text-[var(--text-secondary)]">
+              <span className="font-mono-meta studio-raised rounded-full px-2 py-0.5 text-xs text-[var(--text-secondary)]">
                 v{item.latestDraftVersion}
+              </span>
+            ) : null}
+          </button>
+
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "changes"}
+            onClick={() => setActiveTab("changes")}
+            className={`inline-flex items-center gap-2 border-b-2 px-1 py-2.5 text-sm font-medium transition-colors ${
+              activeTab === "changes"
+                ? "border-[var(--accent-text)] text-[var(--text-primary)]"
+                : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            }`}
+          >
+            <RotateCcw className="h-4 w-4" strokeWidth={1.5} />
+            <span>Changes requested</span>
+            {item.status === "changes_requested" ? (
+              <span className="rounded-full bg-[var(--pastel-rose)] px-2 py-0.5 text-[11px] font-medium text-[#dc2626]">
+                Rework
+              </span>
+            ) : changesBadgeCount > 0 ? (
+              <span className="font-mono-meta studio-raised rounded-full px-2 py-0.5 text-xs text-[var(--text-secondary)]">
+                {changesBadgeCount}
               </span>
             ) : null}
           </button>
@@ -546,16 +583,16 @@ export function ContentDetailView({
                         type="button"
                         disabled={busy}
                         onClick={() => handleGate1("approved_for_production")}
-                        className="studio-btn-accent inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-medium disabled:opacity-50"
+                        className="studio-btn-secondary inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full px-4 text-xs font-medium disabled:opacity-50"
                       >
-                        <Check className="h-4 w-4" strokeWidth={1.5} />
+                        <Check className="h-4 w-4" strokeWidth={1.75} />
                         <span>Approve to recreate</span>
                       </button>
                       <button
                         type="button"
                         disabled={busy}
                         onClick={() => handleGate1("idea_rejected")}
-                        className="studio-raised inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border px-3 text-xs font-medium text-[var(--danger)] hover:bg-[var(--bg-hover)] disabled:opacity-50"
+                        className="studio-raised inline-flex h-9 items-center justify-center gap-1.5 rounded-full border px-4 text-xs font-medium text-[var(--danger)] hover:bg-[var(--bg-hover)] disabled:opacity-50"
                       >
                         <X className="h-4 w-4" strokeWidth={1.5} />
                         <span>Park idea</span>
@@ -605,16 +642,16 @@ export function ContentDetailView({
 
             <form
               onSubmit={handleSaveDetails}
-              className="studio-surface space-y-4 rounded-xl border p-5"
+              className="studio-surface space-y-4 rounded-2xl border p-5"
             >
               <div className="flex items-center justify-between">
-                <h2 className="text-sm font-medium text-[var(--text-primary)]">
+                <h2 className="text-sm font-semibold text-[var(--text-primary)]">
                   Reference details and brief
                 </h2>
                 <button
                   type="submit"
                   disabled={busy}
-                  className="studio-btn-primary h-8 rounded-lg px-3.5 text-xs font-medium disabled:opacity-50"
+                  className="studio-btn-accent h-8 rounded-full px-4 text-xs font-medium disabled:opacity-50"
                 >
                   Save changes
                 </button>
@@ -730,9 +767,9 @@ export function ContentDetailView({
                         key={person}
                         type="button"
                         onClick={() => toggleAssignee(person)}
-                        className={`h-8 rounded-lg border px-3 text-xs capitalize transition-colors ${
+                        className={`h-8 rounded-full border px-3 text-xs capitalize transition-colors ${
                           active
-                            ? "border-[var(--accent)] bg-[var(--accent-soft)] font-medium text-[var(--text-primary)]"
+                            ? "border-[var(--accent-border)] bg-[var(--accent)] font-medium text-[var(--accent-ink)]"
                             : "studio-surface text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
                         }`}
                       >
@@ -841,7 +878,7 @@ export function ContentDetailView({
             </div>
           </div>
         </div>
-      ) : (
+      ) : activeTab === "recreated" ? (
         /* TAB 2: RECREATED POST */
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
           <div className="space-y-5 lg:col-span-6">
@@ -885,11 +922,11 @@ export function ContentDetailView({
             {/* Gate 2: Manager Final Video Review */}
             {item.status === "draft_review" ? (
               <section
-                className="studio-surface rounded-xl border border-l-4 p-5"
-                style={{ borderLeftColor: "var(--accent)" }}
+                className="studio-surface rounded-2xl border border-l-4 p-5"
+                style={{ borderLeftColor: "var(--accent-border)" }}
               >
                 <div className="mb-2 flex items-center gap-2 text-sm font-medium text-[var(--text-primary)]">
-                  <span className="inline-block h-2 w-2 rounded-full bg-amber-400" />
+                  <span className="inline-block h-2 w-2 rounded-full bg-rose-400" />
                   <span>Gate 2 · Final review (v{item.latestDraftVersion})</span>
                 </div>
                 {isManager ? (
@@ -907,7 +944,7 @@ export function ContentDetailView({
                         value={gateFeedback}
                         onChange={(e) => setGateFeedback(e.target.value)}
                         placeholder="e.g. 0:08 adjust subtitle timing"
-                        className="studio-input w-full rounded-lg border px-3 py-2 text-sm"
+                        className="studio-input w-full rounded-xl border px-3 py-2 text-sm"
                       />
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -915,16 +952,16 @@ export function ContentDetailView({
                         type="button"
                         disabled={busy}
                         onClick={() => handleGate2("approved_to_post")}
-                        className="studio-btn-accent inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-medium disabled:opacity-50"
+                        className="studio-btn-secondary inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full px-4 text-xs font-medium disabled:opacity-50"
                       >
-                        <Check className="h-4 w-4" strokeWidth={1.5} />
+                        <Check className="h-4 w-4" strokeWidth={1.75} />
                         <span>Approve to post</span>
                       </button>
                       <button
                         type="button"
                         disabled={busy}
                         onClick={() => handleGate2("changes_requested")}
-                        className="studio-raised inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border px-3 text-xs font-medium text-[var(--text-primary)] hover:bg-[var(--bg-hover)] disabled:opacity-50"
+                        className="studio-raised inline-flex h-9 items-center justify-center gap-1.5 rounded-full border px-4 text-xs font-medium text-[var(--text-primary)] hover:bg-[var(--bg-hover)] disabled:opacity-50"
                       >
                         <RotateCcw className="h-4 w-4" strokeWidth={1.5} />
                         <span>Request changes</span>
@@ -979,7 +1016,7 @@ export function ContentDetailView({
                   <button
                     type="submit"
                     disabled={busy}
-                    className="studio-btn-accent h-9 rounded-lg px-4 text-xs font-medium disabled:opacity-50"
+                    className="studio-btn-secondary h-9 rounded-full px-4 text-xs font-medium disabled:opacity-50"
                   >
                     Mark posted
                   </button>
@@ -989,7 +1026,7 @@ export function ContentDetailView({
 
             {item.status === "posted" && item.publishedUrl ? (
               <div
-                className="studio-surface flex items-center justify-between gap-3 rounded-xl border border-l-4 px-4 py-3 text-xs"
+                className="studio-surface flex items-center justify-between gap-3 rounded-2xl border border-l-4 px-4 py-3 text-xs"
                 style={{ borderLeftColor: "var(--positive)" }}
               >
                 <span className="font-medium text-[var(--text-primary)]">
@@ -999,7 +1036,7 @@ export function ContentDetailView({
                   href={item.publishedUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 font-medium text-[var(--accent)] hover:underline"
+                  className="inline-flex items-center gap-1 font-medium text-[var(--accent-text)] hover:underline"
                 >
                   <span>View live post</span>
                   <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.5} />
@@ -1013,7 +1050,7 @@ export function ContentDetailView({
             item.status === "changes_requested" ? (
               <form
                 onSubmit={handleSubmitDraft}
-                className="studio-surface space-y-4 rounded-xl border p-5"
+                className="studio-surface space-y-4 rounded-2xl border p-5"
               >
                 <div>
                   <h2 className="text-sm font-medium text-[var(--text-primary)]">
@@ -1162,7 +1199,7 @@ export function ContentDetailView({
                 <button
                   type="submit"
                   disabled={busy || fileBusy || (!hasVideoLink && !hasUploadedFile)}
-                  className="studio-btn-accent inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg px-4 text-xs font-medium disabled:opacity-50"
+                  className="studio-btn-accent inline-flex h-9 w-full items-center justify-center gap-2 rounded-full px-4 text-xs font-medium disabled:opacity-50"
                 >
                   <Send className="h-4 w-4" strokeWidth={1.5} />
                   <span>Submit for final review (Gate 2)</span>
@@ -1173,16 +1210,16 @@ export function ContentDetailView({
             {/* Script & Hashtags */}
             <form
               onSubmit={handleSaveDetails}
-              className="studio-surface space-y-3 rounded-xl border p-5"
+              className="studio-surface space-y-3 rounded-2xl border p-5"
             >
               <div className="flex items-center justify-between">
-                <h2 className="text-sm font-medium text-[var(--text-primary)]">
+                <h2 className="text-sm font-semibold text-[var(--text-primary)]">
                   Recreated script and hashtags
                 </h2>
                 <button
                   type="submit"
                   disabled={busy}
-                  className="studio-btn-primary h-8 rounded-lg px-3.5 text-xs font-medium disabled:opacity-50"
+                  className="studio-btn-accent h-8 rounded-full px-4 text-xs font-medium disabled:opacity-50"
                 >
                   Save script
                 </button>
@@ -1201,7 +1238,7 @@ export function ContentDetailView({
                       href={scriptUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-xs font-medium text-[var(--accent)] hover:underline"
+                      className="inline-flex items-center gap-1 text-xs font-medium text-[var(--accent-text)] hover:underline"
                     >
                       <span>Open doc</span>
                       <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.5} />
@@ -1269,8 +1306,8 @@ export function ContentDetailView({
             </form>
 
             {/* Feedback & Comments */}
-            <section className="studio-surface rounded-xl border p-5">
-              <div className="mb-3 flex items-center gap-2 text-sm font-medium text-[var(--text-primary)]">
+            <section className="studio-surface rounded-2xl border p-5">
+              <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
                 <MessageSquare className="h-4 w-4 text-[var(--text-muted)]" strokeWidth={1.5} />
                 <span>Feedback and approval timeline</span>
               </div>
@@ -1284,12 +1321,12 @@ export function ContentDetailView({
                   comments.map((c) => (
                     <div
                       key={c.id}
-                      className="studio-raised rounded-lg border px-3 py-2.5 text-xs"
+                      className="studio-raised rounded-xl border px-3 py-2.5 text-xs"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex items-center gap-2 font-medium text-[var(--text-primary)]">
                           <span>{c.authorName}</span>
-                          <span className="studio-surface rounded border px-1.5 py-0.5 text-[10px] capitalize text-[var(--text-muted)]">
+                          <span className="studio-surface rounded-full border px-2 py-0.5 text-[10px] capitalize text-[var(--text-muted)]">
                             {c.authorRole}
                           </span>
                           {c.draftVersion ? (
@@ -1298,7 +1335,7 @@ export function ContentDetailView({
                             </span>
                           ) : null}
                           {c.timestampLabel ? (
-                            <span className="font-mono-meta text-[11px] text-[var(--accent)]">
+                            <span className="font-mono-meta text-[11px] text-[var(--accent-text)]">
                               @{c.timestampLabel}
                             </span>
                           ) : null}
@@ -1347,7 +1384,7 @@ export function ContentDetailView({
           <div className="space-y-3 lg:col-span-6">
             <div className="space-y-3 lg:sticky lg:top-20">
               {drafts.length > 0 ? (
-                <div className="studio-surface flex flex-wrap items-center gap-2 rounded-xl border px-3.5 py-2.5">
+                <div className="studio-surface flex flex-wrap items-center gap-2 rounded-2xl border px-3.5 py-2.5">
                   <History className="h-4 w-4 text-[var(--text-muted)]" strokeWidth={1.5} />
                   <span className="text-xs font-medium text-[var(--text-secondary)]">
                     Versions
@@ -1357,9 +1394,9 @@ export function ContentDetailView({
                       key={d.id}
                       type="button"
                       onClick={() => setSelectedVersion(d.version)}
-                      className={`font-mono-meta h-7 rounded-md px-2.5 text-xs font-medium transition-colors ${
+                      className={`font-mono-meta h-7 rounded-full px-3 text-xs font-medium transition-colors ${
                         (activeDraft?.version ?? item.latestDraftVersion) === d.version
-                          ? "studio-btn-primary"
+                          ? "studio-btn-accent"
                           : "studio-raised border text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
                       }`}
                     >
@@ -1373,6 +1410,228 @@ export function ContentDetailView({
                 label={
                   activeDraft
                     ? `Recreated draft (v${activeDraft.version})`
+                    : "Recreated post preview"
+                }
+                draft={activeDraft}
+                fallbackVideoUrl={item.latestDraftUrl}
+              />
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* TAB 3: CHANGES REQUESTED */
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+          <div className="space-y-5 lg:col-span-6">
+            {/* Active Manager Change Request Card */}
+            {item.status === "changes_requested" ? (
+              <section className="rounded-2xl bg-[var(--pastel-rose)] p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
+                      <span className="inline-block h-2 w-2 rounded-full bg-[#dc2626]" />
+                      <span>Changes requested by Manager (v{item.latestDraftVersion || 1})</span>
+                    </div>
+                    <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-[var(--text-primary)]">
+                      {item.gate2Feedback || "Manager requested revisions before posting."}
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("recreated")}
+                    className="studio-btn-secondary inline-flex h-9 items-center gap-2 rounded-full px-4 text-xs font-medium"
+                  >
+                    <Upload className="h-3.5 w-3.5" strokeWidth={1.75} />
+                    <span>Upload revised draft in Recreated post</span>
+                  </button>
+                </div>
+              </section>
+            ) : item.status === "idea_rejected" ? (
+              <section className="rounded-2xl bg-[var(--pastel-rose)] p-5">
+                <div className="text-sm font-semibold text-[var(--text-primary)]">
+                  Idea parked at Gate 1
+                </div>
+                <p className="mt-1.5 whitespace-pre-wrap text-xs text-[var(--text-secondary)]">
+                  {item.gate1Feedback || "Manager parked this idea at Gate 1."}
+                </p>
+              </section>
+            ) : (
+              <section className="studio-surface rounded-2xl border p-5">
+                <div className="text-sm font-semibold text-[var(--text-primary)]">
+                  No open change requests
+                </div>
+                <p className="mt-1 text-xs text-[var(--text-secondary)]">
+                  {item.gate2Feedback
+                    ? `Latest review note: ${item.gate2Feedback}`
+                    : "When the Manager requests changes on a submitted cut, feedback and timestamped notes appear here."}
+                </p>
+              </section>
+            )}
+
+            {/* Manager Action Box inside Changes Requested tab when reviewing a draft */}
+            {isManager && item.status === "draft_review" ? (
+              <section className="studio-surface space-y-3 rounded-2xl border p-5">
+                <h2 className="text-sm font-semibold text-[var(--text-primary)]">
+                  Request changes on draft v{item.latestDraftVersion || 1}
+                </h2>
+                <div>
+                  <label
+                    htmlFor="changes-tab-feedback"
+                    className="mb-1 block text-xs text-[var(--text-muted)]"
+                  >
+                    Revision instructions for team
+                  </label>
+                  <textarea
+                    id="changes-tab-feedback"
+                    rows={3}
+                    value={gateFeedback}
+                    onChange={(e) => setGateFeedback(e.target.value)}
+                    placeholder="e.g. 0:08 tighten caption contrast and swap background audio"
+                    className="studio-input w-full rounded-xl border px-3 py-2 text-sm"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => handleGate2("changes_requested")}
+                    className="studio-btn-accent inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full px-4 text-xs font-medium disabled:opacity-50"
+                  >
+                    <RotateCcw className="h-4 w-4" strokeWidth={1.5} />
+                    <span>Send change request</span>
+                  </button>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => handleGate2("approved_to_post")}
+                    className="studio-btn-secondary inline-flex h-9 items-center justify-center gap-1.5 rounded-full px-4 text-xs font-medium disabled:opacity-50"
+                  >
+                    <Check className="h-4 w-4" strokeWidth={1.75} />
+                    <span>Approve to post</span>
+                  </button>
+                </div>
+              </section>
+            ) : null}
+
+            {/* Revision Notes & Timestamped Feedback Thread */}
+            <section className="studio-surface rounded-2xl border p-5">
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
+                  <MessageSquare className="h-4 w-4 text-[var(--text-muted)]" strokeWidth={1.5} />
+                  <span>Change request history &amp; notes</span>
+                </div>
+                <span className="font-mono-meta text-xs text-[var(--text-muted)]">
+                  {revisionComments.length}
+                </span>
+              </div>
+
+              <div className="mb-3 max-h-72 space-y-2 overflow-y-auto pr-1">
+                {revisionComments.length === 0 ? (
+                  <p className="text-xs text-[var(--text-muted)]">
+                    No revision comments or change requests logged yet.
+                  </p>
+                ) : (
+                  revisionComments.map((c) => (
+                    <div
+                      key={c.id}
+                      className={`rounded-xl border px-3.5 py-2.5 text-xs ${
+                        c.actionType === "gate2_request_changes" || c.actionType === "gate1_reject"
+                          ? "border-[var(--accent-border)] bg-[var(--pastel-cream)]"
+                          : "studio-raised"
+                      }`}
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 font-medium text-[var(--text-primary)]">
+                          <span>{c.authorName}</span>
+                          <span className="studio-surface rounded-full border px-2 py-0.5 text-[10px] capitalize text-[var(--text-muted)]">
+                            {c.authorRole}
+                          </span>
+                          {c.draftVersion ? (
+                            <span className="font-mono-meta text-[11px] text-[var(--text-secondary)]">
+                              v{c.draftVersion}
+                            </span>
+                          ) : null}
+                          {c.timestampLabel ? (
+                            <span className="font-mono-meta text-[11px] font-semibold text-[var(--accent-text)]">
+                              @{c.timestampLabel}
+                            </span>
+                          ) : null}
+                        </div>
+                        <span className="text-[11px] capitalize text-[var(--text-muted)]">
+                          {c.actionType === "gate2_request_changes"
+                            ? "Changes requested"
+                            : c.actionType === "gate1_reject"
+                              ? "Idea parked"
+                              : "Comment"}
+                        </span>
+                      </div>
+                      <p className="mt-1 whitespace-pre-wrap text-[var(--text-secondary)]">
+                        {c.body}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <form onSubmit={handleAddComment} className="flex flex-wrap gap-2">
+                <input
+                  type="text"
+                  aria-label="Video timestamp"
+                  value={timestampLabel}
+                  onChange={(e) => setTimestampLabel(e.target.value)}
+                  placeholder="0:12"
+                  className="studio-input font-mono-meta h-9 w-20 rounded-xl border px-2.5 text-xs"
+                />
+                <input
+                  type="text"
+                  aria-label="Revision note"
+                  required
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  placeholder="Add timestamped change note"
+                  className="studio-input h-9 min-w-0 flex-1 rounded-xl border px-3 text-xs"
+                />
+                <button
+                  type="submit"
+                  disabled={busy}
+                  className="studio-btn-accent h-9 rounded-full px-4 text-xs font-medium disabled:opacity-50"
+                >
+                  Post note
+                </button>
+              </form>
+            </section>
+          </div>
+
+          <div className="space-y-3 lg:col-span-6">
+            <div className="space-y-3 lg:sticky lg:top-20">
+              {drafts.length > 0 ? (
+                <div className="studio-surface flex flex-wrap items-center gap-2 rounded-2xl border px-3.5 py-2.5">
+                  <History className="h-4 w-4 text-[var(--text-muted)]" strokeWidth={1.5} />
+                  <span className="text-xs font-medium text-[var(--text-secondary)]">
+                    Versions
+                  </span>
+                  {drafts.map((d) => (
+                    <button
+                      key={d.id}
+                      type="button"
+                      onClick={() => setSelectedVersion(d.version)}
+                      className={`font-mono-meta h-7 rounded-full px-3 text-xs font-medium transition-colors ${
+                        (activeDraft?.version ?? item.latestDraftVersion) === d.version
+                          ? "studio-btn-accent"
+                          : "studio-raised border text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
+                      }`}
+                    >
+                      v{d.version}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+
+              <DraftPreviewCard
+                label={
+                  activeDraft
+                    ? `Draft under review (v${activeDraft.version})`
                     : "Recreated post preview"
                 }
                 draft={activeDraft}

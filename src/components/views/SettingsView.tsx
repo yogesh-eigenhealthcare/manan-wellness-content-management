@@ -79,13 +79,13 @@ export function SettingsView({ hashtagPresets }: SettingsViewProps) {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <h1 className="text-2xl font-medium tracking-tight text-[var(--text-primary)]">
+      <h1 className="font-display text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
         Settings
       </h1>
 
       {/* Appearance */}
-      <section className="studio-surface rounded-xl border p-5">
-        <h2 className="text-base font-medium text-[var(--text-primary)]">
+      <section className="studio-surface rounded-2xl border p-5">
+        <h2 className="text-base font-semibold text-[var(--text-primary)]">
           Appearance
         </h2>
         <p className="mt-1 text-xs text-[var(--text-muted)]">
@@ -99,9 +99,9 @@ export function SettingsView({ hashtagPresets }: SettingsViewProps) {
             return (
               <label
                 key={opt.value}
-                className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3.5 transition-colors ${
+                className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3.5 transition-colors ${
                   active
-                    ? "border-[var(--accent)] bg-[var(--accent-soft)]"
+                    ? "border-[var(--accent-border)] bg-[var(--accent-soft)]"
                     : "studio-raised hover:bg-[var(--bg-hover)]"
                 }`}
               >
@@ -129,9 +129,9 @@ export function SettingsView({ hashtagPresets }: SettingsViewProps) {
       </section>
 
       {/* Team Roles & Manager Access */}
-      <section className="studio-surface space-y-4 rounded-xl border p-5">
+      <section className="studio-surface space-y-4 rounded-2xl border p-5">
         <div>
-          <h2 className="text-base font-medium text-[var(--text-primary)]">
+          <h2 className="text-base font-semibold text-[var(--text-primary)]">
             Team roles and permissions
           </h2>
           <p className="mt-1 text-xs text-[var(--text-muted)]">
@@ -140,7 +140,7 @@ export function SettingsView({ hashtagPresets }: SettingsViewProps) {
         </div>
 
         {!isManager ? (
-          <div className="studio-raised rounded-lg border px-4 py-3 text-xs text-[var(--text-secondary)]">
+          <div className="studio-raised rounded-xl border px-4 py-3 text-xs text-[var(--text-secondary)]">
             Signed in as a Team member. To pre-seed the initial Manager email, add it to{" "}
             <code className="font-mono-meta">scripts/managers.json</code> and run{" "}
             <code className="font-mono-meta">npm run seed:managers</code>.
@@ -148,7 +148,7 @@ export function SettingsView({ hashtagPresets }: SettingsViewProps) {
         ) : (
           <form
             onSubmit={handlePreassign}
-            className="studio-raised space-y-3 rounded-lg border p-4"
+            className="studio-raised space-y-3 rounded-xl border p-4"
           >
             <div className="flex items-center gap-2 text-xs font-medium text-[var(--text-primary)]">
               <UserPlus className="h-4 w-4 text-[var(--text-muted)]" strokeWidth={1.5} />
@@ -162,13 +162,13 @@ export function SettingsView({ hashtagPresets }: SettingsViewProps) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="manager@mananwellness.com"
-                className="studio-input h-9 sm:col-span-2 rounded-lg border px-3 text-sm"
+                className="studio-input h-9 sm:col-span-2 rounded-xl border px-3 text-sm"
               />
               <select
                 aria-label="Pre-assigned role"
                 value={role}
                 onChange={(e) => setRole(e.target.value as UserRole)}
-                className="studio-input h-9 rounded-lg border px-2.5 text-sm"
+                className="studio-input h-9 rounded-xl border px-2.5 text-sm"
               >
                 <option value="manager">Manager</option>
                 <option value="member">Member</option>
@@ -176,7 +176,7 @@ export function SettingsView({ hashtagPresets }: SettingsViewProps) {
               <button
                 type="submit"
                 disabled={busy}
-                className="studio-btn-accent h-9 rounded-lg px-3 text-xs font-medium disabled:opacity-50"
+                className="studio-btn-accent h-9 rounded-full px-3 text-xs font-medium disabled:opacity-50"
               >
                 Save email
               </button>
@@ -186,17 +186,17 @@ export function SettingsView({ hashtagPresets }: SettingsViewProps) {
               value={teamTag}
               onChange={(e) => setTeamTag(e.target.value)}
               placeholder="Team label"
-              className="studio-input h-9 w-full rounded-lg border px-3 text-xs"
+              className="studio-input h-9 w-full rounded-xl border px-3 text-xs"
             />
             {msg ? (
-              <p role="status" className="text-xs font-medium text-[var(--accent)]">
+              <p role="status" className="text-xs font-medium text-[var(--accent-text)]">
                 {msg}
               </p>
             ) : null}
           </form>
         )}
 
-        <div className="divide-y divide-[var(--border-subtle)] rounded-lg border border-[var(--border-subtle)]">
+        <div className="divide-y divide-[var(--border-subtle)] rounded-xl border border-[var(--border-subtle)]">
           {teamUsers.map((u) => (
             <div
               key={u.uid}
@@ -275,10 +275,10 @@ export function SettingsView({ hashtagPresets }: SettingsViewProps) {
       </section>
 
       {/* Hashtag Bank */}
-      <section className="studio-surface space-y-3 rounded-xl border p-5">
+      <section className="studio-surface space-y-3 rounded-2xl border p-5">
         <div className="flex items-center gap-2">
           <Hash className="h-4 w-4 text-[var(--text-muted)]" strokeWidth={1.5} />
-          <h2 className="text-base font-medium text-[var(--text-primary)]">
+          <h2 className="text-base font-semibold text-[var(--text-primary)]">
             Hashtag presets
           </h2>
           <span className="font-mono-meta text-xs text-[var(--text-muted)]">
@@ -287,7 +287,7 @@ export function SettingsView({ hashtagPresets }: SettingsViewProps) {
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {hashtagPresets.map((preset) => (
-            <div key={preset.id} className="studio-raised rounded-lg border p-3.5">
+            <div key={preset.id} className="studio-raised rounded-xl border p-3.5">
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-xs font-medium capitalize text-[var(--text-primary)]">
                   {preset.category}
@@ -295,7 +295,7 @@ export function SettingsView({ hashtagPresets }: SettingsViewProps) {
                 <button
                   type="button"
                   onClick={() => handleCopyTags(preset)}
-                  className="studio-surface inline-flex h-7 items-center gap-1 rounded-md border px-2 text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
+                  className="studio-surface inline-flex h-7 items-center gap-1 rounded-full border px-2.5 text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
                 >
                   {copiedId === preset.id ? (
                     <>
