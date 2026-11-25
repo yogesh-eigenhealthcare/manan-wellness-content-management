@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   BarChart3,
   Columns3,
@@ -9,55 +11,22 @@ import {
   LogOut,
   Menu,
   Plus,
-  Search as SearchIcon,
   Settings,
   ShieldCheck,
   X,
 } from "lucide-react";
-import { PipelineBoard } from "@/components/board/PipelineBoard";
+import { LoginScreen } from "@/components/auth/LoginScreen";
 import { SubmitIdeaModal } from "@/components/modals/SubmitIdeaModal";
-import { ContentDetailView } from "@/components/review/ContentDetailView";
-import { ContentView } from "@/components/views/ContentView";
-import { DashboardView } from "@/components/views/DashboardView";
-import { InsightsView } from "@/components/views/InsightsView";
-import { SettingsView } from "@/components/views/SettingsView";
 import { useAuth } from "@/contexts/AuthContext";
-import { useContentItems } from "@/hooks/useContentItems";
+import { useContent } from "@/contexts/ContentContext";
 import { isGate1Pending, isGate2Pending } from "@/lib/workflow";
-import {
-  FORMAT_OPTIONS,
-  TEAM_ASSIGNEE_OPTIONS,
-  TOPIC_OPTIONS,
-  type ContentFormat,
-  type ContentItem,
-} from "@/types/content";
 
-type NavPage = "dashboard" | "content" | "board" | "insights" | "settings";
+export function AppShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const { user, profile, loading: authLoading, isManager, signOut } = useAuth();
+  const content = useContent();
 
-const PAGE_LABELS: Record<NavPage, string> = {
-  dashboard: "Dashboard",
-  content: "Channel Content",
-  board: "Workflow Board",
-  insights: "Insights",
-  settings: "Settings",
-};
-
-export function AppShell() {
-  const { profile, isManager, signOut } = useAuth();
-  const content = useContentItems();
-
-  const [page, setPage] = useState<NavPage>("dashboard");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  // Board page filters
-  const [boardSearch, setBoardSearch] = useState("");
-  const [boardFormat, setBoardFormat] = useState<"all" | ContentFormat>("all");
-  const [boardTopic, setBoardTopic] = useState("all");
-  const [boardAssignee, setBoardAssignee] = useState("all");
-  const [boardEffort, setBoardEffort] = useState("all");
-  const [showParked, setShowParked] = useState(false);
-
-  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [submitOpen, setSubmitOpen] = useState(false);
 
   const pendingApprovalsCount = useMemo(
@@ -68,95 +37,66 @@ export function AppShell() {
     [content.items]
   );
 
-  const boardFilteredItems = useMemo(() => {
-    const q = boardSearch.trim().toLowerCase();
-    return content.items.filter((item) => {
-      if (boardFormat !== "all" && item.format !== boardFormat) return false;
-      if (boardTopic !== "all" && item.topicType !== boardTopic) return false;
-      if (boardEffort !== "all" && item.effortLevel !== boardEffort) return false;
-      if (
-        boardAssignee !== "all" &&
-        !item.assignedTo.some((a) => a.toLowerCase() === boardAssignee.toLowerCase())
-      ) {
-        return false;
-      }
-      if (q) {
-        const haystack = [
-          item.title,
-          item.adaptationIdea,
-          item.callToAction,
-          item.topicType,
-          item.assignedTo.join(" "),
-          String(item.serialNo),
-        ]
-          .join(" ")
-          .toLowerCase();
-        if (!haystack.includes(q)) return false;
-      }
-      return true;
-    });
-  }, [
-    content.items,
-    boardFormat,
-    boardTopic,
-    boardEffort,
-    boardAssignee,
-    boardSearch,
-  ]);
+  if (authLoading) {
+    return (
+      <main className="flex min-h-dvh items-center justify-center bg-[var(--bg-app)] text-sm text-[var(--text-muted)]">
+        Connecting to Manan Wellness Studio...
+      </main>
+    );
+  }
 
-  const selectedItem: ContentItem | null = useMemo(
-    () => content.items.find((i) => i.id === selectedItemId) ?? null,
-    [content.items, selectedItemId]
-  );
+  if (!user) {
+    return <LoginScreen />;
+  }
 
   const navItems: {
-    id: NavPage;
+    href: string;
     label: string;
     icon: React.ReactNode;
     badge?: number;
+    match: (path: string) => boolean;
   }[] = [
     {
-      id: "dashboard",
+      href: "/dashboard",
       label: "Dashboard",
       icon: <LayoutDashboard className="h-4 w-4" />,
+      match: (p) => p === "/" || p === "/dashboard",
     },
     {
-      id: "content",
+      href: "/content",
       label: "Content",
       icon: <Film className="h-4 w-4" />,
       badge: content.items.length,
+      match: (p) => p.startsWith("/content"),
     },
     {
-      id: "board",
+      href: "/board",
       label: "Board",
       icon: <Columns3 className="h-4 w-4" />,
       badge: pendingApprovalsCount > 0 ? pendingApprovalsCount : undefined,
+      match: (p) => p.startsWith("/board"),
     },
     {
-      id: "insights",
+      href: "/insights",
       label: "Insights",
       icon: <BarChart3 className="h-4 w-4" />,
+      match: (p) => p.startsWith("/insights"),
     },
     {
-      id: "settings",
+      href: "/settings",
       label: "Settings",
       icon: <Settings className="h-4 w-4" />,
+      match: (p) => p.startsWith("/settings"),
     },
   ];
-
-  const handleNavClick = (target: NavPage) => {
-    setSelectedItemId(null);
-    setPage(target);
-    setMobileMenuOpen(false);
-  };
 
   const sidebarContent = (
     <div className="flex h-full flex-col justify-between p-3">
       <div className="space-y-4">
         <div className="flex items-center justify-between px-2 py-1.5">
-          <button
-            type="button"
-            onClick={() => handleNavClick("dashboard")}
+          <Link
+            href="/dashboard"
+            onClick={() => setMobileMenuOpen(false)}
             className="flex items-center gap-2.5 text-left"
           >
             <div className="flex h-9 items-center rounded-lg bg-white px-2 shadow-xs ring-1 ring-slate-200">
@@ -174,7 +114,7 @@ export function AppShell() {
                 Manan Wellness
               </div>
             </div>
-          </button>
+          </Link>
 
           <button
             type="button"
@@ -188,13 +128,13 @@ export function AppShell() {
 
         <nav aria-label="Primary studio navigation" className="space-y-1">
           {navItems.map((item) => {
-            const active = !selectedItem && page === item.id;
+            const active = item.match(pathname || "/");
             return (
-              <button
-                key={item.id}
-                type="button"
+              <Link
+                key={item.href}
+                href={item.href}
                 aria-current={active ? "page" : undefined}
-                onClick={() => handleNavClick(item.id)}
+                onClick={() => setMobileMenuOpen(false)}
                 className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition ${
                   active
                     ? "bg-teal-600/12 font-semibold text-teal-600"
@@ -210,7 +150,7 @@ export function AppShell() {
                     {item.badge}
                   </span>
                 ) : null}
-              </button>
+              </Link>
             );
           })}
         </nav>
@@ -266,7 +206,6 @@ export function AppShell() {
 
       {/* Main Content Area */}
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* Minimal Mobile/Compact Top Bar */}
         <header className="studio-surface sticky top-0 z-20 flex items-center justify-between gap-3 border-b px-4 py-2.5 lg:hidden">
           <div className="flex items-center gap-2.5">
             <button
@@ -277,13 +216,16 @@ export function AppShell() {
             >
               <Menu className="h-5 w-5" />
             </button>
-            <div className="flex h-8 items-center rounded-md bg-white px-2 ring-1 ring-slate-200">
+            <Link
+              href="/dashboard"
+              className="flex h-8 items-center rounded-md bg-white px-2 ring-1 ring-slate-200"
+            >
               <img
                 src="https://mananwellness.com/svg/manan-logo.svg"
                 alt="Manan Wellness"
                 className="h-4 w-auto"
               />
-            </div>
+            </Link>
           </div>
           <button
             type="button"
@@ -295,163 +237,7 @@ export function AppShell() {
         </header>
 
         <main className="mx-auto w-full max-w-[1440px] flex-1 p-4 sm:p-6">
-          {selectedItem ? (
-            <ContentDetailView
-              item={selectedItem}
-              backLabel={PAGE_LABELS[page]}
-              hashtagPresets={content.hashtagPresets}
-              onBack={() => setSelectedItemId(null)}
-              actions={{
-                reviewGate1: content.reviewGate1,
-                resubmitIdea: content.resubmitIdea,
-                startProduction: content.startProduction,
-                submitDraftLink: content.submitDraftLink,
-                submitDraftFile: content.submitDraftFile,
-                reviewGate2: content.reviewGate2,
-                markPosted: content.markPosted,
-                updateItemDetails: content.updateItemDetails,
-                deleteContentItem: content.deleteContentItem,
-                addAuditComment: content.addAuditComment,
-              }}
-            />
-          ) : content.loading && page === "dashboard" ? (
-            <div className="studio-surface rounded-2xl border p-12 text-center text-sm text-[var(--text-muted)]">
-              Loading Manan Wellness Studio...
-            </div>
-          ) : page === "dashboard" ? (
-            <DashboardView
-              items={content.items}
-              isManager={isManager}
-              onNewIdea={() => setSubmitOpen(true)}
-              onNavigate={(target) => setPage(target)}
-              onSelectItem={(it) => setSelectedItemId(it.id)}
-            />
-          ) : page === "content" ? (
-            <ContentView
-              items={content.items}
-              loading={content.loading}
-              isManager={isManager}
-              onSelectItem={(it) => setSelectedItemId(it.id)}
-              onNewIdea={() => setSubmitOpen(true)}
-            />
-          ) : page === "board" ? (
-            <div className="space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-xl font-bold text-[var(--text-primary)]">
-                    Workflow Board
-                  </h2>
-                  <p className="text-xs text-[var(--text-muted)]">
-                    Track items across Gate 1 approval, production, Gate 2 review, and posting
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <label className="studio-surface inline-flex cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium text-[var(--text-secondary)]">
-                    <input
-                      type="checkbox"
-                      checked={showParked}
-                      onChange={(e) => setShowParked(e.target.checked)}
-                      className="accent-teal-600"
-                    />
-                    Show Parked
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setSubmitOpen(true)}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-teal-600 px-3.5 py-2 text-xs font-semibold text-white hover:bg-teal-700"
-                  >
-                    <Plus className="h-4 w-4" /> New Idea
-                  </button>
-                </div>
-              </div>
-
-              <search>
-                <form
-                  onSubmit={(e) => e.preventDefault()}
-                  className="studio-surface grid grid-cols-1 gap-2.5 rounded-xl border p-3 sm:grid-cols-2 lg:grid-cols-6"
-                >
-                  <div className="relative lg:col-span-2">
-                    <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
-                    <input
-                      type="search"
-                      aria-label="Search board"
-                      spellCheck={false}
-                      value={boardSearch}
-                      onChange={(e) => setBoardSearch(e.target.value)}
-                      placeholder="Search board..."
-                      className="studio-input w-full rounded-lg border py-2 pl-9 pr-3 text-sm"
-                    />
-                  </div>
-                  <select
-                    aria-label="Filter board by format"
-                    value={boardFormat}
-                    onChange={(e) =>
-                      setBoardFormat(e.target.value as "all" | ContentFormat)
-                    }
-                    className="studio-input rounded-lg border px-3 py-2 text-sm"
-                  >
-                    <option value="all">All Formats</option>
-                    {FORMAT_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    aria-label="Filter board by topic"
-                    value={boardTopic}
-                    onChange={(e) => setBoardTopic(e.target.value)}
-                    className="studio-input rounded-lg border px-3 py-2 text-sm"
-                  >
-                    <option value="all">All Topics</option>
-                    {TOPIC_OPTIONS.map((t) => (
-                      <option key={t} value={t}>
-                        {t}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    aria-label="Filter board by assignee"
-                    value={boardAssignee}
-                    onChange={(e) => setBoardAssignee(e.target.value)}
-                    className="studio-input rounded-lg border px-3 py-2 text-sm capitalize"
-                  >
-                    <option value="all">All Assignees</option>
-                    {TEAM_ASSIGNEE_OPTIONS.map((a) => (
-                      <option key={a} value={a}>
-                        {a}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    aria-label="Filter board by effort"
-                    value={boardEffort}
-                    onChange={(e) => setBoardEffort(e.target.value)}
-                    className="studio-input rounded-lg border px-3 py-2 text-sm"
-                  >
-                    <option value="all">All Effort Levels</option>
-                    <option value="low">Low effort</option>
-                    <option value="high">High effort</option>
-                    <option value="general">General</option>
-                  </select>
-                </form>
-              </search>
-
-              <PipelineBoard
-                items={boardFilteredItems}
-                viewMode="kanban"
-                showParked={showParked}
-                onSelectItem={(it) => setSelectedItemId(it.id)}
-              />
-            </div>
-          ) : page === "insights" ? (
-            <InsightsView
-              items={content.items}
-              onGoToContent={() => setPage("content")}
-            />
-          ) : (
-            <SettingsView hashtagPresets={content.hashtagPresets} />
-          )}
+          {children}
         </main>
       </div>
 

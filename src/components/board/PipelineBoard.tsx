@@ -8,8 +8,14 @@ import {
   MessageSquare,
   Video,
 } from "lucide-react";
+import { ContentThumbnail } from "@/components/video/ContentThumbnail";
 import { STATUS_META } from "@/lib/workflow";
-import { formatLabel, type ContentFormat, type ContentItem, type WorkflowStatus } from "@/types/content";
+import {
+  formatLabel,
+  type ContentFormat,
+  type ContentItem,
+  type WorkflowStatus,
+} from "@/types/content";
 
 interface PipelineBoardProps {
   items: ContentItem[];
@@ -81,7 +87,7 @@ export function PipelineBoard({
           </caption>
           <thead>
             <tr>
-              <th>Title / Hook</th>
+              <th>Video / Post</th>
               <th>Format</th>
               <th>Topic</th>
               <th>Status</th>
@@ -108,13 +114,31 @@ export function PipelineBoard({
                     className="cursor-pointer transition"
                   >
                     <th>
-                      <button
-                        type="button"
-                        onClick={() => onSelectItem(item)}
-                        className="text-left font-semibold text-[var(--text-primary)] hover:text-teal-600"
-                      >
-                        #{item.serialNo} {item.title}
-                      </button>
+                      <div className="flex items-center gap-3">
+                        <ContentThumbnail
+                          format={item.format}
+                          referenceUrl={item.referenceUrl}
+                          referenceBackupUrl={item.referenceBackupUrl}
+                          latestDraftUrl={item.latestDraftUrl}
+                          latestDraftKind={item.latestDraftKind}
+                          title={item.title}
+                          size="table"
+                        />
+                        <div className="min-w-0">
+                          <button
+                            type="button"
+                            onClick={() => onSelectItem(item)}
+                            className="line-clamp-1 text-left font-semibold text-[var(--text-primary)] hover:text-teal-600"
+                          >
+                            #{item.serialNo} {item.title}
+                          </button>
+                          {item.adaptationIdea || item.callToAction ? (
+                            <p className="mt-0.5 line-clamp-1 max-w-xs text-xs font-normal text-[var(--text-muted)]">
+                              {item.adaptationIdea || item.callToAction}
+                            </p>
+                          ) : null}
+                        </div>
+                      </div>
                     </th>
                     <td data-label="Format" className="whitespace-nowrap">
                       <span className="inline-flex items-center gap-1.5">
@@ -219,9 +243,19 @@ export function PipelineBoard({
                       key={item.id}
                       type="button"
                       onClick={() => onSelectItem(item)}
-                      className="studio-surface group w-full rounded-xl border p-3 text-left shadow-xs transition hover:border-teal-500 hover:shadow-sm"
+                      className="studio-surface group w-full space-y-2 rounded-xl border p-2.5 text-left shadow-xs transition hover:border-teal-500 hover:shadow-sm"
                     >
-                      <div className="mb-1.5 flex items-center justify-between gap-2 text-[11px] text-[var(--text-muted)]">
+                      <ContentThumbnail
+                        format={item.format}
+                        referenceUrl={item.referenceUrl}
+                        referenceBackupUrl={item.referenceBackupUrl}
+                        latestDraftUrl={item.latestDraftUrl}
+                        latestDraftKind={item.latestDraftKind}
+                        title={item.title}
+                        size="card"
+                      />
+
+                      <div className="flex items-center justify-between gap-2 text-[11px] text-[var(--text-muted)]">
                         <span className="inline-flex items-center gap-1 font-medium">
                           <FormatIcon format={item.format} />
                           #{item.serialNo} · {item.topicType}
@@ -238,12 +272,12 @@ export function PipelineBoard({
                       </div>
 
                       {item.adaptationIdea ? (
-                        <p className="mt-1 line-clamp-2 text-xs text-[var(--text-muted)]">
+                        <p className="line-clamp-2 text-xs text-[var(--text-muted)]">
                           {item.adaptationIdea}
                         </p>
                       ) : null}
 
-                      <div className="mt-2.5 flex flex-wrap items-center justify-between gap-1.5 border-t border-[var(--border-subtle)] pt-2 text-[11px] text-[var(--text-muted)]">
+                      <div className="flex flex-wrap items-center justify-between gap-1.5 border-t border-[var(--border-subtle)] pt-2 text-[11px] text-[var(--text-muted)]">
                         <span className="truncate capitalize">
                           {item.assignedTo.length > 0
                             ? item.assignedTo.join(", ")
