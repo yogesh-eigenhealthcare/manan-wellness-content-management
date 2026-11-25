@@ -115,9 +115,15 @@ describe("firestore.rules two-gate approval security", () => {
       .authenticatedContext("manager-1", { email: "manager@manan.com" })
       .firestore();
 
-    // 1. Member submits idea
+    // 1. Member submits idea (reel and long_form both permitted)
     await assertSucceeds(
       setDoc(doc(memberDb, "contentItems", "reel-1"), baseContentItem("member-1"))
+    );
+    await assertSucceeds(
+      setDoc(doc(memberDb, "contentItems", "long-1"), {
+        ...baseContentItem("member-1"),
+        format: "long_form",
+      })
     );
 
     // 2. Member CANNOT approve Gate 1

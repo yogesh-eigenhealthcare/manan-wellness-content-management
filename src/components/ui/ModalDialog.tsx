@@ -15,7 +15,7 @@ interface ModalDialogProps {
 
 /**
  * Accessible native <dialog> wrapper using showModal(), closedby="any",
- * and a pointerdown/click backdrop fallback for browsers lacking closedBy.
+ * and a pointerdown/pointerup backdrop fallback for browsers lacking closedBy.
  */
 export function ModalDialog({
   open,
@@ -97,21 +97,24 @@ export function ModalDialog({
       className={`${maxWidthClass} w-[95vw] rounded-2xl shadow-2xl`}
     >
       {open ? (
-        <div className="flex max-h-[90dvh] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white text-slate-900">
-          <div className="flex items-start justify-between gap-4 border-b border-slate-200 bg-slate-50/80 px-5 py-4">
+        <div className="studio-surface flex max-h-[90dvh] flex-col overflow-hidden rounded-2xl border">
+          <div className="studio-muted flex items-start justify-between gap-4 border-b px-5 py-4">
             <div className="min-w-0">
-              <h1 id={titleId} className="truncate text-lg font-semibold text-slate-900">
+              <h1
+                id={titleId}
+                className="truncate text-lg font-semibold text-[var(--text-primary)]"
+              >
                 {title}
               </h1>
               {subtitle ? (
-                <p className="mt-0.5 text-sm text-slate-500">{subtitle}</p>
+                <p className="mt-0.5 text-sm text-[var(--text-muted)]">{subtitle}</p>
               ) : null}
             </div>
             <button
               type="button"
               onClick={() => dialogRef.current?.close()}
               aria-label="Close dialog"
-              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+              className="studio-surface inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border text-[var(--text-secondary)] transition hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
             >
               <X className="h-4 w-4" />
             </button>

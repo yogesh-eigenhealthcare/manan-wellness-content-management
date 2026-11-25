@@ -1,14 +1,20 @@
 "use client";
 
 import React from "react";
-import { ExternalLink, Film, Image as ImageIcon, MessageSquare } from "lucide-react";
+import {
+  ExternalLink,
+  Film,
+  Image as ImageIcon,
+  MessageSquare,
+  Video,
+} from "lucide-react";
 import { STATUS_META } from "@/lib/workflow";
-import type { ContentItem, WorkflowStatus } from "@/types/content";
+import { formatLabel, type ContentFormat, type ContentItem, type WorkflowStatus } from "@/types/content";
 
 interface PipelineBoardProps {
   items: ContentItem[];
   viewMode: "kanban" | "table";
-  showParked: boolean;
+  showParked?: boolean;
   onSelectItem: (item: ContentItem) => void;
 }
 
@@ -49,10 +55,16 @@ const KANBAN_COLUMNS: {
   },
 ];
 
+function FormatIcon({ format }: { format: ContentFormat }) {
+  if (format === "carousel") return <ImageIcon className="h-3.5 w-3.5 text-sky-500" />;
+  if (format === "long_form") return <Video className="h-3.5 w-3.5 text-indigo-500" />;
+  return <Film className="h-3.5 w-3.5 text-teal-500" />;
+}
+
 export function PipelineBoard({
   items,
   viewMode,
-  showParked,
+  showParked = false,
   onSelectItem,
 }: PipelineBoardProps) {
   if (viewMode === "table") {
@@ -82,7 +94,7 @@ export function PipelineBoard({
           <tbody>
             {items.length === 0 ? (
               <tr>
-                <td colSpan={8} className="py-10 text-center text-slate-400">
+                <td colSpan={8} className="py-10 text-center text-[var(--text-muted)]">
                   No content items match the current filters.
                 </td>
               </tr>
@@ -93,19 +105,22 @@ export function PipelineBoard({
                   <tr
                     key={item.id}
                     onClick={() => onSelectItem(item)}
-                    className="cursor-pointer transition hover:bg-slate-50"
+                    className="cursor-pointer transition"
                   >
                     <th>
                       <button
                         type="button"
                         onClick={() => onSelectItem(item)}
-                        className="text-left font-semibold text-slate-900 hover:text-teal-700"
+                        className="text-left font-semibold text-[var(--text-primary)] hover:text-teal-600"
                       >
                         #{item.serialNo} {item.title}
                       </button>
                     </th>
-                    <td data-label="Format" className="capitalize">
-                      {item.format}
+                    <td data-label="Format" className="whitespace-nowrap">
+                      <span className="inline-flex items-center gap-1.5">
+                        <FormatIcon format={item.format} />
+                        {formatLabel(item.format)}
+                      </span>
                     </td>
                     <td data-label="Topic">{item.topicType}</td>
                     <td data-label="Status">
@@ -135,7 +150,7 @@ export function PipelineBoard({
                             href={item.referenceUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-xs font-medium text-teal-700 hover:underline"
+                            className="inline-flex items-center gap-1 text-xs font-medium text-teal-600 hover:underline"
                           >
                             Ref <ExternalLink className="h-3 w-3" />
                           </a>
@@ -145,7 +160,7 @@ export function PipelineBoard({
                             href={item.latestDraftUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-xs font-medium text-purple-700 hover:underline"
+                            className="inline-flex items-center gap-1 text-xs font-medium text-purple-600 hover:underline"
                           >
                             Draft <ExternalLink className="h-3 w-3" />
                           </a>
@@ -180,20 +195,20 @@ export function PipelineBoard({
         return (
           <section
             key={col.title}
-            className={`flex w-76 shrink-0 flex-col rounded-xl border border-slate-200 border-t-4 ${col.accent} bg-slate-100/70`}
+            className={`studio-muted flex w-76 shrink-0 flex-col rounded-xl border border-t-4 ${col.accent}`}
           >
-            <header className="flex items-center justify-between border-b border-slate-200 bg-white/80 px-3.5 py-2.5">
-              <h2 className="text-xs font-bold uppercase tracking-wide text-slate-700">
+            <header className="studio-surface flex items-center justify-between border-b px-3.5 py-2.5">
+              <h2 className="text-xs font-bold uppercase tracking-wide text-[var(--text-secondary)]">
                 {col.title}
               </h2>
-              <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-700">
+              <span className="studio-muted rounded-full border px-2 py-0.5 text-xs font-semibold text-[var(--text-secondary)]">
                 {colItems.length}
               </span>
             </header>
 
             <div className="flex max-h-[68vh] flex-col gap-2.5 overflow-y-auto p-2.5">
               {colItems.length === 0 ? (
-                <div className="rounded-lg border border-dashed border-slate-300 bg-white/60 p-4 text-center text-xs text-slate-400">
+                <div className="studio-surface rounded-lg border border-dashed p-4 text-center text-xs text-[var(--text-muted)]">
                   No items here
                 </div>
               ) : (
@@ -204,15 +219,11 @@ export function PipelineBoard({
                       key={item.id}
                       type="button"
                       onClick={() => onSelectItem(item)}
-                      className="group w-full rounded-xl border border-slate-200 bg-white p-3 text-left shadow-xs transition hover:border-teal-400 hover:shadow-sm"
+                      className="studio-surface group w-full rounded-xl border p-3 text-left shadow-xs transition hover:border-teal-500 hover:shadow-sm"
                     >
-                      <div className="mb-1.5 flex items-center justify-between gap-2 text-[11px] text-slate-500">
+                      <div className="mb-1.5 flex items-center justify-between gap-2 text-[11px] text-[var(--text-muted)]">
                         <span className="inline-flex items-center gap-1 font-medium">
-                          {item.format === "carousel" ? (
-                            <ImageIcon className="h-3 w-3 text-sky-600" />
-                          ) : (
-                            <Film className="h-3 w-3 text-teal-600" />
-                          )}
+                          <FormatIcon format={item.format} />
                           #{item.serialNo} · {item.topicType}
                         </span>
                         <span
@@ -222,17 +233,17 @@ export function PipelineBoard({
                         </span>
                       </div>
 
-                      <div className="line-clamp-2 text-sm font-semibold text-slate-900 group-hover:text-teal-800">
+                      <div className="line-clamp-2 text-sm font-semibold text-[var(--text-primary)] group-hover:text-teal-600">
                         {item.title}
                       </div>
 
                       {item.adaptationIdea ? (
-                        <p className="mt-1 line-clamp-2 text-xs text-slate-500">
+                        <p className="mt-1 line-clamp-2 text-xs text-[var(--text-muted)]">
                           {item.adaptationIdea}
                         </p>
                       ) : null}
 
-                      <div className="mt-2.5 flex flex-wrap items-center justify-between gap-1.5 border-t border-slate-100 pt-2 text-[11px] text-slate-500">
+                      <div className="mt-2.5 flex flex-wrap items-center justify-between gap-1.5 border-t border-[var(--border-subtle)] pt-2 text-[11px] text-[var(--text-muted)]">
                         <span className="truncate capitalize">
                           {item.assignedTo.length > 0
                             ? item.assignedTo.join(", ")
@@ -245,7 +256,7 @@ export function PipelineBoard({
                             </span>
                           ) : null}
                           {item.gate2Feedback && item.status === "changes_requested" ? (
-                            <MessageSquare className="h-3.5 w-3.5 text-orange-600" />
+                            <MessageSquare className="h-3.5 w-3.5 text-orange-500" />
                           ) : null}
                         </div>
                       </div>

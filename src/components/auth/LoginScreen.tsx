@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Eye, EyeOff, Lock, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Lock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 export function LoginScreen() {
@@ -43,18 +43,22 @@ export function LoginScreen() {
   };
 
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-gradient-to-br from-teal-50 via-slate-50 to-emerald-50 p-4">
-      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl sm:p-8">
+    <main className="flex min-h-dvh items-center justify-center bg-[var(--bg-app)] p-4">
+      <div className="studio-surface w-full max-w-md rounded-2xl border p-6 shadow-xl sm:p-8">
         <div className="mb-6 flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-600 text-white shadow-sm">
-            <Sparkles className="h-5 w-5" />
+          <div className="flex h-11 items-center justify-center rounded-xl bg-white px-2.5 shadow-xs ring-1 ring-slate-200">
+            <img
+              src="https://mananwellness.com/svg/manan-logo.svg"
+              alt="Manan Wellness"
+              className="h-7 w-auto"
+            />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-slate-900">
-              Manan Wellness Studio
+            <h1 className="text-lg font-bold text-[var(--text-primary)]">
+              Content Studio
             </h1>
-            <p className="text-xs text-slate-500">
-              Reel Ideas, Two-Gate Approvals &amp; Production Tracker
+            <p className="text-xs text-[var(--text-muted)]">
+              Reels / Shorts, Long form &amp; Approval Hub
             </p>
           </div>
         </div>
@@ -63,7 +67,7 @@ export function LoginScreen() {
           type="button"
           onClick={handleGoogle}
           disabled={submitting}
-          className="flex min-h-11 w-full items-center justify-center gap-2.5 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 shadow-xs transition hover:bg-slate-50 disabled:opacity-60"
+          className="studio-surface flex min-h-11 w-full items-center justify-center gap-2.5 rounded-xl border px-4 py-2.5 text-sm font-medium shadow-xs transition hover:bg-[var(--bg-hover)] disabled:opacity-60"
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
             <path
@@ -86,10 +90,10 @@ export function LoginScreen() {
           Continue with Google
         </button>
 
-        <div className="my-5 flex items-center gap-3 text-xs text-slate-400">
-          <div className="h-px flex-1 bg-slate-200" />
+        <div className="my-5 flex items-center gap-3 text-xs text-[var(--text-muted)]">
+          <div className="h-px flex-1 bg-[var(--border-subtle)]" />
           <span>or use team email</span>
-          <div className="h-px flex-1 bg-slate-200" />
+          <div className="h-px flex-1 bg-[var(--border-subtle)]" />
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -97,7 +101,7 @@ export function LoginScreen() {
             <div>
               <label
                 htmlFor="fullname"
-                className="mb-1 block text-sm font-medium text-slate-700"
+                className="mb-1 block text-sm font-medium text-[var(--text-secondary)]"
               >
                 Full name
               </label>
@@ -113,7 +117,7 @@ export function LoginScreen() {
                   setDisplayName(e.target.value);
                 }}
                 placeholder="e.g. Avantika or Animation Team"
-                className="min-h-11 w-full rounded-xl border border-slate-300 px-3 py-2 text-base text-slate-900"
+                className="studio-input min-h-11 w-full rounded-xl border px-3 py-2 text-base"
               />
             </div>
           ) : null}
@@ -121,7 +125,7 @@ export function LoginScreen() {
           <div>
             <label
               htmlFor="email"
-              className="mb-1 block text-sm font-medium text-slate-700"
+              className="mb-1 block text-sm font-medium text-[var(--text-secondary)]"
             >
               Email address
             </label>
@@ -139,7 +143,7 @@ export function LoginScreen() {
                 setEmail(e.target.value);
               }}
               placeholder="you@mananwellness.com"
-              className="min-h-11 w-full rounded-xl border border-slate-300 px-3 py-2 text-base text-slate-900"
+              className="studio-input min-h-11 w-full rounded-xl border px-3 py-2 text-base"
             />
           </div>
 
@@ -147,7 +151,7 @@ export function LoginScreen() {
             <div className="mb-1 flex items-center justify-between">
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-slate-700"
+                className="block text-sm font-medium text-[var(--text-secondary)]"
               >
                 Password
               </label>
@@ -156,7 +160,7 @@ export function LoginScreen() {
                 aria-pressed={showPassword}
                 aria-label={showPassword ? "Hide password" : "Show password"}
                 onClick={() => setShowPassword((prev) => !prev)}
-                className="inline-flex items-center gap-1 text-xs font-medium text-teal-700 hover:text-teal-900"
+                className="inline-flex items-center gap-1 text-xs font-medium text-teal-600 hover:text-teal-500"
               >
                 {showPassword ? (
                   <>
@@ -182,7 +186,7 @@ export function LoginScreen() {
                 clearAuthError();
                 setPassword(e.target.value);
               }}
-              className="min-h-11 w-full rounded-xl border border-slate-300 px-3 py-2 text-base text-slate-900"
+              className="studio-input min-h-11 w-full rounded-xl border px-3 py-2 text-base"
             />
           </div>
 
@@ -210,7 +214,7 @@ export function LoginScreen() {
           </button>
         </form>
 
-        <div className="mt-5 text-center text-xs text-slate-500">
+        <div className="mt-5 text-center text-xs text-[var(--text-muted)]">
           {mode === "signin" ? (
             <>
               New to the team?{" "}
@@ -220,7 +224,7 @@ export function LoginScreen() {
                   clearAuthError();
                   setMode("signup");
                 }}
-                className="font-semibold text-teal-700 hover:underline"
+                className="font-semibold text-teal-600 hover:underline"
               >
                 Create an account
               </button>
@@ -234,7 +238,7 @@ export function LoginScreen() {
                   clearAuthError();
                   setMode("signin");
                 }}
-                className="font-semibold text-teal-700 hover:underline"
+                className="font-semibold text-teal-600 hover:underline"
               >
                 Sign in instead
               </button>

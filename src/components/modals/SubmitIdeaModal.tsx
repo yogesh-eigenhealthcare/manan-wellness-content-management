@@ -5,6 +5,7 @@ import { ModalDialog } from "@/components/ui/ModalDialog";
 import { VideoPlayerCard } from "@/components/video/VideoPlayerCard";
 import type { SubmitIdeaInput } from "@/hooks/useContentItems";
 import {
+  FORMAT_OPTIONS,
   TEAM_ASSIGNEE_OPTIONS,
   TOPIC_OPTIONS,
   type ContentFormat,
@@ -113,39 +114,33 @@ export function SubmitIdeaModal({
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <div className="space-y-3.5">
           <div>
-            <span className="mb-1.5 block text-xs font-semibold text-slate-700">
+            <span className="mb-1.5 block text-xs font-semibold text-[var(--text-secondary)]">
               Format
             </span>
-            <div className="flex gap-3">
-              <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm">
-                <input
-                  type="radio"
-                  name="format"
-                  value="reel"
-                  checked={format === "reel"}
-                  onChange={() => setFormat("reel")}
-                  className="accent-teal-600"
-                />
-                Instagram Reel
-              </label>
-              <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm">
-                <input
-                  type="radio"
-                  name="format"
-                  value="carousel"
-                  checked={format === "carousel"}
-                  onChange={() => setFormat("carousel")}
-                  className="accent-teal-600"
-                />
-                Carousel / Static Post
-              </label>
+            <div className="flex flex-wrap gap-2">
+              {FORMAT_OPTIONS.map((opt) => (
+                <label
+                  key={opt.value}
+                  className="studio-surface inline-flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm"
+                >
+                  <input
+                    type="radio"
+                    name="format"
+                    value={opt.value}
+                    checked={format === opt.value}
+                    onChange={() => setFormat(opt.value)}
+                    className="accent-teal-600"
+                  />
+                  {opt.label}
+                </label>
+              ))}
             </div>
           </div>
 
           <div>
             <label
               htmlFor="idea-title"
-              className="mb-1 block text-xs font-semibold text-slate-700"
+              className="mb-1 block text-xs font-semibold text-[var(--text-secondary)]"
             >
               Title / Hook <span aria-hidden="true">*</span>
             </label>
@@ -157,7 +152,7 @@ export function SubmitIdeaModal({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. 5 signs your nervous system is overloaded"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="studio-input w-full rounded-lg border px-3 py-2 text-sm"
             />
           </div>
 
@@ -165,7 +160,7 @@ export function SubmitIdeaModal({
             <div>
               <label
                 htmlFor="idea-topic"
-                className="mb-1 block text-xs font-semibold text-slate-700"
+                className="mb-1 block text-xs font-semibold text-[var(--text-secondary)]"
               >
                 Topic
               </label>
@@ -173,7 +168,7 @@ export function SubmitIdeaModal({
                 id="idea-topic"
                 value={topicType}
                 onChange={(e) => setTopicType(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-2.5 py-2 text-sm"
+                className="studio-input w-full rounded-lg border px-2.5 py-2 text-sm"
               >
                 {TOPIC_OPTIONS.map((t) => (
                   <option key={t} value={t}>
@@ -185,7 +180,7 @@ export function SubmitIdeaModal({
             <div>
               <label
                 htmlFor="idea-effort"
-                className="mb-1 block text-xs font-semibold text-slate-700"
+                className="mb-1 block text-xs font-semibold text-[var(--text-secondary)]"
               >
                 Effort Level
               </label>
@@ -193,7 +188,7 @@ export function SubmitIdeaModal({
                 id="idea-effort"
                 value={effortLevel}
                 onChange={(e) => setEffortLevel(e.target.value as EffortLevel)}
-                className="w-full rounded-lg border border-slate-300 px-2.5 py-2 text-sm"
+                className="studio-input w-full rounded-lg border px-2.5 py-2 text-sm"
               >
                 <option value="low">Low efforts</option>
                 <option value="high">High efforts</option>
@@ -205,9 +200,9 @@ export function SubmitIdeaModal({
           <div>
             <label
               htmlFor="idea-ref-url"
-              className="mb-1 block text-xs font-semibold text-slate-700"
+              className="mb-1 block text-xs font-semibold text-[var(--text-secondary)]"
             >
-              Reference Reel / Post / YouTube URL
+              Reference Reel / Short / YouTube / Post URL
             </label>
             <input
               id="idea-ref-url"
@@ -215,15 +210,15 @@ export function SubmitIdeaModal({
               spellCheck={false}
               value={referenceUrl}
               onChange={(e) => setReferenceUrl(e.target.value)}
-              placeholder="https://www.instagram.com/reel/..."
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              placeholder="https://www.instagram.com/reel/... or https://youtu.be/..."
+              className="studio-input w-full rounded-lg border px-3 py-2 text-sm"
             />
           </div>
 
           <div>
             <label
               htmlFor="idea-backup-url"
-              className="mb-1 block text-xs font-semibold text-slate-700"
+              className="mb-1 block text-xs font-semibold text-[var(--text-secondary)]"
             >
               Backup Drive / MP4 Link (optional)
             </label>
@@ -234,14 +229,14 @@ export function SubmitIdeaModal({
               value={referenceBackupUrl}
               onChange={(e) => setReferenceBackupUrl(e.target.value)}
               placeholder="https://drive.google.com/file/d/.../view"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="studio-input w-full rounded-lg border px-3 py-2 text-sm"
             />
           </div>
 
           <div>
             <label
               htmlFor="idea-adaptation"
-              className="mb-1 block text-xs font-semibold text-slate-700"
+              className="mb-1 block text-xs font-semibold text-[var(--text-secondary)]"
             >
               How should Manan Wellness recreate it?
             </label>
@@ -251,14 +246,14 @@ export function SubmitIdeaModal({
               value={adaptationIdea}
               onChange={(e) => setAdaptationIdea(e.target.value)}
               placeholder="e.g. Use Dr. Pragati speaking with subtle background piano and Manan branding"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="studio-input w-full rounded-lg border px-3 py-2 text-sm"
             />
           </div>
 
           <div>
             <label
               htmlFor="idea-cta"
-              className="mb-1 block text-xs font-semibold text-slate-700"
+              className="mb-1 block text-xs font-semibold text-[var(--text-secondary)]"
             >
               Call to Action
             </label>
@@ -268,12 +263,12 @@ export function SubmitIdeaModal({
               value={callToAction}
               onChange={(e) => setCallToAction(e.target.value)}
               placeholder='e.g. Comment "HELP" to book a session'
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="studio-input w-full rounded-lg border px-3 py-2 text-sm"
             />
           </div>
 
           <div>
-            <span className="mb-1.5 block text-xs font-semibold text-slate-700">
+            <span className="mb-1.5 block text-xs font-semibold text-[var(--text-secondary)]">
               Suggested Assignee
             </span>
             <div className="flex flex-wrap gap-1.5">
@@ -285,7 +280,7 @@ export function SubmitIdeaModal({
                   className={`rounded-full border px-2.5 py-1 text-xs capitalize ${
                     assignedTo.includes(p)
                       ? "border-teal-600 bg-teal-50 font-medium text-teal-800"
-                      : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                      : "studio-surface text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
                   }`}
                 >
                   {p}
@@ -297,7 +292,7 @@ export function SubmitIdeaModal({
           <div>
             <label
               htmlFor="idea-hashtags"
-              className="mb-1 block text-xs font-semibold text-slate-700"
+              className="mb-1 block text-xs font-semibold text-[var(--text-secondary)]"
             >
               Hashtags (optional)
             </label>
@@ -307,7 +302,7 @@ export function SubmitIdeaModal({
               value={hashtagsRaw}
               onChange={(e) => setHashtagsRaw(e.target.value)}
               placeholder="#MananWellness #MentalHealthAwareness"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs"
+              className="studio-input w-full rounded-lg border px-3 py-2 text-xs"
             />
             {hashtagPresets.length > 0 ? (
               <div className="mt-1.5 flex flex-wrap gap-1">
@@ -320,7 +315,7 @@ export function SubmitIdeaModal({
                         [prev.trim(), preset.tags.join(" ")].filter(Boolean).join(" ")
                       )
                     }
-                    className="rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] text-slate-700 hover:bg-teal-50"
+                    className="studio-muted rounded border px-2 py-0.5 text-[11px] text-[var(--text-secondary)] hover:border-teal-500"
                   >
                     + {preset.category}
                   </button>
@@ -336,13 +331,13 @@ export function SubmitIdeaModal({
               label="Live Reference Preview"
               url={referenceUrl}
               backupUrl={referenceBackupUrl}
-              emptyHint="Paste an Instagram Reel, YouTube Shorts, or Google Drive link on the left to preview it here."
+              emptyHint="Paste an Instagram Reel, YouTube Shorts/Long form, or Google Drive link on the left to preview it here."
             />
 
             <div>
               <label
                 htmlFor="idea-script-doc"
-                className="mb-1 block text-xs font-semibold text-slate-700"
+                className="mb-1 block text-xs font-semibold text-[var(--text-secondary)]"
               >
                 Google Doc Script URL (optional)
               </label>
@@ -353,14 +348,14 @@ export function SubmitIdeaModal({
                 value={scriptUrl}
                 onChange={(e) => setScriptUrl(e.target.value)}
                 placeholder="https://docs.google.com/document/d/..."
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="studio-input w-full rounded-lg border px-3 py-2 text-sm"
               />
             </div>
 
             <div>
               <label
                 htmlFor="idea-ref-notes"
-                className="mb-1 block text-xs font-semibold text-slate-700"
+                className="mb-1 block text-xs font-semibold text-[var(--text-secondary)]"
               >
                 Editing / Music Notes
               </label>
@@ -370,12 +365,12 @@ export function SubmitIdeaModal({
                 value={referenceNotes}
                 onChange={(e) => setReferenceNotes(e.target.value)}
                 placeholder="Notes about pacing, audio, or caption style..."
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="studio-input w-full rounded-lg border px-3 py-2 text-sm"
               />
             </div>
           </div>
 
-          <div className="space-y-3 border-t border-slate-200 pt-3">
+          <div className="space-y-3 border-t border-[var(--border-subtle)] pt-3">
             {error ? (
               <div
                 role="alert"
@@ -388,7 +383,7 @@ export function SubmitIdeaModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-lg border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                className="studio-surface rounded-lg border px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
               >
                 Cancel
               </button>

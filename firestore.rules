@@ -33,7 +33,7 @@ service cloud.firestore {
     // Document ID: {itemId}
     // Fields:
     //   - serialNo: number (required, >= 0)
-    //   - format: string (required, 'reel' | 'carousel')
+    //   - format: string (required, 'reel' | 'carousel' | 'long_form')
     //   - title: string (required, 1..200 chars)
     //   - topicType: string (required, 1..60 chars)
     //   - effortLevel: string (required, 'low' | 'high' | 'general')
@@ -234,7 +234,7 @@ service cloud.firestore {
       return hasRequiredFields(allowed) &&
              hasOnlyAllowedFields(allowed) &&
              data.serialNo is number && data.serialNo >= 0 &&
-             data.format in ['reel', 'carousel'] &&
+             data.format in ['reel', 'carousel', 'long_form'] &&
              isValidString(data.title, 1, 200) &&
              isValidString(data.topicType, 1, 60) &&
              data.effortLevel in ['low', 'high', 'general'] &&

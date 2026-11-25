@@ -1,6 +1,6 @@
 export type UserRole = "manager" | "member";
 
-export type ContentFormat = "reel" | "carousel";
+export type ContentFormat = "reel" | "long_form" | "carousel";
 
 export type EffortLevel = "low" | "high" | "general";
 
@@ -101,6 +101,19 @@ export interface HashtagPreset {
   category: string;
   tags: string[];
   updatedAt?: unknown;
+}
+
+export const FORMAT_OPTIONS: { value: ContentFormat; label: string }[] = [
+  { value: "reel", label: "Reels / Shorts" },
+  { value: "long_form", label: "Long form" },
+  { value: "carousel", label: "Carousel / Post" },
+];
+
+export function formatLabel(format: ContentFormat | string): string {
+  if (format === "reel") return "Reels / Shorts";
+  if (format === "long_form") return "Long form";
+  if (format === "carousel") return "Carousel / Post";
+  return format;
 }
 
 export const TOPIC_OPTIONS = [
