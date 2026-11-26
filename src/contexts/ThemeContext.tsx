@@ -15,11 +15,16 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 const STORAGE_KEY = "color-scheme";
 
-function syncMetaTag(pref: ThemePreference) {
+function syncTheme(pref: ThemePreference, resolved: "light" | "dark") {
   if (typeof document === "undefined") return;
   const meta = document.querySelector('meta[name="color-scheme"]');
   if (meta) {
     meta.setAttribute("content", pref === "system" ? "light dark" : pref);
+  }
+  if (resolved === "dark") {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
   }
 }
 
@@ -28,31 +33,39 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [systemScheme, setSystemScheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const initialSystem = mq.matches ? "dark" : "light";
+    setSystemScheme(initialSystem);
+
+    let activePref: ThemePreference = "system";
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored === "light" || stored === "dark") {
-        setPreference(stored);
-        syncMetaTag(stored);
-      } else {
-        setPreference("system");
-        syncMetaTag("system");
+        activePref = stored;
       }
     } catch {
       // Ignore storage failures
     }
-
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    setSystemScheme(mq.matches ? "dark" : "light");
+    setPreference(activePref);
+    syncTheme(activePref, activePref === "system" ? initialSystem : activePref);
 
     const onMediaChange = (e: MediaQueryListEvent) => {
-      setSystemScheme(e.matches ? "dark" : "light");
+      const nextSys = e.matches ? "dark" : "light";
+      setSystemScheme(nextSys);
+      setPreference((currentPref) => {
+        syncTheme(currentPref, currentPref === "system" ? nextSys : currentPref);
+        return currentPref;
+      });
     };
     const onStorage = (e: StorageEvent) => {
       if (e.key !== STORAGE_KEY) return;
       const next =
         e.newValue === "light" || e.newValue === "dark" ? e.newValue : "system";
       setPreference(next);
-      syncMetaTag(next);
+      setSystemScheme((currentSys) => {
+        syncTheme(next, next === "system" ? currentSys : next);
+        return currentSys;
+      });
     };
 
     mq.addEventListener("change", onMediaChange);
@@ -65,7 +78,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const setThemePreference = (next: ThemePreference) => {
     setPreference(next);
-    syncMetaTag(next);
+    const resolved = next === "system" ? systemScheme : next;
+    syncTheme(next, resolved);
     try {
       if (next === "system") {
         localStorage.removeItem(STORAGE_KEY);

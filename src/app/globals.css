@@ -361,6 +361,82 @@ a:focus-visible {
   vertical-align: middle;
 }
 
+/* Status Badges - High contrast in both light mode and dark mode */
+.status-pill-amber {
+  background-color: #fef3c7;
+  border-color: #fcd34d;
+  color: #78350f !important;
+}
+
+.status-pill-rose {
+  background-color: #ffe4e6;
+  border-color: #fecdd3;
+  color: #9f1239 !important;
+}
+
+.status-pill-emerald {
+  background-color: #d1fae5;
+  border-color: #a7f3d0;
+  color: #065f46 !important;
+}
+
+.status-pill-sky {
+  background-color: #e0f2fe;
+  border-color: #bae6fd;
+  color: #075985 !important;
+}
+
+.status-pill-orange {
+  background-color: #ffedd5;
+  border-color: #fed7aa;
+  color: #9a3412 !important;
+}
+
+:is(.dark, :has(> head > meta[name="color-scheme"][content="dark"])) .status-pill-amber,
+@media (prefers-color-scheme: dark) {
+  :not(:has(> head > meta[name="color-scheme"][content="light"])):not(.light) .status-pill-amber {
+    background-color: rgba(245, 158, 11, 0.18);
+    border-color: rgba(245, 158, 11, 0.35);
+    color: #fde68a !important;
+  }
+}
+
+:is(.dark, :has(> head > meta[name="color-scheme"][content="dark"])) .status-pill-rose,
+@media (prefers-color-scheme: dark) {
+  :not(:has(> head > meta[name="color-scheme"][content="light"])):not(.light) .status-pill-rose {
+    background-color: rgba(244, 63, 94, 0.18);
+    border-color: rgba(244, 63, 94, 0.35);
+    color: #fecdd3 !important;
+  }
+}
+
+:is(.dark, :has(> head > meta[name="color-scheme"][content="dark"])) .status-pill-emerald,
+@media (prefers-color-scheme: dark) {
+  :not(:has(> head > meta[name="color-scheme"][content="light"])):not(.light) .status-pill-emerald {
+    background-color: rgba(16, 185, 129, 0.18);
+    border-color: rgba(16, 185, 129, 0.35);
+    color: #a7f3d0 !important;
+  }
+}
+
+:is(.dark, :has(> head > meta[name="color-scheme"][content="dark"])) .status-pill-sky,
+@media (prefers-color-scheme: dark) {
+  :not(:has(> head > meta[name="color-scheme"][content="light"])):not(.light) .status-pill-sky {
+    background-color: rgba(14, 165, 233, 0.18);
+    border-color: rgba(14, 165, 233, 0.35);
+    color: #bae6fd !important;
+  }
+}
+
+:is(.dark, :has(> head > meta[name="color-scheme"][content="dark"])) .status-pill-orange,
+@media (prefers-color-scheme: dark) {
+  :not(:has(> head > meta[name="color-scheme"][content="light"])):not(.light) .status-pill-orange {
+    background-color: rgba(249, 115, 22, 0.18);
+    border-color: rgba(249, 115, 22, 0.35);
+    color: #fed7aa !important;
+  }
+}
+
 @container (width < 640px) {
   .responsive-data-table,
   .responsive-data-table thead,

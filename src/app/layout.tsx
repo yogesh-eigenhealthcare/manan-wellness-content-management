@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     "Two-gate content planning, production, and approval studio for Manan Wellness.",
 };
 
-const FOUC_SCRIPT = `try{var s=localStorage.getItem("color-scheme");if(s==="light"||s==="dark"){document.querySelector('meta[name="color-scheme"]').setAttribute("content",s);}}catch(e){}`;
+const FOUC_SCRIPT = `try{var s=localStorage.getItem("color-scheme");var d=s==="dark"||(!s&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(s==="light"||s==="dark"){document.querySelector('meta[name="color-scheme"]').setAttribute("content",s);}if(d){document.documentElement.classList.add("dark");}else{document.documentElement.classList.remove("dark");}}catch(e){}`;
 
 export default function RootLayout({
   children,
