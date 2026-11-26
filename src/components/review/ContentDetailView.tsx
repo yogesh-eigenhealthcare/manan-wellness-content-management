@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { DraftPreviewCard } from "@/components/video/DraftPreviewCard";
 import { VideoPlayerCard } from "@/components/video/VideoPlayerCard";
+import { WorkflowProgressBar } from "@/components/review/WorkflowProgressBar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useItemSubcollections } from "@/hooks/useContentItems";
 import {
@@ -490,6 +491,9 @@ export function ContentDetailView({
             ) : null}
           </div>
         </div>
+
+        {/* Approved Idea -> Posted Progress Bar */}
+        <WorkflowProgressBar status={item.status} />
 
         {/* Reference / Recreated Underline Tabs */}
         <div
