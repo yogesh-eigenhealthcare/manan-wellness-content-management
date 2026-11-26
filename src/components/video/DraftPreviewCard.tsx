@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Download, FileText, Image as ImageIcon } from "lucide-react";
 import { VideoPlayerCard } from "@/components/video/VideoPlayerCard";
 import type { DraftSubmission } from "@/types/content";
@@ -12,6 +12,26 @@ interface DraftPreviewCardProps {
   emptyHint?: string;
 }
 
+function dataUrlToBlob(dataUrl: string): Blob | null {
+  try {
+    const commaIdx = dataUrl.indexOf(",");
+    if (commaIdx === -1) return null;
+    const header = dataUrl.slice(0, commaIdx);
+    const body = dataUrl.slice(commaIdx + 1);
+    const mimeMatch = header.match(/data:([^;]+)/);
+    const mime = mimeMatch?.[1] || "application/pdf";
+    const isBase64 = header.includes(";base64");
+    const byteString = isBase64 ? atob(body) : decodeURIComponent(body);
+    const bytes = new Uint8Array(byteString.length);
+    for (let i = 0; i < byteString.length; i += 1) {
+      bytes[i] = byteString.charCodeAt(i);
+    }
+    return new Blob([bytes], { type: mime });
+  } catch {
+    return null;
+  }
+}
+
 export function DraftPreviewCard({
   label,
   draft,
@@ -19,8 +39,27 @@ export function DraftPreviewCard({
   emptyHint = "No recreated draft submitted yet. Submit a video link or upload an image/PDF on the left to preview it here.",
 }: DraftPreviewCardProps) {
   const kind = draft?.draftKind ?? (draft?.fileDataUrl ? "image" : "video");
+  const [pdfObjectUrl, setPdfObjectUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!draft || kind !== "pdf" || !draft.fileDataUrl) {
+      setPdfObjectUrl(null);
+      return;
+    }
+    const blob = dataUrlToBlob(draft.fileDataUrl);
+    if (!blob) {
+      setPdfObjectUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(blob);
+    setPdfObjectUrl(url);
+    return () => {
+      URL.revokeObjectURL(url);
+    };
+  }, [draft, kind]);
 
   if (draft && (kind === "image" || kind === "pdf") && draft.fileDataUrl) {
+    const pdfSrc = pdfObjectUrl || draft.fileDataUrl;
     return (
       <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[#0f0f10] text-[#ededed]">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[rgba(237,237,237,0.08)] bg-[#19191b] px-3.5 py-2.5 text-xs">
@@ -60,7 +99,7 @@ export function DraftPreviewCard({
               />
             ) : (
               <iframe
-                src={`${draft.fileDataUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+                src={`${pdfSrc}#toolbar=0&navpanes=0&scrollbar=0`}
                 title={draft.fileName || label}
                 scrolling="no"
                 className="h-full w-full overflow-hidden border-0 bg-black"

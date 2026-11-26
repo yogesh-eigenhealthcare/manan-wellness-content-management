@@ -11,6 +11,7 @@ import {
   query,
   serverTimestamp,
   updateDoc,
+  writeBatch,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
@@ -90,7 +91,11 @@ export function useContentItems() {
     };
   }, [user]);
 
-  const actorName = profile?.displayName || profile?.email || "Team Member";
+  const actorName = (
+    profile?.displayName ||
+    profile?.email ||
+    "Team Member"
+  ).slice(0, 100);
   const actorRole = isManager ? "manager" : "member";
 
   const addAuditComment = async (
@@ -217,9 +222,14 @@ export function useContentItems() {
     if (!user) throw new Error("Not authenticated");
     const nextVersion = currentVersion + 1;
     const cleanUrl = videoUrl.trim();
-    const cleanNotes = notes.trim();
+    const cleanNotes = notes.trim().slice(0, 2000);
 
-    await updateDoc(doc(db, "contentItems", itemId), {
+    const batch = writeBatch(db);
+    const itemRef = doc(db, "contentItems", itemId);
+    const draftRef = doc(collection(db, "contentItems", itemId, "drafts"));
+    const commentRef = doc(collection(db, "contentItems", itemId, "comments"));
+
+    batch.update(itemRef, {
       status: "draft_review",
       latestDraftUrl: cleanUrl,
       latestDraftKind: "video",
@@ -228,7 +238,7 @@ export function useContentItems() {
       updatedAt: serverTimestamp(),
     });
 
-    await addDoc(collection(db, "contentItems", itemId, "drafts"), {
+    batch.set(draftRef, {
       version: nextVersion,
       draftKind: "video",
       videoUrl: cleanUrl,
@@ -238,12 +248,20 @@ export function useContentItems() {
       submittedAt: serverTimestamp(),
     });
 
-    await addAuditComment(
-      itemId,
-      "draft_submit",
-      cleanNotes || `Submitted video draft v${nextVersion} for manager review.`,
-      nextVersion
-    );
+    batch.set(commentRef, {
+      authorUid: user.uid,
+      authorName: actorName,
+      authorRole: actorRole,
+      actionType: "draft_submit",
+      draftVersion: nextVersion,
+      timestampLabel: null,
+      body:
+        cleanNotes ||
+        `Submitted video draft v${nextVersion} for manager review.`,
+      createdAt: serverTimestamp(),
+    });
+
+    await batch.commit();
   };
 
   const submitDraftFile = async (
@@ -254,37 +272,51 @@ export function useContentItems() {
   ) => {
     if (!user) throw new Error("Not authenticated");
     const nextVersion = currentVersion + 1;
-    const cleanNotes = notes.trim();
+    const cleanNotes = notes.trim().slice(0, 2000);
+    const safeFileName = file.fileName.slice(0, 200) || `draft-v${nextVersion}`;
+    const safeMimeType = file.mimeType.slice(0, 100);
 
-    await updateDoc(doc(db, "contentItems", itemId), {
+    const batch = writeBatch(db);
+    const itemRef = doc(db, "contentItems", itemId);
+    const draftRef = doc(collection(db, "contentItems", itemId, "drafts"));
+    const commentRef = doc(collection(db, "contentItems", itemId, "comments"));
+
+    batch.update(itemRef, {
       status: "draft_review",
       latestDraftUrl: null,
       latestDraftKind: file.draftKind,
-      latestDraftName: file.fileName,
+      latestDraftName: safeFileName,
       latestDraftVersion: nextVersion,
       updatedAt: serverTimestamp(),
     });
 
-    await addDoc(collection(db, "contentItems", itemId, "drafts"), {
+    batch.set(draftRef, {
       version: nextVersion,
       draftKind: file.draftKind,
       videoUrl: "",
       fileDataUrl: file.fileDataUrl,
-      fileName: file.fileName,
-      mimeType: file.mimeType,
+      fileName: safeFileName,
+      mimeType: safeMimeType,
       notes: cleanNotes,
       submittedByUid: user.uid,
       submittedByName: actorName,
       submittedAt: serverTimestamp(),
     });
 
-    await addAuditComment(
-      itemId,
-      "draft_submit",
-      cleanNotes ||
-        `Uploaded ${file.draftKind.toUpperCase()} (${file.fileName}) draft v${nextVersion} for manager review.`,
-      nextVersion
-    );
+    batch.set(commentRef, {
+      authorUid: user.uid,
+      authorName: actorName,
+      authorRole: actorRole,
+      actionType: "draft_submit",
+      draftVersion: nextVersion,
+      timestampLabel: null,
+      body:
+        cleanNotes ||
+        `Uploaded ${file.draftKind.toUpperCase()} (${safeFileName}) draft v${nextVersion} for manager review.`,
+      createdAt: serverTimestamp(),
+    });
+
+    await batch.commit();
   };
 
   const reviewGate2 = async (
@@ -402,6 +434,9 @@ export function useItemSubcollections(itemId: string | null) {
             ...(d.data() as Omit<DraftSubmission, "id">),
           }))
         );
+      },
+      (err) => {
+        console.error("Failed to subscribe to drafts:", err);
       }
     );
 
@@ -417,6 +452,9 @@ export function useItemSubcollections(itemId: string | null) {
             ...(d.data() as Omit<ContentComment, "id">),
           }))
         );
+      },
+      (err) => {
+        console.error("Failed to subscribe to comments:", err);
       }
     );
 
