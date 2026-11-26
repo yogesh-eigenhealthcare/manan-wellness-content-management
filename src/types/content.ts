@@ -1,8 +1,10 @@
 export type UserRole = "manager" | "member";
 
-export type ContentFormat = "reel" | "carousel";
+export type ContentFormat = "reel" | "long_form" | "carousel";
 
 export type EffortLevel = "low" | "high" | "general";
+
+export type DraftKind = "video" | "image" | "pdf";
 
 export type WorkflowStatus =
   | "idea_pending"
@@ -60,6 +62,8 @@ export interface ContentItem {
   assignedTo: string[];
   targetPostDate: string | null;
   latestDraftUrl: string | null;
+  latestDraftKind?: DraftKind | null;
+  latestDraftName?: string | null;
   latestDraftVersion: number;
   publishedUrl: string | null;
   gate1ReviewedBy: string | null;
@@ -77,7 +81,11 @@ export interface ContentItem {
 export interface DraftSubmission {
   id: string;
   version: number;
+  draftKind?: DraftKind;
   videoUrl: string;
+  fileDataUrl?: string;
+  fileName?: string;
+  mimeType?: string;
   notes: string;
   submittedByUid: string;
   submittedByName: string;
@@ -101,6 +109,19 @@ export interface HashtagPreset {
   category: string;
   tags: string[];
   updatedAt?: unknown;
+}
+
+export const FORMAT_OPTIONS: { value: ContentFormat; label: string }[] = [
+  { value: "reel", label: "Reels / Shorts" },
+  { value: "long_form", label: "Long form" },
+  { value: "carousel", label: "Carousel / Post" },
+];
+
+export function formatLabel(format: ContentFormat | string): string {
+  if (format === "reel") return "Reels / Shorts";
+  if (format === "long_form") return "Long form";
+  if (format === "carousel") return "Carousel / Post";
+  return format;
 }
 
 export const TOPIC_OPTIONS = [

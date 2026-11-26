@@ -9,6 +9,7 @@ interface VideoPlayerCardProps {
   url: string | null | undefined;
   backupUrl?: string | null | undefined;
   emptyHint?: string;
+  tall?: boolean;
 }
 
 export function VideoPlayerCard({
@@ -16,6 +17,7 @@ export function VideoPlayerCard({
   url,
   backupUrl,
   emptyHint = "No video link added yet.",
+  tall = false,
 }: VideoPlayerCardProps) {
   const [useBackup, setUseBackup] = useState(false);
 
@@ -23,13 +25,15 @@ export function VideoPlayerCard({
   const activeUrl = useBackup && hasBackup ? backupUrl : url;
   const resolved = resolveVideoEmbed(activeUrl);
 
+  const frameWidthClass = tall ? "max-w-[360px]" : "max-w-[300px]";
+
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-950 text-white">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 bg-slate-900 px-3 py-2 text-xs">
-        <div className="flex items-center gap-2 font-medium text-slate-200">
-          <Film className="h-3.5 w-3.5 text-teal-400" />
+    <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[#0f0f10] text-[#ededed]">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[rgba(237,237,237,0.08)] bg-[#19191b] px-3.5 py-2.5 text-xs">
+        <div className="flex items-center gap-2 font-medium text-[#ededed]">
+          <Film className="h-4 w-4 text-[#a1a1a6]" strokeWidth={1.5} />
           <span>{label}</span>
-          <span className="rounded-md bg-slate-800 px-2 py-0.5 text-[11px] text-slate-300">
+          <span className="rounded bg-[#232325] px-2 py-0.5 text-[11px] text-[#a1a1a6]">
             {resolved.providerLabel}
           </span>
         </div>
@@ -39,9 +43,9 @@ export function VideoPlayerCard({
             <button
               type="button"
               onClick={() => setUseBackup((v) => !v)}
-              className="rounded-md border border-slate-700 bg-slate-800 px-2 py-1 text-[11px] text-slate-200 hover:bg-slate-700"
+              className="rounded-md border border-[rgba(237,237,237,0.12)] bg-[#232325] px-2.5 py-1 text-[11px] text-[#ededed] hover:bg-[#2a2a2d]"
             >
-              {useBackup ? "Show Primary Link" : "Switch to Backup Link"}
+              {useBackup ? "Primary link" : "Backup link"}
             </button>
           ) : null}
           {resolved.originalUrl ? (
@@ -49,64 +53,75 @@ export function VideoPlayerCard({
               href={resolved.originalUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 rounded-md bg-teal-600/90 px-2.5 py-1 text-[11px] font-medium text-white hover:bg-teal-500"
+              className="inline-flex items-center gap-1 rounded-md bg-[#232325] px-2.5 py-1 text-[11px] font-medium text-[#ededed] hover:bg-[#2a2a2d]"
             >
-              Open <ExternalLink className="h-3 w-3" />
+              <span>Open</span>
+              <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.5} />
             </a>
           ) : null}
         </div>
       </div>
 
-      {resolved.kind === "none" ? (
-        <div className="flex aspect-[9/12] max-h-80 w-full flex-col items-center justify-center gap-2 bg-slate-900/70 p-6 text-center text-xs text-slate-400">
-          <PlayCircle className="h-8 w-8 text-slate-600" />
-          <p>{emptyHint}</p>
-        </div>
-      ) : resolved.kind === "direct-video" && resolved.embedUrl ? (
-        <video
-          src={resolved.embedUrl}
-          controls
-          playsInline
-          className="aspect-[9/12] max-h-96 w-full bg-black object-contain"
-        />
-      ) : resolved.canInlinePlay && resolved.embedUrl ? (
-        <div className="relative bg-black">
-          <iframe
-            src={resolved.embedUrl}
-            title={label}
-            allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-            allowFullScreen
-            className="aspect-[9/12] max-h-96 w-full border-0"
-          />
-          {resolved.kind === "instagram" ? (
-            <div className="border-t border-slate-800 bg-slate-900/95 px-3 py-1.5 text-[11px] text-slate-400">
-              If Instagram blocks inline playback for this reel, click{" "}
+      {/* Strict 9/16 scroll-free black letterboxed preview stage */}
+      <div className="flex w-full items-center justify-center bg-black p-3">
+        <div
+          className={`relative aspect-[9/16] w-full ${frameWidthClass} overflow-hidden rounded-lg bg-black`}
+        >
+          {resolved.kind === "none" ? (
+            <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-[#0a0a0b] p-6 text-center text-xs text-[#85858b]">
+              <PlayCircle className="h-8 w-8 text-[#525252]" strokeWidth={1.5} />
+              <p className="max-w-xs">{emptyHint}</p>
+            </div>
+          ) : resolved.kind === "direct-video" && resolved.embedUrl ? (
+            <video
+              src={resolved.embedUrl}
+              controls
+              playsInline
+              className="h-full w-full bg-black object-contain"
+            />
+          ) : resolved.canInlinePlay && resolved.embedUrl ? (
+            <iframe
+              src={resolved.embedUrl}
+              title={label}
+              scrolling="no"
+              allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+              allowFullScreen
+              className="h-full w-full overflow-hidden border-0 bg-black"
+            />
+          ) : (
+            <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-black p-6 text-center text-xs text-[#a1a1a6]">
+              <PlayCircle className="h-8 w-8 text-[#85858b]" strokeWidth={1.5} />
+              <p className="max-w-xs break-all text-[#85858b]">
+                {resolved.originalUrl}
+              </p>
               <a
                 href={resolved.originalUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-medium text-teal-400 underline"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[#ededed] px-3.5 py-2 font-medium text-[#0f0f10]"
               >
-                Open
-              </a>{" "}
-              or paste a Google Drive backup link.
+                <span>Open link</span>
+                <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.5} />
+              </a>
             </div>
-          ) : null}
+          )}
         </div>
-      ) : (
-        <div className="flex aspect-[9/12] max-h-80 w-full flex-col items-center justify-center gap-3 p-6 text-center text-xs text-slate-300">
-          <PlayCircle className="h-9 w-9 text-teal-400" />
-          <p className="max-w-xs break-all text-slate-400">{resolved.originalUrl}</p>
+      </div>
+
+      {resolved.kind === "instagram" ? (
+        <div className="border-t border-[rgba(237,237,237,0.08)] bg-[#19191b] px-3.5 py-2 text-[11px] text-[#a1a1a6]">
+          If Instagram blocks inline playback, click{" "}
           <a
             href={resolved.originalUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-teal-600 px-3 py-2 font-medium text-white hover:bg-teal-500"
+            className="font-medium text-[#ededed] underline"
           >
-            Open Video in New Tab <ExternalLink className="h-3.5 w-3.5" />
-          </a>
+            Open
+          </a>{" "}
+          or attach a Google Drive backup link.
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

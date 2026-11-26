@@ -14,6 +14,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
+import type { PreparedDraftFile } from "@/lib/fileUpload";
 import type {
   CommentActionType,
   ContentComment,
@@ -137,6 +138,8 @@ export function useContentItems() {
       assignedTo: input.assignedTo,
       targetPostDate: input.targetPostDate || null,
       latestDraftUrl: null,
+      latestDraftKind: null,
+      latestDraftName: null,
       latestDraftVersion: 0,
       publishedUrl: null,
       gate1ReviewedBy: null,
@@ -219,12 +222,15 @@ export function useContentItems() {
     await updateDoc(doc(db, "contentItems", itemId), {
       status: "draft_review",
       latestDraftUrl: cleanUrl,
+      latestDraftKind: "video",
+      latestDraftName: null,
       latestDraftVersion: nextVersion,
       updatedAt: serverTimestamp(),
     });
 
     await addDoc(collection(db, "contentItems", itemId, "drafts"), {
       version: nextVersion,
+      draftKind: "video",
       videoUrl: cleanUrl,
       notes: cleanNotes,
       submittedByUid: user.uid,
@@ -235,7 +241,48 @@ export function useContentItems() {
     await addAuditComment(
       itemId,
       "draft_submit",
-      cleanNotes || `Submitted draft v${nextVersion} for manager review.`,
+      cleanNotes || `Submitted video draft v${nextVersion} for manager review.`,
+      nextVersion
+    );
+  };
+
+  const submitDraftFile = async (
+    itemId: string,
+    currentVersion: number,
+    file: PreparedDraftFile,
+    notes: string
+  ) => {
+    if (!user) throw new Error("Not authenticated");
+    const nextVersion = currentVersion + 1;
+    const cleanNotes = notes.trim();
+
+    await updateDoc(doc(db, "contentItems", itemId), {
+      status: "draft_review",
+      latestDraftUrl: null,
+      latestDraftKind: file.draftKind,
+      latestDraftName: file.fileName,
+      latestDraftVersion: nextVersion,
+      updatedAt: serverTimestamp(),
+    });
+
+    await addDoc(collection(db, "contentItems", itemId, "drafts"), {
+      version: nextVersion,
+      draftKind: file.draftKind,
+      videoUrl: "",
+      fileDataUrl: file.fileDataUrl,
+      fileName: file.fileName,
+      mimeType: file.mimeType,
+      notes: cleanNotes,
+      submittedByUid: user.uid,
+      submittedByName: actorName,
+      submittedAt: serverTimestamp(),
+    });
+
+    await addAuditComment(
+      itemId,
+      "draft_submit",
+      cleanNotes ||
+        `Uploaded ${file.draftKind.toUpperCase()} (${file.fileName}) draft v${nextVersion} for manager review.`,
       nextVersion
     );
   };
@@ -323,6 +370,7 @@ export function useContentItems() {
     resubmitIdea,
     startProduction,
     submitDraftLink,
+    submitDraftFile,
     reviewGate2,
     markPosted,
     updateItemDetails,

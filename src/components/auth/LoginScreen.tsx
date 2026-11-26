@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Eye, EyeOff, Lock, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Lock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 export function LoginScreen() {
@@ -25,7 +25,7 @@ export function LoginScreen() {
         await signUpWithEmail(displayName, email, password);
       }
     } catch {
-      // Error surfaced via authError state
+      // Surfaced via authError
     } finally {
       setSubmitting(false);
     }
@@ -36,25 +36,29 @@ export function LoginScreen() {
     try {
       await signInWithGoogle();
     } catch {
-      // Error surfaced via authError state
+      // Surfaced via authError
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-gradient-to-br from-teal-50 via-slate-50 to-emerald-50 p-4">
-      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl sm:p-8">
+    <main className="flex min-h-dvh items-center justify-center bg-[var(--bg-app)] p-6">
+      <div className="studio-surface w-full max-w-md rounded-2xl border p-6 sm:p-8">
         <div className="mb-6 flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-600 text-white shadow-sm">
-            <Sparkles className="h-5 w-5" />
+          <div className="flex h-11 items-center justify-center rounded-xl border border-[var(--accent-border)] bg-white px-2.5">
+            <img
+              src="https://mananwellness.com/svg/manan-logo.svg"
+              alt="Manan Wellness"
+              className="h-6 w-auto"
+            />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-slate-900">
+            <h1 className="font-display text-xl font-semibold text-[var(--text-primary)]">
               Manan Wellness Studio
             </h1>
-            <p className="text-xs text-slate-500">
-              Reel Ideas, Two-Gate Approvals &amp; Production Tracker
+            <p className="text-xs text-[var(--text-muted)]">
+              Content planning and two-gate approval
             </p>
           </div>
         </div>
@@ -63,7 +67,7 @@ export function LoginScreen() {
           type="button"
           onClick={handleGoogle}
           disabled={submitting}
-          className="flex min-h-11 w-full items-center justify-center gap-2.5 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 shadow-xs transition hover:bg-slate-50 disabled:opacity-60"
+          className="studio-raised flex h-10 w-full items-center justify-center gap-2.5 rounded-full border px-4 text-sm font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-hover)] disabled:opacity-60"
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
             <path
@@ -83,13 +87,13 @@ export function LoginScreen() {
               d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96Z"
             />
           </svg>
-          Continue with Google
+          <span>Continue with Google</span>
         </button>
 
-        <div className="my-5 flex items-center gap-3 text-xs text-slate-400">
-          <div className="h-px flex-1 bg-slate-200" />
-          <span>or use team email</span>
-          <div className="h-px flex-1 bg-slate-200" />
+        <div className="my-5 flex items-center gap-3 text-xs text-[var(--text-muted)]">
+          <div className="h-px flex-1 bg-[var(--border-subtle)]" />
+          <span>or</span>
+          <div className="h-px flex-1 bg-[var(--border-subtle)]" />
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -97,7 +101,7 @@ export function LoginScreen() {
             <div>
               <label
                 htmlFor="fullname"
-                className="mb-1 block text-sm font-medium text-slate-700"
+                className="mb-1 block text-xs font-medium text-[var(--text-secondary)]"
               >
                 Full name
               </label>
@@ -112,8 +116,8 @@ export function LoginScreen() {
                   clearAuthError();
                   setDisplayName(e.target.value);
                 }}
-                placeholder="e.g. Avantika or Animation Team"
-                className="min-h-11 w-full rounded-xl border border-slate-300 px-3 py-2 text-base text-slate-900"
+                placeholder="Avantika or Animation Team"
+                className="studio-input h-10 w-full rounded-lg border px-3 text-sm"
               />
             </div>
           ) : null}
@@ -121,7 +125,7 @@ export function LoginScreen() {
           <div>
             <label
               htmlFor="email"
-              className="mb-1 block text-sm font-medium text-slate-700"
+              className="mb-1 block text-xs font-medium text-[var(--text-secondary)]"
             >
               Email address
             </label>
@@ -139,7 +143,7 @@ export function LoginScreen() {
                 setEmail(e.target.value);
               }}
               placeholder="you@mananwellness.com"
-              className="min-h-11 w-full rounded-xl border border-slate-300 px-3 py-2 text-base text-slate-900"
+              className="studio-input h-10 w-full rounded-lg border px-3 text-sm"
             />
           </div>
 
@@ -147,7 +151,7 @@ export function LoginScreen() {
             <div className="mb-1 flex items-center justify-between">
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-slate-700"
+                className="block text-xs font-medium text-[var(--text-secondary)]"
               >
                 Password
               </label>
@@ -156,15 +160,17 @@ export function LoginScreen() {
                 aria-pressed={showPassword}
                 aria-label={showPassword ? "Hide password" : "Show password"}
                 onClick={() => setShowPassword((prev) => !prev)}
-                className="inline-flex items-center gap-1 text-xs font-medium text-teal-700 hover:text-teal-900"
+                className="inline-flex items-center gap-1 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
               >
                 {showPassword ? (
                   <>
-                    <EyeOff className="h-3.5 w-3.5" /> Hide
+                    <EyeOff className="h-4 w-4" strokeWidth={1.5} />
+                    <span>Hide</span>
                   </>
                 ) : (
                   <>
-                    <Eye className="h-3.5 w-3.5" /> Show
+                    <Eye className="h-4 w-4" strokeWidth={1.5} />
+                    <span>Show</span>
                   </>
                 )}
               </button>
@@ -182,7 +188,7 @@ export function LoginScreen() {
                 clearAuthError();
                 setPassword(e.target.value);
               }}
-              className="min-h-11 w-full rounded-xl border border-slate-300 px-3 py-2 text-base text-slate-900"
+              className="studio-input h-10 w-full rounded-lg border px-3 text-sm"
             />
           </div>
 
@@ -190,7 +196,8 @@ export function LoginScreen() {
             <div
               role="alert"
               aria-live="polite"
-              className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700"
+              className="studio-raised rounded-lg border border-l-4 px-3 py-2 text-xs text-[var(--danger)]"
+              style={{ borderLeftColor: "var(--danger)" }}
             >
               {authError}
             </div>
@@ -199,18 +206,20 @@ export function LoginScreen() {
           <button
             type="submit"
             disabled={submitting}
-            className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-700 disabled:opacity-60"
+            className="studio-btn-accent flex h-10 w-full items-center justify-center gap-2 rounded-full px-4 text-sm font-medium disabled:opacity-60"
           >
-            <Lock className="h-4 w-4" />
-            {submitting
-              ? "Please wait..."
-              : mode === "signin"
-                ? "Sign In"
-                : "Create Team Account"}
+            <Lock className="h-4 w-4" strokeWidth={1.5} />
+            <span>
+              {submitting
+                ? "Please wait"
+                : mode === "signin"
+                  ? "Sign in"
+                  : "Create team account"}
+            </span>
           </button>
         </form>
 
-        <div className="mt-5 text-center text-xs text-slate-500">
+        <div className="mt-5 text-center text-xs text-[var(--text-muted)]">
           {mode === "signin" ? (
             <>
               New to the team?{" "}
@@ -220,7 +229,7 @@ export function LoginScreen() {
                   clearAuthError();
                   setMode("signup");
                 }}
-                className="font-semibold text-teal-700 hover:underline"
+                className="font-medium text-[var(--accent-text)] hover:underline"
               >
                 Create an account
               </button>
@@ -234,9 +243,9 @@ export function LoginScreen() {
                   clearAuthError();
                   setMode("signin");
                 }}
-                className="font-semibold text-teal-700 hover:underline"
+                className="font-medium text-[var(--accent-text)] hover:underline"
               >
-                Sign in instead
+                Sign in
               </button>
             </>
           )}

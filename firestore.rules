@@ -33,7 +33,7 @@ service cloud.firestore {
     // Document ID: {itemId}
     // Fields:
     //   - serialNo: number (required, >= 0)
-    //   - format: string (required, 'reel' | 'carousel')
+    //   - format: string (required, 'reel' | 'carousel' | 'long_form')
     //   - title: string (required, 1..200 chars)
     //   - topicType: string (required, 1..60 chars)
     //   - effortLevel: string (required, 'low' | 'high' | 'general')
@@ -49,6 +49,8 @@ service cloud.firestore {
     //   - assignedTo: list (required, size <= 20)
     //   - targetPostDate: string | null (required key, 0..40 chars if string)
     //   - latestDraftUrl: string | null (required key, 0..1000 chars if string)
+    //   - latestDraftKind: string | null (optional, 'video' | 'image' | 'pdf' | null)
+    //   - latestDraftName: string | null (optional, 0..200 chars if string)
     //   - latestDraftVersion: int (required, >= 0)
     //   - publishedUrl: string | null (required key, 0..1000 chars if string)
     //   - gate1ReviewedBy: string | null (required key, 0..128 chars if string)
@@ -66,7 +68,11 @@ service cloud.firestore {
     // Document ID: {draftId}
     // Fields:
     //   - version: int (required, >= 1)
-    //   - videoUrl: string (required, 1..1000 chars)
+    //   - videoUrl: string (required, 1..1000 chars for video link, or '' for image/pdf upload)
+    //   - draftKind: string (optional, 'video' | 'image' | 'pdf')
+    //   - fileDataUrl: string (optional, 0..950000 chars; 1..950000 chars when draftKind is 'image' | 'pdf')
+    //   - fileName: string (optional, 0..200 chars)
+    //   - mimeType: string (optional, 0..100 chars)
     //   - notes: string (required, 0..2000 chars)
     //   - submittedByUid: string (required, immutable, == request.auth.uid on create, 1..128 chars)
     //   - submittedByName: string (required, 0..100 chars)
@@ -217,7 +223,7 @@ service cloud.firestore {
     }
 
     function isValidContentItem(data) {
-      let allowed = [
+      let required = [
         'serialNo', 'format', 'title', 'topicType', 'effortLevel', 'status',
         'referenceUrl', 'referenceBackupUrl', 'referenceNotes', 'adaptationIdea',
         'callToAction', 'scriptUrl', 'scriptText', 'hashtags', 'assignedTo',
@@ -231,10 +237,10 @@ service cloud.firestore {
         'in_production', 'draft_review', 'changes_requested',
         'approved_to_post', 'posted'
       ];
-      return hasRequiredFields(allowed) &&
-             hasOnlyAllowedFields(allowed) &&
+      return hasRequiredFields(required) &&
+             hasOnlyAllowedFields(required.concat(['latestDraftKind', 'latestDraftName'])) &&
              data.serialNo is number && data.serialNo >= 0 &&
-             data.format in ['reel', 'carousel'] &&
+             data.format in ['reel', 'carousel', 'long_form'] &&
              isValidString(data.title, 1, 200) &&
              isValidString(data.topicType, 1, 60) &&
              data.effortLevel in ['low', 'high', 'general'] &&
@@ -250,6 +256,10 @@ service cloud.firestore {
              isValidList(data.assignedTo, 20) &&
              isNullableString(data.targetPostDate, 0, 40) &&
              isNullableString(data.latestDraftUrl, 0, 1000) &&
+             (!('latestDraftKind' in data) ||
+              data.latestDraftKind == null ||
+              (data.latestDraftKind is string && data.latestDraftKind in ['video', 'image', 'pdf'])) &&
+             (!('latestDraftName' in data) || isNullableString(data.latestDraftName, 0, 200)) &&
              data.latestDraftVersion is int && data.latestDraftVersion >= 0 &&
              isNullableString(data.publishedUrl, 0, 1000) &&
              isNullableString(data.gate1ReviewedBy, 0, 128) &&
@@ -287,11 +297,28 @@ service cloud.firestore {
       let draftVersionUnchanged =
         request.resource.data.latestDraftVersion == resource.data.latestDraftVersion;
       let isDraftSubmit =
-        (prev in ['in_production', 'approved_for_production', 'changes_requested']) &&
+        (prev in ['in_production', 'approved_for_production', 'changes_requested', 'draft_review']) &&
         next == 'draft_review' &&
-        request.resource.data.latestDraftUrl is string &&
-        request.resource.data.latestDraftUrl.size() > 0 &&
-        request.resource.data.latestDraftVersion == resource.data.latestDraftVersion + 1;
+        request.resource.data.latestDraftVersion == resource.data.latestDraftVersion + 1 &&
+        (
+          (
+            request.resource.data.latestDraftUrl is string &&
+            request.resource.data.latestDraftUrl.size() > 0 &&
+            (
+              !('latestDraftKind' in request.resource.data) ||
+              request.resource.data.latestDraftKind == 'video' ||
+              request.resource.data.latestDraftKind == null
+            )
+          ) ||
+          (
+            ('latestDraftKind' in request.resource.data) &&
+            request.resource.data.latestDraftKind in ['image', 'pdf'] &&
+            ('latestDraftName' in request.resource.data) &&
+            request.resource.data.latestDraftName is string &&
+            request.resource.data.latestDraftName.size() > 0 &&
+            request.resource.data.latestDraftUrl == null
+          )
+        );
       let isMarkPosted =
         prev == 'approved_to_post' &&
         next == 'posted' &&
@@ -309,14 +336,32 @@ service cloud.firestore {
     }
 
     function isValidDraft(data) {
-      let allowed = [
+      let required = [
         'version', 'videoUrl', 'notes',
         'submittedByUid', 'submittedByName', 'submittedAt'
       ];
-      return hasRequiredFields(allowed) &&
-             hasOnlyAllowedFields(allowed) &&
+      return hasRequiredFields(required) &&
+             hasOnlyAllowedFields(required.concat(['draftKind', 'fileDataUrl', 'fileName', 'mimeType'])) &&
              data.version is int && data.version >= 1 &&
-             isValidString(data.videoUrl, 1, 1000) &&
+             (!('draftKind' in data) ||
+              (data.draftKind is string && data.draftKind in ['video', 'image', 'pdf'])) &&
+             (!('fileDataUrl' in data) || isValidString(data.fileDataUrl, 0, 950000)) &&
+             (!('fileName' in data) || isValidString(data.fileName, 0, 200)) &&
+             (!('mimeType' in data) || isValidString(data.mimeType, 0, 100)) &&
+             (
+               (
+                 isValidString(data.videoUrl, 1, 1000) &&
+                 (!('fileDataUrl' in data) || data.fileDataUrl == '') &&
+                 (!('draftKind' in data) || data.draftKind == 'video')
+               ) ||
+               (
+                 ('draftKind' in data) &&
+                 data.draftKind in ['image', 'pdf'] &&
+                 ('fileDataUrl' in data) &&
+                 isValidString(data.fileDataUrl, 1, 950000) &&
+                 data.videoUrl == ''
+               )
+             ) &&
              isValidString(data.notes, 0, 2000) &&
              isValidString(data.submittedByUid, 1, 128) &&
              isValidString(data.submittedByName, 0, 100) &&

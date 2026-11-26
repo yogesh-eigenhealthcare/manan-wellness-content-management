@@ -1,60 +1,70 @@
 "use client";
 
-import React from "react";
-import { ExternalLink, Film, Image as ImageIcon, MessageSquare } from "lucide-react";
+import React, { useState } from "react";
+import { ExternalLink, MessageSquare } from "lucide-react";
+import { ContentThumbnail } from "@/components/video/ContentThumbnail";
 import { STATUS_META } from "@/lib/workflow";
-import type { ContentItem, WorkflowStatus } from "@/types/content";
+import {
+  formatLabel,
+  type ContentItem,
+  type WorkflowStatus,
+} from "@/types/content";
 
 interface PipelineBoardProps {
   items: ContentItem[];
   viewMode: "kanban" | "table";
-  showParked: boolean;
+  showParked?: boolean;
   onSelectItem: (item: ContentItem) => void;
 }
+
+const INITIAL_COLUMN_ITEMS = 4;
+const LOAD_MORE_STEP = 6;
 
 const KANBAN_COLUMNS: {
   title: string;
   statuses: WorkflowStatus[];
-  accent: string;
+  dotClass: string;
 }[] = [
   {
-    title: "Gate 1 · Idea Pending",
+    title: "Gate 1 · Idea pending",
     statuses: ["idea_pending"],
-    accent: "border-t-amber-500",
+    dotClass: "bg-amber-500",
   },
   {
-    title: "Approved & In Production",
+    title: "Approved and in production",
     statuses: ["approved_for_production", "in_production"],
-    accent: "border-t-sky-500",
+    dotClass: "bg-sky-500",
   },
   {
-    title: "Gate 2 · Final Review",
+    title: "Gate 2 · Final review",
     statuses: ["draft_review"],
-    accent: "border-t-purple-500",
+    dotClass: "bg-amber-400",
   },
   {
-    title: "Changes Requested",
+    title: "Changes requested",
     statuses: ["changes_requested"],
-    accent: "border-t-orange-500",
+    dotClass: "bg-orange-500",
   },
   {
-    title: "Ready to Post",
+    title: "Ready to post",
     statuses: ["approved_to_post"],
-    accent: "border-t-emerald-500",
+    dotClass: "bg-emerald-500",
   },
   {
     title: "Posted",
     statuses: ["posted"],
-    accent: "border-t-teal-600",
+    dotClass: "bg-teal-500",
   },
 ];
 
 export function PipelineBoard({
   items,
   viewMode,
-  showParked,
+  showParked = false,
   onSelectItem,
 }: PipelineBoardProps) {
+  const [visibleCounts, setVisibleCounts] = useState<Record<string, number>>({});
+
   if (viewMode === "table") {
     return (
       <div
@@ -69,11 +79,11 @@ export function PipelineBoard({
           </caption>
           <thead>
             <tr>
-              <th>Title / Hook</th>
+              <th>Video / Post</th>
               <th>Format</th>
               <th>Topic</th>
               <th>Status</th>
-              <th>Assigned To</th>
+              <th>Assigned to</th>
               <th>Effort</th>
               <th>Draft</th>
               <th>Links</th>
@@ -82,8 +92,8 @@ export function PipelineBoard({
           <tbody>
             {items.length === 0 ? (
               <tr>
-                <td colSpan={8} className="py-10 text-center text-slate-400">
-                  No content items match the current filters.
+                <td colSpan={8} className="py-10 text-center text-[var(--text-muted)]">
+                  No content items match the current filters
                 </td>
               </tr>
             ) : (
@@ -93,35 +103,61 @@ export function PipelineBoard({
                   <tr
                     key={item.id}
                     onClick={() => onSelectItem(item)}
-                    className="cursor-pointer transition hover:bg-slate-50"
+                    className="cursor-pointer"
                   >
                     <th>
-                      <button
-                        type="button"
-                        onClick={() => onSelectItem(item)}
-                        className="text-left font-semibold text-slate-900 hover:text-teal-700"
-                      >
-                        #{item.serialNo} {item.title}
-                      </button>
+                      <div className="flex items-center gap-3">
+                        <ContentThumbnail
+                          format={item.format}
+                          referenceUrl={item.referenceUrl}
+                          referenceBackupUrl={item.referenceBackupUrl}
+                          latestDraftUrl={item.latestDraftUrl}
+                          latestDraftKind={item.latestDraftKind}
+                          title={item.title}
+                          size="table"
+                        />
+                        <div className="min-w-0">
+                          <button
+                            type="button"
+                            onClick={() => onSelectItem(item)}
+                            className="line-clamp-1 text-left text-sm font-medium text-[var(--text-primary)] hover:text-[var(--accent-text)]"
+                          >
+                            <span className="font-mono-meta mr-1.5 text-xs text-[var(--text-muted)]">
+                              #{item.serialNo}
+                            </span>
+                            {item.title}
+                          </button>
+                          {item.adaptationIdea || item.callToAction ? (
+                            <p className="mt-0.5 line-clamp-1 max-w-xs text-xs font-normal text-[var(--text-muted)]">
+                              {item.adaptationIdea || item.callToAction}
+                            </p>
+                          ) : null}
+                        </div>
+                      </div>
                     </th>
-                    <td data-label="Format" className="capitalize">
-                      {item.format}
+                    <td data-label="Format" className="whitespace-nowrap text-xs">
+                      {formatLabel(item.format)}
                     </td>
-                    <td data-label="Topic">{item.topicType}</td>
+                    <td data-label="Topic" className="text-xs">
+                      {item.topicType}
+                    </td>
                     <td data-label="Status">
                       <span
-                        className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold ${meta.badgeClass}`}
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${meta.badgeClass}`}
                       >
+                        <span
+                          className={`inline-block h-1.5 w-1.5 rounded-full ${meta.dotClass}`}
+                        />
                         {meta.shortLabel}
                       </span>
                     </td>
-                    <td data-label="Assigned To" className="capitalize">
+                    <td data-label="Assigned to" className="text-xs capitalize">
                       {item.assignedTo.length > 0 ? item.assignedTo.join(", ") : "Unassigned"}
                     </td>
-                    <td data-label="Effort" className="capitalize">
+                    <td data-label="Effort" className="text-xs capitalize">
                       {item.effortLevel}
                     </td>
-                    <td data-label="Draft">
+                    <td data-label="Draft" className="font-mono-meta text-xs">
                       {item.latestDraftVersion > 0 ? `v${item.latestDraftVersion}` : "—"}
                     </td>
                     <td
@@ -129,15 +165,15 @@ export function PipelineBoard({
                       onClick={(e) => e.stopPropagation()}
                       className="whitespace-nowrap"
                     >
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-3 text-xs">
                         {item.referenceUrl ? (
                           <a
                             href={item.referenceUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-xs font-medium text-teal-700 hover:underline"
+                            className="inline-flex items-center gap-1 text-[var(--text-secondary)] hover:text-[var(--accent-text)]"
                           >
-                            Ref <ExternalLink className="h-3 w-3" />
+                            Ref <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.5} />
                           </a>
                         ) : null}
                         {item.latestDraftUrl ? (
@@ -145,9 +181,9 @@ export function PipelineBoard({
                             href={item.latestDraftUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-xs font-medium text-purple-700 hover:underline"
+                            className="inline-flex items-center gap-1 font-medium text-[var(--accent-text)] hover:underline"
                           >
-                            Draft <ExternalLink className="h-3 w-3" />
+                            Draft <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.5} />
                           </a>
                         ) : null}
                       </div>
@@ -166,73 +202,88 @@ export function PipelineBoard({
     ? [
         ...KANBAN_COLUMNS,
         {
-          title: "Parked / Declined",
+          title: "Parked",
           statuses: ["idea_rejected"] as WorkflowStatus[],
-          accent: "border-t-rose-500",
+          dotClass: "bg-rose-500",
         },
       ]
     : KANBAN_COLUMNS;
 
+  const handleShowMore = (colTitle: string) => {
+    setVisibleCounts((prev) => ({
+      ...prev,
+      [colTitle]: (prev[colTitle] ?? INITIAL_COLUMN_ITEMS) + LOAD_MORE_STEP,
+    }));
+  };
+
   return (
-    <div className="flex gap-4 overflow-x-auto pb-4">
+    <div className="flex items-start gap-4 overflow-x-auto pb-4">
       {columns.map((col) => {
         const colItems = items.filter((it) => col.statuses.includes(it.status));
+        const limit = visibleCounts[col.title] ?? INITIAL_COLUMN_ITEMS;
+        const visibleItems = colItems.slice(0, limit);
+        const remaining = colItems.length - visibleItems.length;
+
         return (
           <section
             key={col.title}
-            className={`flex w-76 shrink-0 flex-col rounded-xl border border-slate-200 border-t-4 ${col.accent} bg-slate-100/70`}
+            className="studio-raised flex w-72 shrink-0 flex-col rounded-2xl border"
           >
-            <header className="flex items-center justify-between border-b border-slate-200 bg-white/80 px-3.5 py-2.5">
-              <h2 className="text-xs font-bold uppercase tracking-wide text-slate-700">
-                {col.title}
-              </h2>
-              <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-700">
+            <header className="flex items-center justify-between border-b border-[var(--border-subtle)] px-4 py-3">
+              <div className="flex items-center gap-2">
+                <span className={`inline-block h-2 w-2 rounded-full ${col.dotClass}`} />
+                <h2 className="text-xs font-semibold text-[var(--text-primary)]">
+                  {col.title}
+                </h2>
+              </div>
+              <span className="font-mono-meta rounded-full bg-[var(--bg-surface)] px-2 py-0.5 text-[11px] text-[var(--text-muted)]">
                 {colItems.length}
               </span>
             </header>
 
-            <div className="flex max-h-[68vh] flex-col gap-2.5 overflow-y-auto p-2.5">
-              {colItems.length === 0 ? (
-                <div className="rounded-lg border border-dashed border-slate-300 bg-white/60 p-4 text-center text-xs text-slate-400">
-                  No items here
+            <div className="flex flex-col gap-2.5 p-2.5">
+              {visibleItems.length === 0 ? (
+                <div className="studio-surface rounded-xl border border-dashed p-4 text-center text-xs text-[var(--text-muted)]">
+                  No items
                 </div>
               ) : (
-                colItems.map((item) => {
+                visibleItems.map((item) => {
                   const meta = STATUS_META[item.status];
                   return (
                     <button
                       key={item.id}
                       type="button"
                       onClick={() => onSelectItem(item)}
-                      className="group w-full rounded-xl border border-slate-200 bg-white p-3 text-left shadow-xs transition hover:border-teal-400 hover:shadow-sm"
+                      className="studio-surface group w-full space-y-2 rounded-xl border p-2.5 text-left transition-colors duration-150 hover:border-[var(--accent-border)] hover:bg-[var(--bg-hover)]"
                     >
-                      <div className="mb-1.5 flex items-center justify-between gap-2 text-[11px] text-slate-500">
-                        <span className="inline-flex items-center gap-1 font-medium">
-                          {item.format === "carousel" ? (
-                            <ImageIcon className="h-3 w-3 text-sky-600" />
-                          ) : (
-                            <Film className="h-3 w-3 text-teal-600" />
-                          )}
-                          #{item.serialNo} · {item.topicType}
+                      <ContentThumbnail
+                        format={item.format}
+                        referenceUrl={item.referenceUrl}
+                        referenceBackupUrl={item.referenceBackupUrl}
+                        latestDraftUrl={item.latestDraftUrl}
+                        latestDraftKind={item.latestDraftKind}
+                        title={item.title}
+                        size="card"
+                      />
+
+                      <div className="flex items-center justify-between gap-2 text-xs text-[var(--text-muted)]">
+                        <span className="truncate">
+                          <span className="font-mono-meta mr-1">#{item.serialNo}</span>·{" "}
+                          {item.topicType}
                         </span>
-                        <span
-                          className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${meta.badgeClass}`}
-                        >
+                        <span className="inline-flex shrink-0 items-center gap-1 text-[11px] text-[var(--text-secondary)]">
+                          <span
+                            className={`inline-block h-1.5 w-1.5 rounded-full ${meta.dotClass}`}
+                          />
                           {meta.shortLabel}
                         </span>
                       </div>
 
-                      <div className="line-clamp-2 text-sm font-semibold text-slate-900 group-hover:text-teal-800">
+                      <div className="line-clamp-2 text-sm font-medium text-[var(--text-primary)]">
                         {item.title}
                       </div>
 
-                      {item.adaptationIdea ? (
-                        <p className="mt-1 line-clamp-2 text-xs text-slate-500">
-                          {item.adaptationIdea}
-                        </p>
-                      ) : null}
-
-                      <div className="mt-2.5 flex flex-wrap items-center justify-between gap-1.5 border-t border-slate-100 pt-2 text-[11px] text-slate-500">
+                      <div className="flex items-center justify-between gap-2 border-t border-[var(--border-subtle)] pt-2 text-xs text-[var(--text-muted)]">
                         <span className="truncate capitalize">
                           {item.assignedTo.length > 0
                             ? item.assignedTo.join(", ")
@@ -240,12 +291,15 @@ export function PipelineBoard({
                         </span>
                         <div className="flex items-center gap-1.5">
                           {item.latestDraftVersion > 0 ? (
-                            <span className="rounded bg-purple-100 px-1.5 py-0.5 font-semibold text-purple-800">
+                            <span className="font-mono-meta rounded bg-[var(--bg-raised)] px-1.5 py-0.5 text-[11px] text-[var(--text-primary)]">
                               v{item.latestDraftVersion}
                             </span>
                           ) : null}
                           {item.gate2Feedback && item.status === "changes_requested" ? (
-                            <MessageSquare className="h-3.5 w-3.5 text-orange-600" />
+                            <MessageSquare
+                              className="h-3.5 w-3.5 text-[var(--warning)]"
+                              strokeWidth={1.5}
+                            />
                           ) : null}
                         </div>
                       </div>
@@ -253,6 +307,16 @@ export function PipelineBoard({
                   );
                 })
               )}
+
+              {remaining > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => handleShowMore(col.title)}
+                  className="studio-btn-secondary h-8 w-full rounded-full text-xs font-medium"
+                >
+                  Show more ({remaining})
+                </button>
+              ) : null}
             </div>
           </section>
         );
