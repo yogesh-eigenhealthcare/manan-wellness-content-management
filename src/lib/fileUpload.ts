@@ -83,11 +83,12 @@ function compressImageInBrowser(file: File): Promise<{ dataUrl: string; mimeType
  * without requiring paid Firebase Storage buckets.
  */
 export async function prepareDraftUploadFile(file: File): Promise<PreparedDraftFile> {
+  const safeFileName = (file.name || "draft-file").trim().slice(0, 200);
   const isPdf =
-    file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+    file.type === "application/pdf" || safeFileName.toLowerCase().endsWith(".pdf");
   const isImage =
     file.type.startsWith("image/") ||
-    /\.(png|jpe?g|webp|gif)$/i.test(file.name);
+    /\.(png|jpe?g|webp|gif)$/i.test(safeFileName);
 
   if (!isPdf && !isImage) {
     throw new Error("Only PDF (.pdf) or Image (.png, .jpg, .webp) files are supported.");
@@ -103,7 +104,7 @@ export async function prepareDraftUploadFile(file: File): Promise<PreparedDraftF
     return {
       draftKind: "pdf",
       fileDataUrl: dataUrl,
-      fileName: file.name,
+      fileName: safeFileName,
       mimeType: "application/pdf",
     };
   }
@@ -114,8 +115,8 @@ export async function prepareDraftUploadFile(file: File): Promise<PreparedDraftF
     return {
       draftKind: "image",
       fileDataUrl: directUrl,
-      fileName: file.name,
-      mimeType: file.type || "image/png",
+      fileName: safeFileName,
+      mimeType: (file.type || "image/png").slice(0, 100),
     };
   }
 
@@ -123,8 +124,8 @@ export async function prepareDraftUploadFile(file: File): Promise<PreparedDraftF
   return {
     draftKind: "image",
     fileDataUrl: compressed.dataUrl,
-    fileName: file.name,
-    mimeType: compressed.mimeType,
+    fileName: safeFileName,
+    mimeType: compressed.mimeType.slice(0, 100),
   };
 }
 

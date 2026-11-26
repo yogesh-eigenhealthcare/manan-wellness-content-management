@@ -6,7 +6,7 @@ import {
   initializeTestEnvironment,
   type RulesTestEnvironment,
 } from "@firebase/rules-unit-testing";
-import { doc, setDoc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, updateDoc, serverTimestamp, writeBatch } from "firebase/firestore";
 import { afterAll, beforeAll, beforeEach, describe, it } from "vitest";
 
 let testEnv: RulesTestEnvironment;
@@ -189,7 +189,8 @@ describe("firestore.rules two-gate approval security", () => {
       })
     );
 
-    // 8. Member can also submit an uploaded PDF/image draft on carousel/long_form
+    // 8. Member can submit an uploaded PDF/image draft atomically via writeBatch,
+    //    and re-upload while in draft_review
     await assertSucceeds(
       updateDoc(doc(managerDb, "contentItems", "long-1"), {
         status: "approved_for_production",
@@ -199,15 +200,62 @@ describe("firestore.rules two-gate approval security", () => {
         updatedAt: serverTimestamp(),
       })
     );
-    await assertSucceeds(
-      updateDoc(doc(memberDb, "contentItems", "long-1"), {
-        status: "draft_review",
-        latestDraftUrl: null,
-        latestDraftKind: "pdf",
-        latestDraftName: "storyboard.pdf",
-        latestDraftVersion: 1,
-        updatedAt: serverTimestamp(),
-      })
-    );
+
+    const fileBatch = writeBatch(memberDb);
+    fileBatch.update(doc(memberDb, "contentItems", "long-1"), {
+      status: "draft_review",
+      latestDraftUrl: null,
+      latestDraftKind: "image",
+      latestDraftName: "recreated-frame.png",
+      latestDraftVersion: 1,
+      updatedAt: serverTimestamp(),
+    });
+    fileBatch.set(doc(memberDb, "contentItems", "long-1", "drafts", "draft-1"), {
+      version: 1,
+      draftKind: "image",
+      videoUrl: "",
+      fileDataUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+      fileName: "recreated-frame.png",
+      mimeType: "image/png",
+      notes: "First cut image",
+      submittedByUid: "member-1",
+      submittedByName: "Animation Team",
+      submittedAt: serverTimestamp(),
+    });
+    fileBatch.set(doc(memberDb, "contentItems", "long-1", "comments", "comment-1"), {
+      authorUid: "member-1",
+      authorName: "Animation Team",
+      authorRole: "member",
+      actionType: "draft_submit",
+      draftVersion: 1,
+      timestampLabel: null,
+      body: "Uploaded IMAGE (recreated-frame.png) draft v1 for manager review.",
+      createdAt: serverTimestamp(),
+    });
+    await assertSucceeds(fileBatch.commit());
+
+    // Member re-uploads PDF v2 while still in draft_review
+    const reuploadBatch = writeBatch(memberDb);
+    reuploadBatch.update(doc(memberDb, "contentItems", "long-1"), {
+      status: "draft_review",
+      latestDraftUrl: null,
+      latestDraftKind: "pdf",
+      latestDraftName: "storyboard-v2.pdf",
+      latestDraftVersion: 2,
+      updatedAt: serverTimestamp(),
+    });
+    reuploadBatch.set(doc(memberDb, "contentItems", "long-1", "drafts", "draft-2"), {
+      version: 2,
+      draftKind: "pdf",
+      videoUrl: "",
+      fileDataUrl: "data:application/pdf;base64,JVBERi0xLjQK",
+      fileName: "storyboard-v2.pdf",
+      mimeType: "application/pdf",
+      notes: "Updated storyboard",
+      submittedByUid: "member-1",
+      submittedByName: "Animation Team",
+      submittedAt: serverTimestamp(),
+    });
+    await assertSucceeds(reuploadBatch.commit());
   });
 });

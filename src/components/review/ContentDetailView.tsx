@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { DraftPreviewCard } from "@/components/video/DraftPreviewCard";
 import { VideoPlayerCard } from "@/components/video/VideoPlayerCard";
+import { WorkflowProgressBar } from "@/components/review/WorkflowProgressBar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useItemSubcollections } from "@/hooks/useContentItems";
 import {
@@ -167,6 +168,11 @@ export function ContentDetailView({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
+    setNotice(null);
+    setErrorMsg(null);
+  }, [item.id]);
+
+  useEffect(() => {
     setSelectedVersion(item.latestDraftVersion || null);
     setDraftUrl("");
     setPreparedFile(null);
@@ -190,8 +196,6 @@ export function ContentDetailView({
     setHashtagsText((item.hashtags ?? []).join(" "));
     setAssignedTo(item.assignedTo ?? []);
     setTargetPostDate(item.targetPostDate ?? "");
-    setNotice(null);
-    setErrorMsg(null);
   }, [item]);
 
   const statusMeta = STATUS_META[item.status];
@@ -487,6 +491,9 @@ export function ContentDetailView({
             ) : null}
           </div>
         </div>
+
+        {/* Approved Idea -> Posted Progress Bar */}
+        <WorkflowProgressBar status={item.status} />
 
         {/* Reference / Recreated Underline Tabs */}
         <div
@@ -1089,7 +1096,8 @@ export function ContentDetailView({
                       {activeDraft?.draftKind ?? item.latestDraftKind ?? "video"}
                     </span>
                   </div>
-                  {(item.status === "draft_review" || item.status === "approved_to_post") ? (
+                  {item.status === "draft_review" ||
+                  (isManager && item.status === "approved_to_post") ? (
                     <button
                       type="button"
                       onClick={() => setReuploadOpen((prev) => !prev)}
@@ -1299,6 +1307,16 @@ export function ContentDetailView({
                     className="studio-input h-9 w-full rounded-lg border px-3 text-sm"
                   />
                 </div>
+
+                {errorMsg ? (
+                  <div
+                    role="alert"
+                    className="studio-raised rounded-lg border border-l-4 px-3 py-2 text-xs font-medium text-[var(--danger)]"
+                    style={{ borderLeftColor: "var(--danger)" }}
+                  >
+                    {errorMsg}
+                  </div>
+                ) : null}
 
                 <button
                   type="submit"
@@ -1524,6 +1542,11 @@ export function ContentDetailView({
                 }
                 draft={stagedPreviewDraft ?? activeDraft}
                 fallbackVideoUrl={item.latestDraftUrl}
+                emptyHint={
+                  item.latestDraftVersion > 0 && !activeDraft
+                    ? "Loading submitted draft preview..."
+                    : undefined
+                }
               />
             </div>
           </div>

@@ -116,7 +116,7 @@ export function LoginScreen() {
                   clearAuthError();
                   setDisplayName(e.target.value);
                 }}
-                placeholder="Avantika or Animation Team"
+                placeholder="Your Name"
                 className="studio-input h-10 w-full rounded-lg border px-3 text-sm"
               />
             </div>
@@ -142,7 +142,7 @@ export function LoginScreen() {
                 clearAuthError();
                 setEmail(e.target.value);
               }}
-              placeholder="you@mananwellness.com"
+              placeholder="Your Email Address"
               className="studio-input h-10 w-full rounded-lg border px-3 text-sm"
             />
           </div>

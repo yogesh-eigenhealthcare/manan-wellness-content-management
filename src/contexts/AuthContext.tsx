@@ -4,9 +4,11 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import {
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
+  getRedirectResult,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
   signOut as firebaseSignOut,
   updateProfile,
   type User,
@@ -60,6 +62,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     void initClientAnalytics();
+    getRedirectResult(auth).catch((err: unknown) => {
+      const code =
+        typeof err === "object" && err !== null && "code" in err
+          ? String((err as { code?: unknown }).code)
+          : "";
+      if (code === "auth/unauthorized-domain") {
+        setAuthError(
+          "This domain is not authorized in Firebase Authentication settings. Please add it to Authorized Domains."
+        );
+      } else {
+        setAuthError(err instanceof Error ? err.message : "Google sign-in redirect failed.");
+      }
+    });
   }, []);
 
   useEffect(() => {
@@ -169,10 +184,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInWithGoogle = async () => {
     setAuthError(null);
+    const provider = new GoogleAuthProvider();
     try {
-      const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
     } catch (err: unknown) {
+      const code =
+        typeof err === "object" && err !== null && "code" in err
+          ? String((err as { code?: unknown }).code)
+          : "";
+      if (
+        code === "auth/popup-blocked" ||
+        code === "auth/operation-not-supported-in-this-environment"
+      ) {
+        try {
+          await signInWithRedirect(auth, provider);
+          return;
+        } catch (redirectErr: unknown) {
+          const msg =
+            redirectErr instanceof Error
+              ? redirectErr.message
+              : "Google sign-in redirect failed.";
+          setAuthError(msg);
+          throw redirectErr;
+        }
+      }
+      if (code === "auth/unauthorized-domain") {
+        const msg =
+          "This domain is not authorized for Google Sign-In in Firebase Console.";
+        setAuthError(msg);
+        throw err;
+      }
       setAuthError(err instanceof Error ? err.message : "Google sign-in failed.");
       throw err;
     }

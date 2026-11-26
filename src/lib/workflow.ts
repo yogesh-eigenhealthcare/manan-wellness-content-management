@@ -154,3 +154,67 @@ export function isGate1Pending(status: WorkflowStatus): boolean {
 export function isGate2Pending(status: WorkflowStatus): boolean {
   return status === "draft_review";
 }
+
+export interface ProgressCheckpoint {
+  key:
+    | "approved_for_production"
+    | "in_production"
+    | "draft_review"
+    | "approved_to_post"
+    | "posted";
+  label: string;
+}
+
+export interface WorkflowProgressState {
+  checkpoints: ProgressCheckpoint[];
+  currentIndex: number;
+  isComplete: boolean;
+  isRework: boolean;
+  percent: number;
+}
+
+const BASE_PROGRESS_CHECKPOINTS: ProgressCheckpoint[] = [
+  { key: "approved_for_production", label: "Idea approved" },
+  { key: "in_production", label: "In production" },
+  { key: "draft_review", label: "Final review" },
+  { key: "approved_to_post", label: "Ready to post" },
+  { key: "posted", label: "Posted" },
+];
+
+const PROGRESS_INDEX: Partial<Record<WorkflowStatus, number>> = {
+  approved_for_production: 0,
+  in_production: 1,
+  draft_review: 2,
+  changes_requested: 2,
+  approved_to_post: 3,
+  posted: 4,
+};
+
+/**
+ * Returns checkpoint progress once a Gate 1 idea has been approved;
+ * returns null while the idea is still pending or parked.
+ */
+export function getWorkflowProgress(
+  status: WorkflowStatus
+): WorkflowProgressState | null {
+  const currentIndex = PROGRESS_INDEX[status];
+  if (currentIndex === undefined) {
+    return null;
+  }
+
+  const isRework = status === "changes_requested";
+  const isComplete = status === "posted";
+  const checkpoints = BASE_PROGRESS_CHECKPOINTS.map((cp) =>
+    cp.key === "draft_review" && isRework
+      ? { ...cp, label: "Changes requested" }
+      : cp
+  );
+
+  return {
+    checkpoints,
+    currentIndex,
+    isComplete,
+    isRework,
+    percent: Math.round((currentIndex / (checkpoints.length - 1)) * 100),
+  };
+}
