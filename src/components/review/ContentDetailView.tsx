@@ -36,6 +36,7 @@ import {
   formatLabel,
   type ContentFormat,
   type ContentItem,
+  type DraftSubmission,
   type EffortLevel,
   type HashtagPreset,
 } from "@/types/content";
@@ -137,6 +138,7 @@ export function ContentDetailView({
   const [preparedFile, setPreparedFile] = useState<PreparedDraftFile | null>(null);
   const [fileBusy, setFileBusy] = useState(false);
   const [draftNotes, setDraftNotes] = useState("");
+  const [reuploadOpen, setReuploadOpen] = useState(false);
 
   const [gateFeedback, setGateFeedback] = useState("");
   const [publishedUrl, setPublishedUrl] = useState(item.publishedUrl ?? "");
@@ -169,6 +171,7 @@ export function ContentDetailView({
     setDraftUrl("");
     setPreparedFile(null);
     setDraftNotes("");
+    setReuploadOpen(false);
     setGateFeedback("");
     setPublishedUrl(item.publishedUrl ?? "");
     setCommentText("");
@@ -209,6 +212,33 @@ export function ContentDetailView({
 
   const hasVideoLink = Boolean(draftUrl.trim());
   const hasUploadedFile = Boolean(preparedFile);
+
+  const stagedPreviewDraft: DraftSubmission | null = preparedFile
+    ? {
+        id: "staged-preview",
+        version: item.latestDraftVersion + 1,
+        draftKind: preparedFile.draftKind,
+        videoUrl: "",
+        fileDataUrl: preparedFile.fileDataUrl,
+        fileName: preparedFile.fileName,
+        mimeType: preparedFile.mimeType,
+        notes: draftNotes,
+        submittedByUid: "",
+        submittedByName: "",
+        submittedAt: null,
+      }
+    : hasVideoLink
+      ? {
+          id: "staged-preview",
+          version: item.latestDraftVersion + 1,
+          draftKind: "video",
+          videoUrl: draftUrl.trim(),
+          notes: draftNotes,
+          submittedByUid: "",
+          submittedByName: "",
+          submittedAt: null,
+        }
+      : null;
 
   const parseHashtags = (raw: string): string[] =>
     Array.from(
@@ -319,6 +349,8 @@ export function ContentDetailView({
       setDraftUrl("");
       handleClearFile();
       setDraftNotes("");
+      setReuploadOpen(false);
+      setSelectedVersion(item.latestDraftVersion + 1);
     }, `Submitted draft v${item.latestDraftVersion + 1} for manager review`);
   };
 
@@ -1044,19 +1076,85 @@ export function ContentDetailView({
               </div>
             ) : null}
 
-            {/* Submit Recreated Draft (Mutually Exclusive Video Link OR PDF/Image) */}
+            {/* Current Submitted Draft Card (shown after upload / submission) */}
+            {item.latestDraftVersion > 0 ? (
+              <section className="studio-surface space-y-3 rounded-2xl border p-5">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-[var(--text-muted)]" strokeWidth={1.5} />
+                    <h2 className="text-sm font-semibold text-[var(--text-primary)]">
+                      Submitted draft (v{activeDraft?.version ?? item.latestDraftVersion})
+                    </h2>
+                    <span className="font-mono-meta studio-raised rounded-full border px-2 py-0.5 text-[10px] uppercase text-[var(--text-secondary)]">
+                      {activeDraft?.draftKind ?? item.latestDraftKind ?? "video"}
+                    </span>
+                  </div>
+                  {(item.status === "draft_review" || item.status === "approved_to_post") ? (
+                    <button
+                      type="button"
+                      onClick={() => setReuploadOpen((prev) => !prev)}
+                      className="studio-btn-secondary inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-xs font-medium"
+                    >
+                      <Upload className="h-3.5 w-3.5" strokeWidth={1.75} />
+                      <span>
+                        {reuploadOpen ? "Hide re-upload" : "Re-upload & submit"}
+                      </span>
+                    </button>
+                  ) : null}
+                </div>
+
+                <div className="studio-raised rounded-xl border px-3.5 py-2.5 text-xs">
+                  {activeDraft?.fileName || item.latestDraftName ? (
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate font-medium text-[var(--text-primary)]">
+                        {activeDraft?.fileName ?? item.latestDraftName}
+                      </span>
+                      <span className="text-[11px] text-[var(--positive)] font-medium">
+                        Uploaded for review
+                      </span>
+                    </div>
+                  ) : activeDraft?.videoUrl || item.latestDraftUrl ? (
+                    <a
+                      href={activeDraft?.videoUrl || item.latestDraftUrl || "#"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 font-medium text-[var(--accent-text)] hover:underline"
+                    >
+                      <span className="truncate">
+                        {activeDraft?.videoUrl || item.latestDraftUrl}
+                      </span>
+                      <ExternalLink className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
+                    </a>
+                  ) : (
+                    <span className="text-[var(--text-muted)]">
+                      Loading submitted draft details...
+                    </span>
+                  )}
+                  {activeDraft?.notes ? (
+                    <p className="mt-1.5 text-[var(--text-secondary)]">
+                      Notes: {activeDraft.notes}
+                    </p>
+                  ) : null}
+                </div>
+              </section>
+            ) : null}
+
+            {/* Submit / Re-upload Recreated Draft (Mutually Exclusive Video Link OR PDF/Image) */}
             {item.status === "approved_for_production" ||
             item.status === "in_production" ||
-            item.status === "changes_requested" ? (
+            item.status === "changes_requested" ||
+            reuploadOpen ? (
               <form
                 onSubmit={handleSubmitDraft}
                 className="studio-surface space-y-4 rounded-2xl border p-5"
               >
                 <div>
                   <h2 className="text-sm font-medium text-[var(--text-primary)]">
-                    {item.status === "changes_requested"
-                      ? `Submit revised draft (v${item.latestDraftVersion + 1})`
-                      : `Submit recreated post (v${item.latestDraftVersion + 1})`}
+                    {reuploadOpen
+                      ? `Re-upload & submit cut (v${item.latestDraftVersion + 1})`
+                      : item.status === "changes_requested"
+                        ? `Submit revised draft (v${item.latestDraftVersion + 1})`
+                        : `Submit recreated post (v${item.latestDraftVersion + 1})`}
                   </h2>
                   <p className="mt-0.5 text-xs text-[var(--text-muted)]">
                     Provide either a video link or upload a PDF/image file. Adding one disables the other.
@@ -1116,6 +1214,12 @@ export function ContentDetailView({
                       Disabled while a PDF/image is selected. Remove the file to paste a link.
                     </p>
                   ) : null}
+                </div>
+
+                <div className="flex items-center gap-3 text-[11px] font-medium uppercase tracking-wider text-[var(--text-muted)]">
+                  <div className="h-px flex-1 bg-[var(--border-subtle)]" />
+                  <span>OR</span>
+                  <div className="h-px flex-1 bg-[var(--border-subtle)]" />
                 </div>
 
                 {/* Option 2: Upload PDF or Image */}
@@ -1202,7 +1306,11 @@ export function ContentDetailView({
                   className="studio-btn-accent inline-flex h-9 w-full items-center justify-center gap-2 rounded-full px-4 text-xs font-medium disabled:opacity-50"
                 >
                   <Send className="h-4 w-4" strokeWidth={1.5} />
-                  <span>Submit for final review (Gate 2)</span>
+                  <span>
+                    {reuploadOpen
+                      ? `Re-upload & submit v${item.latestDraftVersion + 1} for review`
+                      : "Submit for final review (Gate 2)"}
+                  </span>
                 </button>
               </form>
             ) : null}
@@ -1408,11 +1516,13 @@ export function ContentDetailView({
 
               <DraftPreviewCard
                 label={
-                  activeDraft
-                    ? `Recreated draft (v${activeDraft.version})`
-                    : "Recreated post preview"
+                  stagedPreviewDraft
+                    ? `Unsaved preview (v${item.latestDraftVersion + 1})`
+                    : activeDraft
+                      ? `Recreated draft (v${activeDraft.version})`
+                      : "Recreated post preview"
                 }
-                draft={activeDraft}
+                draft={stagedPreviewDraft ?? activeDraft}
                 fallbackVideoUrl={item.latestDraftUrl}
               />
             </div>

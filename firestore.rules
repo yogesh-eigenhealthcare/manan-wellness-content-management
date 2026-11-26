@@ -297,7 +297,7 @@ service cloud.firestore {
       let draftVersionUnchanged =
         request.resource.data.latestDraftVersion == resource.data.latestDraftVersion;
       let isDraftSubmit =
-        (prev in ['in_production', 'approved_for_production', 'changes_requested']) &&
+        (prev in ['in_production', 'approved_for_production', 'changes_requested', 'draft_review']) &&
         next == 'draft_review' &&
         request.resource.data.latestDraftVersion == resource.data.latestDraftVersion + 1 &&
         (

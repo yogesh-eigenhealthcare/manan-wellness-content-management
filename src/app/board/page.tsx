@@ -7,6 +7,7 @@ import { PipelineBoard } from "@/components/board/PipelineBoard";
 import { AppShell } from "@/components/layout/AppShell";
 import { SubmitIdeaModal } from "@/components/modals/SubmitIdeaModal";
 import { useContent } from "@/contexts/ContentContext";
+import { useDebounce } from "@/hooks/useDebounce";
 import {
   FORMAT_OPTIONS,
   TEAM_ASSIGNEE_OPTIONS,
@@ -26,8 +27,10 @@ export default function BoardPage() {
   const [showParked, setShowParked] = useState(false);
   const [submitOpen, setSubmitOpen] = useState(false);
 
+  const debouncedSearch = useDebounce(boardSearch, 250);
+
   const boardFilteredItems = useMemo(() => {
-    const q = boardSearch.trim().toLowerCase();
+    const q = debouncedSearch.trim().toLowerCase();
     return content.items.filter((item) => {
       if (boardFormat !== "all" && item.format !== boardFormat) return false;
       if (boardTopic !== "all" && item.topicType !== boardTopic) return false;
@@ -59,7 +62,7 @@ export default function BoardPage() {
     boardTopic,
     boardEffort,
     boardAssignee,
-    boardSearch,
+    debouncedSearch,
   ]);
 
   return (

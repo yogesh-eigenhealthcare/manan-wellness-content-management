@@ -10,6 +10,7 @@ import {
   Search,
 } from "lucide-react";
 import { PipelineBoard } from "@/components/board/PipelineBoard";
+import { useDebounce } from "@/hooks/useDebounce";
 import { isGate1Pending, isGate2Pending } from "@/lib/workflow";
 import {
   FORMAT_OPTIONS,
@@ -48,12 +49,14 @@ export function ContentView({
   const [pageSize, setPageSize] = useState(15);
   const [currentPage, setCurrentPage] = useState(1);
 
+  const debouncedSearch = useDebounce(searchQuery, 250);
+
   useEffect(() => {
     setSearchQuery(initialQuery);
   }, [initialQuery]);
 
   const filteredItems = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
+    const q = debouncedSearch.trim().toLowerCase();
     return items.filter((item) => {
       if (formatTab !== "all" && item.format !== formatTab) return false;
 
@@ -106,14 +109,14 @@ export function ContentView({
     topicFilter,
     effortFilter,
     assigneeFilter,
-    searchQuery,
+    debouncedSearch,
   ]);
 
   const totalPages = Math.max(1, Math.ceil(filteredItems.length / pageSize));
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [formatTab, stageFilter, topicFilter, effortFilter, assigneeFilter, searchQuery, pageSize]);
+  }, [formatTab, stageFilter, topicFilter, effortFilter, assigneeFilter, debouncedSearch, pageSize]);
 
   const clampedPage = Math.min(currentPage, totalPages);
   const startIndex = (clampedPage - 1) * pageSize;
