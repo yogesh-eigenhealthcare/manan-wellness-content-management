@@ -9,9 +9,9 @@ interface StudioLogoProps {
 }
 
 /**
- * StudioLogo: Custom branded Content Studio logo icon adhering to the Friendly UI design system.
- * Features an organic rounded squircle with Manan's signature pastel cream/amber & coral gradient,
- * a clean minimalist play/creator aperture icon, and high-contrast ink accents.
+ * StudioLogo: Clean, friendly branded Content Studio logo icon adhering to the Friendly UI design system.
+ * - In Light mode: Clean bright crisp white card surface with soft pastel amber/coral border & Manan wellness accent.
+ * - In Dark mode: Deep surface with subtle translucent border and luminous accent.
  */
 export function StudioLogo({
   size = "md",
@@ -28,7 +28,7 @@ export function StudioLogo({
   return (
     <div className={`relative inline-flex items-center ${className}`}>
       <div
-        className={`${dimensions.box} flex items-center justify-center rounded-xl border border-[var(--border-subtle)] bg-linear-to-br from-[#FFF5EE] via-[#FDF8F3] to-[#F2D9DC] text-[var(--accent-text)] shadow-xs transition-transform duration-150 group-hover:scale-105 dark:from-[#262125] dark:via-[#1f1d22] dark:to-[#2b1f24] border-[rgba(242,217,220,0.2)]`}
+        className={`${dimensions.box} flex items-center justify-center rounded-xl border border-[#F2D9DC] bg-white text-[#8A5A2B] shadow-xs transition-transform duration-150 group-hover:scale-105 dark:border-[rgba(242,217,220,0.25)] dark:bg-[#1E1F24] dark:text-[#F3C68F]`}
         aria-hidden="true"
       >
         <svg
@@ -37,53 +37,56 @@ export function StudioLogo({
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="shrink-0 drop-shadow-xs"
+          className="shrink-0"
         >
-          {/* Subtle outer camera / aperture ring */}
+          {/* Outer camera / studio canvas ring */}
           <rect
             x="2.5"
             y="3.5"
             width="19"
             height="17"
-            rx="5.5"
+            rx="5"
             stroke="currentColor"
             strokeWidth="1.8"
-            className="text-[var(--text-primary)] opacity-85"
+            className="text-[#8A5A2B] opacity-80 dark:text-[#F3C68F]"
           />
-          {/* Studio reel notch lines */}
+
+          {/* Film / Studio reel notches */}
           <line
-            x1="7"
+            x1="7.5"
             y1="3.5"
-            x2="7"
-            y2="7.5"
+            x2="7.5"
+            y2="7"
             stroke="currentColor"
             strokeWidth="1.6"
             strokeLinecap="round"
-            className="opacity-50"
+            className="text-[#8A5A2B] opacity-40 dark:text-[#F3C68F]"
           />
           <line
-            x1="17"
+            x1="16.5"
             y1="3.5"
-            x2="17"
-            y2="7.5"
+            x2="16.5"
+            y2="7"
             stroke="currentColor"
             strokeWidth="1.6"
             strokeLinecap="round"
-            className="opacity-50"
+            className="text-[#8A5A2B] opacity-40 dark:text-[#F3C68F]"
           />
-          {/* Friendly soft Play core */}
+
+          {/* Friendly soft play triangle */}
           <path
             d="M10 8.5L16 12L10 15.5V8.5Z"
             fill="currentColor"
-            className="text-[var(--accent-text)]"
+            className="text-[#8A5A2B] dark:text-[#F3C68F]"
           />
-          {/* Corner sparkle / star highlight */}
-          <circle cx="18" cy="6.5" r="1.2" fill="#E11D48" className="opacity-90" />
+
+          {/* Vibrant coral accent dot */}
+          <circle cx="18" cy="6.5" r="1.3" fill="#E11D48" />
         </svg>
       </div>
 
       {withBadge ? (
-        <span className="font-mono-meta absolute -bottom-1 -right-1.5 rounded-full bg-[var(--accent-text)] px-1 py-0.2 text-[9px] font-bold tracking-wider text-white uppercase shadow-xs">
+        <span className="font-mono-meta absolute -bottom-1 -right-1.5 rounded-full bg-[#8A5A2B] px-1 py-0.2 text-[9px] font-bold tracking-wider text-white uppercase shadow-xs">
           Pro
         </span>
       ) : null}
