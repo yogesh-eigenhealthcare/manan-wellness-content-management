@@ -16,6 +16,13 @@ export const metadata: Metadata = {
   title: "Manan Wellness Studio",
   description:
     "Two-gate content planning, production, and approval studio for Manan Wellness.",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
 };
 
 const FOUC_SCRIPT = `try{var s=localStorage.getItem("color-scheme");var d=s==="dark"||(!s&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(s==="light"||s==="dark"){document.querySelector('meta[name="color-scheme"]').setAttribute("content",s);}if(d){document.documentElement.classList.add("dark");}else{document.documentElement.classList.remove("dark");}}catch(e){}`;

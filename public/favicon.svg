@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Dark sleek squircle badge matching Image 1 -->
+  <rect x="1" y="1" width="30" height="30" rx="9" fill="#181A20" stroke="#2B2F38" stroke-width="1.5"/>
+
+  <!-- Centered logo group -->
+  <g transform="translate(4, 4)">
+    <!-- Golden amber camera / studio aperture canvas -->
+    <rect
+      x="2.5"
+      y="3.5"
+      width="19"
+      height="17"
+      rx="5"
+      stroke="#F3C68F"
+      stroke-width="1.8"
+      stroke-opacity="0.95"
+    />
+
+    <!-- Studio reel notches -->
+    <line
+      x1="7.5"
+      y1="3.5"
+      x2="7.5"
+      y2="7"
+      stroke="#F3C68F"
+      stroke-width="1.6"
+      stroke-linecap="round"
+      stroke-opacity="0.55"
+    />
+    <line
+      x1="16.5"
+      y1="3.5"
+      x2="16.5"
+      y2="7"
+      stroke="#F3C68F"
+      stroke-width="1.6"
+      stroke-linecap="round"
+      stroke-opacity="0.55"
+    />
+
+    <!-- Solid golden amber play triangle -->
+    <path
+      d="M10 8.5L16 12L10 15.5V8.5Z"
+      fill="#F3C68F"
+    />
+
+    <!-- Vibrant coral accent dot -->
+    <circle cx="18" cy="6.5" r="1.35" fill="#E11D48"/>
+  </g>
+</svg>
