@@ -223,15 +223,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </button>
 
           <Link href="/dashboard" className="flex items-center gap-2.5">
-            <span className="flex h-7 items-center rounded-full border border-[var(--border-subtle)] bg-white px-2.5">
+            <span className="flex h-7 items-center rounded-full bg-white px-2.5">
               <img
-                src="https://mananwellness.com/svg/manan-logo.svg"
-                alt="Manan Wellness"
+                src=""
+                alt="Content Studio"
                 className="h-4 w-auto"
               />
             </span>
             <span className="font-display text-base font-semibold tracking-tight text-[var(--text-primary)]">
-              Studio
+              Content Studio
             </span>
           </Link>
         </div>
