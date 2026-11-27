@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { LoginScreen } from "@/components/auth/LoginScreen";
 import { SubmitIdeaModal } from "@/components/modals/SubmitIdeaModal";
+import { StudioLogo } from "@/components/ui/StudioLogo";
 import { useAuth } from "@/contexts/AuthContext";
 import { useContent } from "@/contexts/ContentContext";
 import { isGate1Pending, isGate2Pending } from "@/lib/workflow";
@@ -222,17 +223,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Menu className="h-4 w-4" strokeWidth={1.5} />
           </button>
 
-          <Link href="/dashboard" className="flex items-center gap-2.5">
-            <span className="flex h-7 items-center rounded-full bg-white px-2.5">
-              <img
-                src=""
-                alt="Content Studio"
-                className="h-4 w-auto"
-              />
-            </span>
-            <span className="font-display text-base font-semibold tracking-tight text-[var(--text-primary)]">
-              Content Studio
-            </span>
+          <Link href="/dashboard" className="group flex items-center gap-2.5">
+            <StudioLogo size="md" />
+            <div className="flex flex-col">
+              <span className="font-display text-sm font-semibold tracking-tight text-[var(--text-primary)]">
+                Content Studio
+              </span>
+              <span className="font-mono-meta -mt-0.5 text-[10px] text-[var(--text-muted)]">
+                Manan Wellness
+              </span>
+            </div>
           </Link>
         </div>
 
