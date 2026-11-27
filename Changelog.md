@@ -4,6 +4,72 @@ All notable changes and features implemented in the Manan Wellness Content Studi
 
 ---
 
+## [2026-11-26] - Workflow Progress Bar, Atomic Draft Uploads, Status Badge Theming & Auth Reliability
+
+### 📈 Workflow Progress Bar & Checkpoints
+
+- **Five-Checkpoint Pipeline Progress Indicator**:
+  - Implemented `WorkflowProgressBar` component at the top of `ContentDetailView`, displaying real-time progression across 5 milestones:
+    1. **Idea approved** (`approved_for_production`)
+    2. **In production** (`in_production`)
+    3. **Final review** (`draft_review`, or **Changes requested** with rework indicator when `changes_requested`)
+    4. **Ready to post** (`approved_to_post`)
+    5. **Posted** (`posted`)
+  - Displays progress track, step counter (`Step X of 5 · <status>`), completed checkmarks, active step ring indicator, and upcoming checkpoint numbers.
+  - Automatically hidden for unapproved ideas (`idea_pending` and `idea_rejected`).
+  - Added unit test coverage for `getWorkflowProgress` across all 8 workflow statuses in `src/lib/workflow.test.ts`.
+
+---
+
+### 🎨 Status Badge Theming & Dark Mode Contrast Fix
+
+- **Reusable Semantic Status Badge Classes**:
+  - Added dedicated status classes in `src/app/globals.css`: `.status-pill-emerald`, `.status-pill-sky`, `.status-pill-amber`, `.status-pill-rose`, and `.status-pill-orange`.
+  - Fixed specificity clashing with `.responsive-data-table tbody td` by providing explicit colors with consistent high contrast:
+    - **Light Mode**: High-contrast dark text on soft pastel backgrounds (e.g. `#065f46` emerald, `#075985` sky, `#78350f` amber, `#9f1239` rose, `#9a3412` orange).
+    - **Dark Mode**: Luminous text on subtle translucent tinted backgrounds (e.g. `#a7f3d0` emerald, `#bae6fd` sky, `#fde68a` amber, `#fecdd3` rose, `#fed7aa` orange).
+- **Theme Class Synchronization**:
+  - Updated `ThemeContext.tsx` and the inline FOUC prevention script in `src/app/layout.tsx` to keep `document.documentElement.classList.add('dark')` / `remove('dark')` in sync alongside `<meta name="color-scheme">`.
+  - Refactored `STATUS_META` in `src/lib/workflow.ts` to reference the semantic status pill classes.
+
+---
+
+### 📤 Atomic Draft Submissions & File Preview Enhancements
+
+- **Atomic Firestore Draft Submissions**:
+  - Refactored `submitDraftFile` and `submitDraftLink` in `src/hooks/useContentItems.ts` to use Firestore `writeBatch`, atomically updating `contentItems/{itemId}`, creating the new draft document in `drafts`, and adding the audit entry in `comments` in a single transaction.
+  - Added safe character bounds for `actorName` (≤ 100), `notes` (≤ 2000), `fileName` (≤ 200), and `mimeType` (≤ 100) to ensure compliance with Firestore security rules.
+  - Added error handling listeners to `useItemSubcollections`.
+- **Draft Preview & Re-Upload Flow**:
+  - Updated `DraftPreviewCard.tsx` to convert PDF data URLs to managed `Blob` object URLs, fixing iframe PDF rendering issues.
+  - Added "Submitted draft" card showing the active version and draft type, with a toggleable "Re-upload & submit" flow.
+  - Positioned submission errors directly above the submit button in `ContentDetailView.tsx` for immediate visibility.
+- **Live Cloud Firestore Rules Deployment**:
+  - Deployed updated `firestore.rules` to live project `manan-content-management`, enabling `latestDraftKind`, `latestDraftName`, and PDF/image uploads in production.
+  - Expanded security rules unit tests in `tests/firestore.rules.test.ts` to verify `writeBatch` file uploads and re-uploads in `draft_review`.
+
+---
+
+### ⚡ Search Debouncing
+
+- **Smooth Input Debouncing**:
+  - Created `useDebounce` hook (250ms delay).
+  - Integrated debounced search filtering across both the Channel Content table (`src/components/views/ContentView.tsx`) and the Kanban Board (`src/app/board/page.tsx`), preventing unnecessary re-renders during fast typing.
+
+---
+
+### 🔑 Google Authentication & Vercel Production Support
+
+- **Authorized Production Domain**:
+  - Added `manan-wellness-content-management.vercel.app` to Firebase Authentication `authorizedDomains`.
+- **Popup-Blocked Fallback**:
+  - Updated `signInWithGoogle` in `AuthContext.tsx` to automatically fall back to `signInWithRedirect` when popups are blocked by browsers (`auth/popup-blocked` or `auth/operation-not-supported-in-this-environment`).
+  - Added `getRedirectResult(auth)` on mount to cleanly catch and report redirect auth outcomes.
+- **COOP Headers**:
+  - Configured `Cross-Origin-Opener-Policy: same-origin-allow-popups` in `next.config.ts` to preserve OAuth popup communication.
+
+---
+
 ## [2026-11-25] - Studio Overhaul, Friendly Design System, Multi-Page Navigation & Review Enhancements
 
 ### 🎨 Design System & UI Overhaul (Friendly UI & YouTube Studio Layout)
